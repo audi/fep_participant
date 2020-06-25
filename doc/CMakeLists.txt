@@ -26,7 +26,7 @@ option(DOXYGEN_SKIP_MSCGEN "If true this module will skip trying to find mscgen 
 if(fep_participant_cmake_enable_documentation)
     ## Doxygen is not required. But only built html Doku if doxygen is found
     ## Otherwise just the Markdown docu will be copied.
-    find_package(Doxygen REQUIRED dot mscgen)
+    find_package(Doxygen REQUIRED)
     if(NOT DOXYGEN_FOUND)
         message(STATUS "No doxygen executable found.")
         return()
