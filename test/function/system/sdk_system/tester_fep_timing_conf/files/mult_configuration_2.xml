@@ -1,0 +1,88 @@
+<!--
+  Copyright @ 2019 Audi AG. All rights reserved.
+  
+      This Source Code Form is subject to the terms of the Mozilla
+      Public License, v. 2.0. If a copy of the MPL was not distributed
+      with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+  
+  If it is not possible or desirable to put the notice in a particular file, then
+  You may include the notice in a location (such as a LICENSE file in a
+  relevant directory) where a recipient would be likely to look for such a notice.
+  
+  You may add additional accurate notices of copyright ownership.
+  -->
+<?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
+<timing xmlns:timing="timing">
+ <header>
+  <author>AUDI AG</author>
+  <date_creation>10.10.2017</date_creation>
+  <date_change>12.10.2017</date_change>
+  <description>Timing Configuratuion for Demo Timing</description>
+ </header>
+ <participants>
+    <participant name="ClientElement0">
+        <steps>
+            <step name="SendRequest" cycleTime_sim_us="100000" maxRuntime_us="99999" maxInputWaittime_us="500000000" runtimeViolationStrategy="TS_SET_STM_TO_ERROR">
+                <outputs>
+                    <output name="Request0" />
+                </outputs>
+            </step>
+            <step name="ProcessResponse" cycleTime_sim_us="100000" maxRuntime_us="99999" maxInputWaittime_us="500000000" runtimeViolationStrategy="TS_SET_STM_TO_ERROR">
+                <inputs>
+                    <input name="Response0" validAge_sim_us="0" delay_sim_us="0" inputViolationStrategy="IS_SET_STM_TO_ERROR" />
+                </inputs>
+            </step>
+        </steps>
+        <inputs>
+            <input name="Response0" backLogSize="10" />
+        </inputs>
+    </participant>
+    <participant name="ServerElement0">
+        <steps>
+            <step name="ServRequest" cycleTime_sim_us="100000" maxRuntime_us="99999" maxInputWaittime_us="500000000" runtimeViolationStrategy="TS_SET_STM_TO_ERROR">
+                <inputs>
+                    <input name="Request0" validAge_sim_us="0" delay_sim_us="0" inputViolationStrategy="IS_SET_STM_TO_ERROR" />
+                </inputs>
+                <outputs>
+                    <output name="Response0" />
+                </outputs>
+            </step>
+        </steps>
+        <inputs>
+            <input name="Request0" backLogSize="10" />
+        </inputs>
+    </participant>
+    <participant name="ClientElement1">
+        <steps>
+            <step name="SendRequest" cycleTime_sim_us="100000" maxRuntime_us="99999" maxInputWaittime_us="500000000" runtimeViolationStrategy="TS_SET_STM_TO_ERROR">
+                <outputs>
+                    <output name="Request1" />
+                </outputs>
+            </step>
+            <step name="ProcessResponse" cycleTime_sim_us="100000" maxRuntime_us="99999" maxInputWaittime_us="500000000" runtimeViolationStrategy="TS_SET_STM_TO_ERROR">
+                <inputs>
+                    <input name="Response1" validAge_sim_us="0" delay_sim_us="0" inputViolationStrategy="IS_SET_STM_TO_ERROR" />
+                </inputs>
+            </step>
+        </steps>
+        <inputs>
+            <input name="Response1" backLogSize="10" />
+        </inputs>
+    </participant>
+    <participant name="ServerElement1">
+        <steps>
+            <step name="ServRequest" cycleTime_sim_us="100000" maxRuntime_us="99999" maxInputWaittime_us="500000000" runtimeViolationStrategy="TS_SET_STM_TO_ERROR">
+                <inputs>
+                    <input name="Request1" validAge_sim_us="0" delay_sim_us="0" inputViolationStrategy="IS_SET_STM_TO_ERROR" />
+                </inputs>
+                <outputs>
+                    <output name="Response1" />
+                </outputs>
+            </step>
+        </steps>
+        <inputs>
+            <input name="Request1" backLogSize="10" />
+        </inputs>
+    </participant>
+ </participants>
+</timing>

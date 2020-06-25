@@ -1,0 +1,84 @@
+/**
+ *
+ * This file documents the FEP Incident Guidelines
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+namespace fep
+{
+
+/**
+\page fep_participant_incident_guidelines FEP Incident Guidelines
+
+\section sec_guidelines Guidelines
+
+The following paragraphes will introduce basic guidelines for incident usage with regard to when to
+use them in addition to result codes, which severity level to use, when to add specific incident
+codes and when to use specific messages.
+
+When to use Incidents and when are Result Codes sufficient?
+===========================================================
+In decreasing precedence order:
+
+- synchronous vs. asynchronous reaction :<br>
+    * asynchronous -> Incidents<br>
+    * synchronous -> Result-Codes<br>
+
+- Remote vs. local relevance:<br>
+    * Remote relevance -> Incidents<br>
+    * Local relevance -> Result-Codes<br>
+
+- Incident Handler available:<br>
+    * available -> Incident<br>
+    * not available -> Result-Codes<br>
+
+\warning
+The Incident Handler can only be used after the associated FEP Participant was fully created.
+
+Which Severity Level ?
+=======================
+
+- SL_INFO:<br>
+    - Inform user of the occurrence of an incident<br>
+    - The incident does not impact the operability in any way<br>
+
+- SL_Warning:<br>
+    - Inform user of an incident that may lead to unwanted/undefined/unexpected behavior<br>
+    - FEP-Participant and FEP-System can continue operation<br>
+
+- SL_Critical:<br>
+    - Inform user of an incident that affects the operability of the fep system severely<br>
+    - Neither FEP-Participant nor FEP-System are guaranteed to be operational anymore<br>
+    - Incident affects operability of the fep system<br>
+
+\note In earlier FEP Versions there where two kinds of critical severity level (SL_Critical_Local
+ and SL_Critical_Global). These deprecated severity levels now share the same value of SL_Critical
+ and act like SL_Critical_Global).
+
+Dedicated Incident Code or specific message?
+============================================
+- Incident-Codes:<br>
+    - Incident-Codes should be used for a category of issues, not a specific issue <br>
+    - Incident-Codes can be used for programmatic reactions to an incident<br>
+
+- Incident-Descriptions:<br>
+    - Incident-Descriptions should primarily be used for human readable information<br>
+    - Incident-Descriptions can be used to add detailed information to a certain incident
+      category<br>
+    - Incident-Descriptions should not be used for programmatic reactions  whenever it can be
+      avoided<br>
+
+*/
+}

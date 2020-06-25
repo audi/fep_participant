@@ -1,0 +1,470 @@
+/**
+ *
+ * This file describes the FEP Configuration Areas.
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+ 
+namespace fep
+{
+/**
+\page fep_configs The FEP Configuration Areas
+
+The FEP Property Tree Component allows SDK pre-defined configuration as well as user-defined
+configuration of a FEP Participant during runtime and is accessible by every FEP Participant by the
+underlying FEP Module. While the FEP Property Tree is primarily intended to host user-defined
+settings it also provides configuration options for FEP Component specific settings which are
+built-in into the FEP Library. Keep in mind that not all changes in the configuration take effect
+immediately. Many properties are only read out in certain state transitions, usually from
+fep::FS_INITIALIZING to fep::FS_READY. The component specific behavior is described individually by
+the documentation for each component.
+
+As each configuration entry ("Property") is represented by a specific path, all configuration
+properties for FEP Components are also identified by a path. These property paths as well as the
+property names are provided to the user by a header file. The properties, their path and their
+meaning are listed in the following sections.
+
+\note
+Please note that references in the FEP Configuration Area headers are 'external' and do not expose
+the actually used path within the FEP Property Tree. The entire FEP Property Tree is fully
+accessible and its paths are stored in plain text, they may as well be used directly. Nevertheless,
+it is not advisable to do so when using the FEP Configuration Areas as the paths may change without
+further notice. By using the published external symbols, the FEP SDK will always ensure consistent
+configuration paths throughout all FEP-based implementations.
+
+\warning
+The supported symbols of a version are always upwards- but not downwards-compatible across SDK minor
+versions.
+
+\section fep_CCA_structure Structure of the FEP Configuration Area
+
+For better clarity, the Property Tree is divided into three main parts called Configuration Areas:
+- Header
+- Component Configuration
+- Function Configuration
+
+The purpose of each of these parts will be discussed in the following sections. All the Properties
+stored in the these areas are intented for static or quasi-static configuration i.e. configuration
+parameters which do not change (or very rarely) during runtime.
+
+\subsection fep_CCA_header Header
+
+The FEP Module header provides the necessary information to identify a module in the network, much
+in the same way a passport identifies a person. It is considered mandatory for a module to provide
+all header properties. If a module leaves state FS_STARTUP without having written these properties
+to the property tree an incident of type \ref FSI_PROP_TREE_PARTICIPANT_HEADER_INVALID is thrown. 
+
+<table border="1">
+  <tr>
+    <th>Defines</th>
+    <th>Static Variable (legacy)</th>
+    <th>Path / Field name</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td width="25%">\ref FEP_PARTICIPANT_HEADER_VERSION</td>
+    <td width="25%">fep::g_strElementHeaderPath_fElementVersion</td>
+    <td width="25%">\c "Header.ElementVersion"</td>
+    <td width="25%">The version number of the participant (as a double). Other modules can
+    determine this version and react upon it, for example by checking compatibility to this version</td>
+  </tr>
+   <tr>
+   <td width="25%">\ref FEP_PARTICIPANT_HEADER_NAME</td>
+    <td width="25%">fep::g_strElementHeaderPath_strElementName</td>
+    <td width="25%">\c "Header.ElementName"</td>
+    <td width="25%">The name of the participant</td>
+  </tr>
+  <tr>
+  <td width="25%">\ref FEP_PARTICIPANT_HEADER_DESCRIPTION</td>
+    <td width="25%">fep::g_strElementHeaderPath_strElementDescription</td>
+    <td width="25%">\c "Header.ElementDescription"</td>
+    <td width="25%">A short description of the participant, providing information about its purpose and functionality e.g. the
+    services it provides</td>
+  </tr>
+  <tr>
+  <td width="25%">\ref FEP_PARTICIPANT_HEADER_FEP_VERSION</td>
+    <td width="25%">fep::g_strElementHeaderPath_fFEPVersion</td>
+    <td width="25%">\c "Header.FEPVersion"</td>
+    <td width="25%">The FEP SDK version against which the module was built (as double)</td>
+  </tr>
+  <tr>
+  <td width="25%">\ref FEP_PARTICIPANT_HEADER_PLATFORM</td>
+    <td width="25%">fep::g_strElementHeaderPath_strElementPlatform</td>
+    <td width="25%">\c "Header.Platform"</td>
+    <td width="25%">The Plattform on which the participant is running</td>
+  </tr>
+  <tr>
+    <td width="25%">\ref FEP_PARTICIPANT_HEADER_CONTEXT</td>
+    <td width="25%">fep::g_strElementHeaderPath_strElementContext</td>
+    <td width="25%">\c "Header.ElementContext"</td>
+    <td width="25%">Runtime context in which the participant runs(e.g. runs on ADTF/Matlab/standalone)</td>
+  </tr>
+  <tr>
+    <td width="25%">\ref FEP_PARTICIPANT_HEADER_CONTEXT_VERSION</td>
+    <td width="25%">fep::g_strElementHeaderPath_fElementContextVersion</td>
+    <td width="25%">\c "Header.ElementContextVersion"</td>
+    <td width="25%">Version of the runtime context in which the participant runs(e.g. version of ADTF/Matlab/standalone)</td>
+  </tr>
+  <tr>
+    <td width="25%">\ref FEP_PARTICIPANT_HEADER_VENDOR</td>
+    <td width="25%">fep::g_strElementHeaderPath_strElementVendor</td>
+    <td width="25%">\c "Header.ElementVendor"</td>
+    <td width="25%">The vendor who created the participant and is responible for it</td>
+  </tr>
+  <tr>
+    <td width="25%">\ref FEP_PARTICIPANT_HEADER_DISPLAY_NAME</td>
+    <td width="25%">fep::g_strElementHeaderPath_strElementDisplayName</td>
+    <td width="25%">\c "Header.ElementDisplayName"</td>
+    <td width="25%">LEGACY!: This property should be set to the participant name</td>
+  </tr>
+  <tr>
+    <td width="25%">\ref FEP_PARTICIPANT_HEADER_COMPILATION_DATE</td>
+    <td width="25%">fep::g_strElementHeaderPath_strElementCompilationDate</td>
+    <td width="25%">\c "Header.ElementCompilationDate"</td>
+    <td width="25%">Date of compilation of the participant (automatically filled)</td>
+  </tr>
+  <tr>
+    <td width="25%">\ref FEP_PARTICIPANT_HEADER_CURRENT_STATE</td>
+    <td width="25%">fep::g_strElementHeaderPath_strElementCurrentState</td>
+    <td width="25%">\c "Header.CurrentState"</td>
+    <td width="25%">Current state of the participant (automatically updated upon state changes)</td>
+  </tr>
+  <tr>
+    <td width="25%">\ref FEP_PARTICIPANT_HEADER_HOST</td>
+    <td width="25%">fep::g_strElementHeaderPath_strElementHost</td>
+    <td width="25%">\c "Header.Host"</td>
+    <td width="25%">Hostname of the Participant creator</td>
+  </tr>
+  <tr>
+    <td width="25%">\ref FEP_PARTICIPANT_HEADER_INSTANCE_ID</td>
+    <td width="25%">fep::g_strElementHeaderPath_strInstanceID</td>
+    <td width="25%">\c "Header.InstanceID"</td>
+    <td width="25%">Unique-ID of participant (automatically filled)</td>
+  </tr>
+  <tr>
+    <td width="25%">\ref FEP_PARTICIPANT_HEADER_TYPE_ID</td>
+    <td width="25%">fep::g_strElementHeaderPath_strTypeID</td>
+    <td width="25%">\c "Header.TypeID"</td>
+    <td width="25%">(Optional) A user defined type ID</td>
+  </tr>
+    <tr>
+    <td width="25%">\ref FEP_PARTICIPANT_HEADER_GLOBAL_MUTE</td>
+    <td width="25%">fep::g_strElementHeaderPath_bGlobalMute</td>
+    <td width="25%">\c "Header.GlobalMute"</td>
+    <td width="25%">(READ ONLY!) Mute status of the participant. If muted the participant does not transmit any signals.
+    Messages are still transmitted!</td>
+  </tr>
+</table>
+
+\note Make sure to fill in these properties carefully and take time to make them meaningfull, since this is
+how other FEP Elements/users see your participant.
+
+\subsection fep_CCA_function Function Configuration
+
+All user-defined symbols are published in fep_function_config.h and are located inside the
+fep::function_config namespace:
+
+<table border="1">
+  <tr>
+    <th>Defines</th>
+    <th>Static Variable (legacy)</th>
+    <th>Path / Field name</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td width="25%">\ref FEP_FUNCTION_CONFIG</td>
+    <td width="25%">fep::function_config::g_strFunctionConfig</td>
+    <td width="25%">\c "FunctionConfig"</td>
+    <td width="25%">Root node for all user specific properties </td>
+  </tr>
+  </table>
+  
+\include fep_function_config.h
+
+\subsection fep_CCA_component Component Configuration
+
+All FEP Component symbols are published in fep_component_config.h and are located inside the
+fep::component_config namespace. These are properties that configure internal FEP Components.
+Changing them usually results in changed behavior. For more details, please refer to the
+corresponding component.
+
+<table border="1"> 
+ <tr>
+    <th>Defines</th>
+    <th>Static Variable (legacy)</th>
+    <th>Path / Field name</th>
+    <th>Description</th>
+  </tr>
+
+  <tr>
+    <td>\ref FEP_COMPONENT_CONFIG</td>
+<td>fep::component_config::g_strComponentConfig</td><td>\c "ComponentConfig"</td>
+<td>Root configuration node of all component property paths </td></tr>
+
+<tr>
+  <td>\ref FEP_COMPONENT_CONFIG_AI</td>
+<td>fep::component_config::g_strAIBase</td><td>\c "ComponentConfig.AI"</td>
+<td>Root configuration node of FEP Automation Interface </td></tr>
+
+<tr>  <td>\ref FEP_AI_ELEMENT_DETECTION_TIMEOUT_PATH</td>
+<td>fep::component_config::g_strAIPath_nElementDetectionTimeoutMilliseconds</td><td>\c "ComponentConfig.AI.ElementDetectionTimeoutMilliseconds"</td>
+<td>Global timeout in milliseconds for participant detection functions [full path] </td></tr>
+
+<tr>  <td>\ref FEP_AI_ELEMENT_DETECTION_TIMEOUT_FIELD</td><td>fep::component_config::g_strAIField_nElementDetectionTimeoutMilliseconds</td><td>\c "ElementDetectionTimeoutMilliseconds"</td>
+<td>Global timeout in milliseconds for participant detection functions </td></tr>
+
+<tr>  <td>\ref FEP_COMPONENT_CONFIG_INCIDENT_HANDLER</td><td>fep::component_config::g_strIncidentHandlerBase</td><td>\c "ComponentConfig.sIncidentHandler"</td>
+<td>The root configuration node of the FEP Incident Handler </td></tr>
+
+<tr>  <td>\ref FEP_GLOBAL_OPT_ENABLE</td><td>fep::component_config::g_strIncidentHandlerField_bEnable</td><td>\c "bEnable"</td>
+<td>Switch to enable / disable the FEP Incident Handler </td></tr>
+
+<tr>  <td>\ref FEP_INCIDENT_HANDLER_ENABLE</td><td>fep::component_config::g_strIncidentHandlerPath_bEnable</td><td>\c "ComponentConfig.sIncidentHandler.bEnable"</td>
+<td>Switch to enable / disable the FEP Incident Handler [full path] </td></tr>
+
+<tr>  <td>\ref FEP_INCIDENT_HANDLER_OPT_GLOBAL_SCOPE</td><td>fep::component_config::g_strIncidentHandlerPath_bFieldGlobalScope</td><td>\c "bEnableGlobalScope"</td>
+<td>Switch to enable the the global scope for the Incident Handler to support incident recorded by remote FEP Participants </td></tr>
+
+<tr>  <td>\ref FEP_INCIDENT_HANDLER_ENABLE_GLOBAL_SCOPE</td><td>fep::component_config::g_strIncidentHandlerPath_bEnableGlobalScope</td><td>\c "ComponentConfig.sIncidentHandler.bEnableGlobalScope"</td>
+<td>Switch to enable the the global scope for the Incident Handler to support incident recorded by remote FEP Participants [full path] </td></tr>
+
+<tr>  <td>\ref FEP_INCIDENT_HANDLER_OPT_SOURCE</td><td>fep::component_config::g_strIncidentHandlerField_strSourceFilter</td><td>\c "strSourceFilter"</td>
+<td>If the global scope is enabled, this allows to filter remote incidents by specific FEP Participant names (full PCRE compatible) </td></tr>
+
+<tr>  <td>\ref FEP_INCIDENT_HANDLER_FILTER_SOURCE</td><td>fep::component_config::g_strIncidentHandlerPath_strSourceFilter</td><td>\c "ComponentConfig.sIncidentHandler.strSourceFilter"</td>
+<td>If the global scope is enabled, this allows to filter remote incidents by specific FEP Participant names (full PCRE compatible) [full path] </td></tr>
+
+<tr>  <td>\ref FEP_CONSOLE_LOG_STRATEGY</td><td>fep::component_config::g_strIncidentConsoleLogBase</td><td>\c "ComponentConfig.sIncidentHandler.sConsoleLog"</td>
+<td>Root configuration node of the FEP Console Log Strategy </td></tr>
+
+<tr>  <td>\ref FEP_GLOBAL_OPT_ENABLE</td><td>fep::component_config::g_strIncidentConsoleLogField_bEnable</td><td>\c "bEnable"</td>
+<td>Switch to enable / disable the FEP Console Log Strategy </td></tr>
+
+<tr>  <td>\ref FEP_CONSOLE_LOG_ENABLE</td><td>fep::component_config::g_strIncidentConsoleLogPath_bEnable</td><td>\c "ComponentConfig.sIncidentHandler.sConsoleLog.bEnable"</td>
+<td>Switch to enable / disable the FEP Console Log Strategy [full path] </td></tr>
+
+<tr>  <td>\ref FEP_GLOBAL_OPT_CATCHALL</td><td>fep::component_config::g_strIncidentConsoleLogField_bEnableCatchAll</td><td>\c "bEnableCatchAll""</td>
+<td>/// Switch to enable catch-all mode for the History Log Strategy </td></tr>
+
+<tr>  <td>\ref FEP_CONSOLE_LOG_ENABLE_CATCHALL</td><td>fep::component_config::g_strIncidentConsoleLogPath_bEnableCatchAll</td><td>\c "ComponentConfig.sIncidentHandler.sConsoleLog.bEnableCatchAll"</td>
+<td>Switch to enable catch-all mode for the History Log Strategy [full path] </td></tr>
+
+<tr>  <td>\ref FEP_HISTORY_LOG_STRATEGY</td><td>fep::component_config::g_strIncidentHistoryLogBase</td><td>\c "ComponentConfig.sIncidentHandler.sIncidentHistory"</td>
+<td>Root configuration node of the FEP History Log Strategy </td></tr>
+
+<tr>  <td>\ref FEP_GLOBAL_OPT_ENABLE</td><td>fep::component_config::g_strIncidentHistoryLogField_bEnable</td><td>\c "bEnable"</td>
+<td>Switch to enable / disable the FEP File Log Strategy </td></tr>
+
+<tr>  <td>\ref FEP_HISTORY_LOG_ENABLE</td><td>fep::component_config::g_strIncidentHistoryLogPath_bEnable</td><td>\c "ComponentConfig.sIncidentHandler.sIncidentHistory.bEnable"</td>
+<td>Switch to enable / disable the FEP File Log Strategy [full path] </td></tr>
+
+<tr>  <td>\ref FEP_GLOBAL_OPT_CATCHALL</td><td>fep::component_config::g_strIncidentHistoryLogField_bEnableCatchAll</td><td>\c "bEnableCatchAll"</td>
+<td>Switch to enable catch-all mode for the File Log Strategy </td></tr>
+
+<tr>  <td>\ref FEP_HISTORY_LOG_ENABLE_CATCHALL</td><td>fep::component_config::g_strIncidentHistoryLogPath_bEnableCatchAll</td><td>\c "ComponentConfig.sIncidentHandler.sIncidentHistory.bEnableCatchAll"</td>
+<td>Switch to enable catch-all mode for the File Log Strategy [full path] </td></tr>
+
+<tr>  <td>\ref FEP_HISTORY_LOG_STRATEGY_OPT_QUEUESZ</td><td>fep::component_config::g_strIncidentHistoryLogField_nQueueSize</td><td>\c "nBufferSize"</td>
+<td>Definition of the maximum length of the Incident History </td></tr>
+
+<tr>  <td>\ref FEP_HISTORY_LOG_QUEUE_SIZE</td><td>fep::component_config::g_strIncidentHistoryLogPath_nQueueSize</td><td>\c "ComponentConfig.sIncidentHandler.sIncidentHistory.nBufferSize"</td>
+<td>Definition of the maximum length of the Incident History [full path] </td></tr>
+
+<tr>  <td>\ref FEP_FILE_LOG_STRATEGY</td><td>fep::component_config::g_strIncidentFileLogBase</td><td>\c "ComponentConfig.sIncidentHandler.sFileLog"</td>
+<td>Root configuration node of the FEP File Log Strategy </td></tr>
+
+<tr>  <td>\ref FEP_GLOBAL_OPT_ENABLE</td><td>fep::component_config::g_strIncidentFileLogField_bEnable</td><td>\c "bEnable"</td>
+<td>Switch to enable / disable the FEP File Log Strategy </td></tr>
+
+<tr>  <td>\ref FEP_FILE_LOG_ENABLE</td><td>fep::component_config::g_strIncidentFileLogPath_bEnable</td><td>\c "ComponentConfig.sIncidentHandler.sFileLog.bEnable"</td>
+<td>Switch to enable / disable the FEP File Log Strategy [full path] </td></tr>
+
+<tr>  <td>\ref FEP_FILE_LOG_STRATEGY_OPT_CSV</td><td>fep::component_config::g_strIncidentFileLogField_bEnableCSV</td><td>\c "bEnableCSV"</td>
+<td>Switch to enable / disable the CSV output format of the FEP File Log Strategy </td></tr>
+
+<tr>  <td>\ref FEP_FILE_LOG_ENABLE_CSV</td><td>fep::component_config::g_strIncidentFileLogPath_bEnableCSV</td><td>\c "ComponentConfig.sIncidentHandler.sFileLog.bEnableCSV"</td>
+<td>Switch to enable / disable the CSV output format of the FEP File Log Strategy [full path] </td></tr>
+
+<tr>  <td>\ref FEP_GLOBAL_OPT_CATCHALL</td><td>fep::component_config::g_strIncidentFileLogField_bEnableCatchAll</td><td>\c "bEnableCatchAll"</td>
+<td>Switch to enable catch-all mode for the File Log Strategy </td></tr>
+
+<tr>  <td>\ref FEP_FILE_LOG_ENABLE_CATCHALL</td><td>fep::component_config::g_strIncidentFileLogPath_bEnableCatchAll</td><td>\c "ComponentConfig.sIncidentHandler.sFileLog.bEnableCatchAll"</td>
+<td>Switch to enable catch-all mode for the File Log Strategy [full path] </td></tr>
+
+<tr>  <td>\ref FEP_FILE_LOG_STRATEGY_OPT_PATH</td><td>fep::component_config::g_strIncidentFileLogField_strPath</td><td>\c "strPath"</td>
+<td>Relative or absolute path to where to store the resulting log file </td></tr>
+
+<tr>  <td>\ref FEP_FILE_LOG_TARGET_FILE</td><td>fep::component_config::g_strIncidentFileLogPath_strPath</td><td>\c "ComponentConfig.sIncidentHandler.sFileLog.strPath"</td>
+<td>Relative or absolute path to where to store the resulting log file [full path] </td></tr>
+
+<tr>  <td>\ref FEP_FILE_LOG_STRATEGY_OPT_OVERWRITE</td><td>fep::component_config::g_strIncidentFileLogField_bOverwriteExisting</td><td>\c "bOverwriteExisting"</td>
+<td>Switch selecting whether to append log (if the given file exisits) or to replace previous logs</td></tr>
+
+<tr>  <td>\ref FEP_FILE_LOG_OVERWRITE_EXISTING</td><td>fep::component_config::g_strIncidentFileLogPath_bOverwriteExisting</td><td>\c "ComponentConfig.sIncidentHandler.sFileLog.bOverwriteExisting"</td>
+<td>Switch selecting whether to append log (if the given file exisits) or to replace previous logs [full path]</td></tr>
+
+<tr>  <td>\ref FEP_NOTIFICATION_LOG</td><td>fep::component_config::g_strIncidentNotificationLogBase</td><td>\c "ComponentConfig.sIncidentHandler.sIncidentNotification"</td>
+<td>Root configuration node of the FEP Notification Log Strategy </td></tr>
+
+<tr>  <td>\ref FEP_GLOBAL_OPT_ENABLE</td><td>fep::component_config::g_strIncidentNotificationLogField_bEnable</td><td>\c "bEnable"</td>
+<td>Switch to enable / disable the FEP Notification Log Strategy </td></tr>
+
+<tr>  <td>\ref FEP_NOTIFICATION_LOG_ENABLE</td><td>fep::component_config::g_strIncidentNotificationLogPath_bEnable</td><td>\c "ComponentConfig.sIncidentHandler.sIncidentNotification.bEnable"</td>
+<td>Switch to enable / disable the FEP Notification Log Strategy [full path] </td></tr>
+
+<tr>  <td>\ref FEP_GLOBAL_OPT_CATCHALL</td><td>fep::component_config::g_strIncidentNotificationLogField_bEnableCatchAll</td><td>\c "bEnableCatchAll"</td>
+<td>Switch to enable catch-all mode for the Notification Log Strategy </td></tr>
+
+<tr>  <td>\ref FEP_NOTIFICATION_LOG_ENABLE_CATCHALL</td><td>fep::component_config::g_strIncidentNotificationLogPath_bEnableCatchAll</td><td>\c "ComponentConfig.sIncidentHandler.sIncidentNotification.bEnableCatchAll"</td>
+<td>Switch to enable catch-all mode for the Notification Log Strategy [full path] </td></tr>
+
+<tr>  <td>\ref FEP_NOTIFICATION_LOG_OPT_TARGET</td><td>fep::component_config::g_strIncidentNotificationLogField_strTarget</td><td>\c "strTarget"</td>
+<td>Optional target Participant Name to address Incident Notifications to (Default: "*") </td></tr>
+
+<tr>  <td>\ref FEP_NOTIFICATION_LOG_TARGET</td><td>fep::component_config::g_strIncidentNotificationLogPath_strTarget</td><td>\c "ComponentConfig.sIncidentHandler.sIncidentNotification.strTarget"</td>
+<td>Optional target Participant Name to address Incident Notifications to (Default: "*") [full path] </td></tr>
+
+<tr>  <td>\ref FEP_COMPONENT_CONFIG_STATEMACHINE</td><td>fep::component_config::g_strStateMachineBase</td><td>\c "ComponentConfig.StateMachine"</td>
+<td>Root configuration node of the FEP state machine </td></tr>
+
+<tr>   <td>\ref FEP_STM_STANDALONE_PATH</td><td>fep::component_config::g_strStateMachineStandAloneModeField_bEnable</td><td>\c "ComponentConfig.StateMachine.bStandAloneModeEnabled"</td>
+<td>Switch to enable standalone mode for the FEP state machine </td></tr>
+
+<tr>   <td>\ref FEP_COMPONENT_CONFIG_TX_ADAPTER</td><td>fep::component_config::g_strTxAdapterBase</td><td>\c "ComponentConfig.TxAdapter"</td>
+<td>Root configuration node of the FEP Transmission Adapter </td></tr>
+
+<tr>   <td>\ref FEP_TX_ADAPTER_WORKERTHREADS_FIELD</td><td>fep::component_config::g_strTxAdapterField_nNumberOfWorkerThreads</td><td>\c "nNumberOfWorkerThreads"</td>
+<td>Number of worker threads for forwarding incoming data </td></tr>
+
+<tr>   <td>\ref FEP_TX_ADAPTER_WORKERTHREADS_PATH</td><td>fep::component_config::g_strTxAdapterPath_nNumberOfWorkerThreads</td><td>\c "ComponentConfig.TxAdapter.nNumberOfWorkerThreads"</td>
+<td>Number of worker threads for forwarding incoming data [full path] </td></tr>
+
+<tr>   <td>\ref FEP_TIMING_ROOT</td><td style="text-align:center">-</td><td> \c "ComponentConfig.Timing"</td> 
+<td>Root node </td></tr>
+
+<tr>   <td>\ref FEP_TIMING_CLIENT_CONFIGURATION_FILE</td><td style="text-align:center">-</td> <td>\c "ComponentConfig.Timing.TimingClient.strTimingConfig"</td>
+<td>Timing configuration file </td></tr>
+
+<tr>   <td>\ref FEP_TIMING_CLIENT_USE_MULTICAST</td><td style="text-align:center">-</td> <td>\c "ComponentConfig.Timing.TimingClient.bMulticastEnable"</td>
+<td>Timing can use multicast (only with RTI_DDS) for better performance. If the network supports this, it can increase performance. Default is false.
+Set to true to use it. </td></tr>
+
+<tr>   <td>\ref FEP_TIMING_MASTER_PARTICIPANT</td><td style="text-align:center">-</td> <td>\c "ComponentConfig.Timing.TimingMaster.strMasterElement"</td>
+<td>Timing master participant </td></tr>
+
+<tr>   <td>\ref FEP_TIMING_MASTER_TRIGGER_MODE</td><td style="text-align:center">-</td> <td>\c "ComponentConfig.Timing.TimingMaster.strTriggerMode"</td>
+<td>Timing master trigger mode: Allowed values are "AFAP", "SYSTEM_TIME", "EXTERNAL_CLOCK", "USER_IMPLEMENTATION" </td></tr>
+
+<tr>   <td>\ref FEP_TIMING_MASTER_TIME_FACTOR</td><td style="text-align:center">-</td>  <td>\c "ComponentConfig.Timing.TimingMaster.fSpeedFactor"</td>
+<td>Timing master speed factor </td></tr>
+
+<tr>   <td>\ref FEP_TIMING_MASTER_CLIENT_TIMEOUT</td><td style="text-align:center">-</td> <td>\c "ComponentConfig.Timing.TimingMaster.tmAckWaitTimeout_s"</td>
+<td>Timing master timeout before entering error state when waiting for acknowledgements of the Step Listeners (in seconds) </td></tr>
+
+<tr>   <td>\ref FEP_TIMING_MASTER_MIN_TRIGGER_TIME</td><td style="text-align:center">-</td> <td>\c "ComponentConfig.Timing.TimingMaster.tmMinTriggerTime_ms"</td>
+<td>Timing master minimal trigger time (only used if FEP_TIMING_MASTER_TRIGGER_MODE is "SYSTEM_TIME")</td></tr>
+
+<tr>   <td>\ref FEP_COMPONENT_CONFIG_SIGNAL_REGISTRY</td><td>fep::component_config::g_strSignalRegistryBase</td><td>\c "ComponentConfig.SignalRegistry"</td>
+<td>Root node </td></tr>
+
+<tr>   <td>\ref FEP_CSR_SERIALIZATION_FIELD</td><td>fep::component_config::g_strSignalRegistryField_bSerialization</td><td>\c "bEnableSerialization"</td>
+<td>Flag indicating whether serialization should be enabled or disabled </td></tr>
+
+<tr>   <td>\ref FEP_CSR_SERIALIZATION_PATH</td><td>fep::component_config::g_strSignalRegistryPath_bSerialization</td><td>\c "ComponentConfig.SignalRegistry.bEnableSerialization"</td>
+<td>Flag indicating whether serialization should be enabled or disabled </td></tr>
+
+<tr>   <td>\ref FEP_CSR_OUTPUT_SIGNALS_PATH</td><td>fep::component_config::g_strSignalRegistryPath_RegisteredOutSignals</td><td>\c "ComponentConfig.SignalRegistry.RegisteredOutputSignals"</td>
+<td>Output signals node </td></tr>
+
+<tr>   <td>\ref FEP_CSR_INPUT_SIGNALS_PATH</td><td>fep::component_config::g_strSignalRegistryPath_RegisteredInSignals</td><td>\c "ComponentConfig.SignalRegistry.RegisteredInputSignals"</td>
+<td>Input signals node </td></tr>
+
+<tr>   <td>\ref FEP_CSR_SIGNAL_TYPE_FIELD</td><td>fep::component_config::g_strSignalRegistryField_SignalType</td><td>\c "strSignalType"</td>
+<td>Signal type </td></tr>
+
+<tr>   <td>\ref FEP_CSR_SIGNAL_DIRECTION_FIELD</td><td>fep::component_config::g_strSignalRegistryField_SignalDirection</td><td>\c "strSignalDirection"</td>
+<td>Signal direction </td></tr>
+
+<tr>   <td>\ref FEP_CSR_SIGNAL_SIZE_FIELD</td><td>fep::component_config::g_strSignalRegistryField_SignalSize</td><td>\c "szSignalSize"</td>
+<td>Signal size </td></tr>
+
+<tr>   <td>\ref FEP_CSR_SIGNAL_MAPPED_FIELD</td><td>fep::component_config::g_strSignalRegistryField_MappedSignal</td><td>\c "bMappedSignal"</td>
+<td>Mapping indication </td></tr>
+
+<tr>   <td>\ref FEP_CSR_SIGNAL_MUTED_FIELD</td><td>fep::component_config::g_strSignalRegistryField_MutedSignal</td><td>\c "bMutedSignal"</td>
+<td>Signal mute status </td></tr>
+
+<tr>   <td>\ref FEP_CSR_SIGNAL_BACKLOCK_LENGTH_FIELD</td><td>fep::component_config::g_strSignalRegistryField_SampleBacklogLength</td><td>\c "szSampleBacklogLength"</td>
+<td>Sample backlog length </td></tr>
+
+<tr>   <td>\ref FEP_COMPONENT_CONFIG_MAPPING</td><td>fep::component_config::g_strMappingBase</td><td>\c "ComponentConfig.Mapping"</td>
+<td>Root node </td></tr>
+
+<tr>
+  <td>\ref FEP_MAPPING_REMOTE_MAPPING_FIELD</td>
+  <td>fep::component_config::g_strMappingField_strRemoteMapping</td>
+  <td>\c "strRemoteMappingPath"</td>
+  <td>File Path to remote signal mapping file</td>
+</tr>
+
+<tr>
+  <td>\ref FEP_MAPPING_REMOTE_MAPPING_PATH</td>
+  <td>fep::component_config::g_strMappingPath_strRemoteMapping</td>
+  <td>\c "ComponentConfig.Mapping.strRemoteMappingPath"</td>
+  <td>File Path to remote signal mapping file [full path]</td>
+</tr>
+
+<tr>
+  <td>\ref FEP_DESCRIPTION_REMOTE_DESCRIPTION_FIELD</td>
+  <td>fep::component_config::g_strDescriptionField_strRemoteDescription</td>
+  <td>\c "strRemoteDescriptionPath"</td>
+  <td>File Path to remote signal description file</td>
+</tr>
+
+<tr>
+  <td>\ref FEP_DESCRIPTION_REMOTE_DESCRIPTION_PATH</td>
+  <td>fep::component_config::g_strDescriptionPath_strRemoteDescription</td>
+  <td>\c "ComponentConfig.Description.strRemoteDescriptionPath"</td>
+  <td>File Path to remote signal description file [full path]</td>
+</tr>
+
+<tr>
+  <td>\ref FEP_COMPONENT_CONFIG_RPC_CLIENT</td>
+  <td>fep::component_config::g_strRPCClientBase</td>
+  <td>\c "ComponentConfig.RPCClient"</td>
+  <td>Root node</td>
+</tr>
+
+<tr>
+  <td>\ref FEP_RPC_CLIENT_REMOTE_TIMEOUT_FIELD</td>
+  <td>fep::component_config::g_strRPCClient_RemoteTimeoutField</td>
+  <td>\c "nTimeoutMS"</td>
+  <td>Waiting time for rpc client (field)</td>
+</tr>
+
+<tr>
+  <td>\ref FEP_RPC_CLIENT_REMOTE_TIMEOUT_PATH</td>
+  <td>fep::component_config::g_strRPCClient_RemoteTimeoutPath</td>
+  <td>\c "ComponentConfig.RPCClient.nTimeoutMS"</td>
+  <td>Waiting time for rpc client [full path]</td>
+</tr>
+
+</table>
+
+
+\include fep_component_config.h
+
+*/
+}

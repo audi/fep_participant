@@ -1,0 +1,31 @@
+#
+# Copyright @ 2019 Audi AG. All rights reserved.
+# 
+#     This Source Code Form is subject to the terms of the Mozilla
+#     Public License, v. 2.0. If a copy of the MPL was not distributed
+#     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+# 
+# If it is not possible or desirable to put the notice in a particular file, then
+# You may include the notice in a location (such as a LICENSE file in a
+# relevant directory) where a recipient would be likely to look for such a notice.
+# 
+# You may add additional accurate notices of copyright ownership.
+#
+set(PROPERTYTREE_SOURCES
+    fep3/components/legacy/property_tree/fep_propertytree.cpp
+    fep3/components/legacy/property_tree/fep_component_config.cpp
+    fep3/components/legacy/property_tree/fep_function_config.cpp
+    fep3/components/legacy/property_tree/propertytreebase.cpp
+    fep3/components/legacy/property_tree/property.cpp
+    
+    fep3/components/legacy/property_tree/fep_propertytree.h
+    fep3/components/legacy/property_tree/propertytreebase.h
+    fep3/components/legacy/property_tree/property.h
+    
+    ${PROJECT_SOURCE_DIR}/include/fep3/components/legacy/property_tree/fep_component_config.h
+    ${PROJECT_SOURCE_DIR}/include/fep3/components/legacy/property_tree/fep_module_header_config.h
+    ${PROJECT_SOURCE_DIR}/include/fep3/components/legacy/property_tree/fep_function_config.h
+    ${PROJECT_SOURCE_DIR}/include/fep3/components/legacy/property_tree/fep_propertytree_intf.h
+)
+
+source_group(components\\legacy\\property_tree FILES ${PROPERTYTREE_SOURCES})

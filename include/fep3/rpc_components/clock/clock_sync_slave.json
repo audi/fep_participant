@@ -1,0 +1,11 @@
+[
+  {
+    "name": "syncTimeEvent",
+    "params": {
+      "event_id": 1,
+      "old_time": "int64_time",
+      "new_time": "int64_time"
+    },
+    "returns": "int64_time" //microsec
+  }
+]

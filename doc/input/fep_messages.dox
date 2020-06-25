@@ -1,0 +1,192 @@
+/**
+ *
+ * This file describes the usage of commands in FEP
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+namespace fep
+{
+ /**
+\page fep_messages FEP Messages
+
+Aside from \ref fep_data you can also send various types of messages.
+
+In FEP we distinguish between to classes of messages:
+- \ref fep_notification "FEP Notifications"
+- \ref fep_commands "FEP Commands"
+
+Messages in FEP are sent asynchronously and not in real time. They consist of JSON strings containing
+a header and a body.
+
+The header contains information accessible through getter-methods such as
+- \link IMessage::GetMajorVersion() the FEP SDK Major Version of the sender FEP Participant\endlink,
+- \link IMessage::GetMinorVersion() the FEP SDK Minor Version of the sender FEP Participant\endlink,
+- \link IMessage::GetReceiver() the intended receiver FEP Participant\endlink,
+- \link IMessage::GetSender() the sender FEP Participant\endlink
+- \link IMessage::GetTimeStamp() and the time stamp of the message.\endlink
+
+To understand the hierarchy of available messages, have a look at the inheritance diagram of
+\ref IMessage.
+
+Before being able to send a message, your FEP Participant must have reached state STARTUP.
+
+A FEP Participant sending a message of any kind will never receive its own message.
+
+\anchor fep_notification
+FEP Notifications
+----------------------------------------------------------------------------------------------------
+Notifications in FEP are used to provide the outside world with information about a FEP Participant.
+There are two types of public notifications:
+- \ref fep_notification_incident "Incident Notifications"
+- \ref fep_notification_state "State Notifications"
+
+\anchor fep_notification_incident
+<br><br><b><i>Incident Notifications</i></b><br>
+This kind of notification is intended for both, remote incident handling as well as general logging
+purposes. For a detailed documentation of what FEP delivers in terms of incident handling, please
+refer to \ref fep_incident_handling. A simple log dump can be invoked as follows (Note:
+configuration settings for the FEP Incident Handler apply):
+\snippet snippets/snippet_messages/snippet_messages.cpp IncidentLog
+
+\warning If FEP Participants experience issues with allegedly corrupted logs on stdout or stderr
+make sure to use FEP Incidents for logging exclusively. This will ensure thread safety since
+dumping logs to stdout is handled in a separate thread context. Dumping logs to stdout manually
+might mix up the order of messages or interleave the messages with each other.
+
+\anchor fep_notification_state 
+<br>
+<br>
+<b><i>State Notification</i></b>
+<br>
+The FEP State Machine in the underlying FEP Module will automatically send out notifications with
+information about the current state of a FEP Participant. You do not need to send these
+notifications yourself.
+
+\anchor fep_commands
+FEP Commands
+----------------------------------------------------------------------------------------------------
+FEP supports interaction of FEP Participants via commands. Commands are generally divided into two
+types:
+- \ref fep_command_custom "Custom Commands"
+- FEP internal commands (you will normally not recognize them)
+<br>
+<br>
+<b><i>The Command Body</i></b>
+<br>
+The body of a command is different depending on the type. Internally, when sent over the bus,
+commands will be translated to <a href="http://en.wikipedia.org/wiki/JSON">JSON</a> strings.
+Hence, using \ref fep_command_custom "Custom Commands" will require a body written in JSON.
+
+\anchor fep_command_custom
+Custom Commands
+----------------------------------------------------------------------------------------------------
+To extend the existing set of internal commands, you can define your own commands, so called "Custom
+Commands". The custom command's name and its parameters can be freely defined.
+<br>
+<br>
+<b><i>When should I use a Custom Command?</i></b>
+<br>
+A custom command is supposed to be received during state RUNNING to make the receiving FEP
+Participant perform a specific action. Usually these are actions that are not triggered by signal
+data or time.  Also keep in mind, that you should not try to replicate existing FEP functionality,
+such as remote properties or remote state machine events. So instead of sending a command containing
+some configuration information essential for a FEP Participant, you should use \ref
+fep::IPropertyTree::SetRemotePropertyValue. Also, do not send any kind of simulation data via
+Custom Commands. That is what data transmission (see \ref fep_data) is intended for.
+<br>
+<br>
+<b><i>How to define a Custom Command</i></b>
+<br>
+The Custom Command's parameters are expected to be represented by a JSON string, anything else is
+currently not supported by FEP. Thus, a typical parameter tree could look like this:
+\code
+{
+  "param1":"value1",
+  "param2":
+  {
+    "sub_param1" : false,
+    "sub_param2" : 5,
+  },
+  "param3" : 6.5
+}
+\endcode
+
+You are free to define any set of parameters. Available types are
+- string
+- integer
+- double
+- boolean
+- subsets containing types mentioned above
+
+It is good practice to create a helper class for your command derived from \ref cCustomCommand that
+offers an API for accessing the parameters. This way you can
+- have a convenient way to use the command in all of your FEP Participants,
+- use \ref ICommandAccess::TransmitCommand() to send your command,
+- be type safe regarding your parameters.
+
+\warning As of version 1.0.0 the FEP SDK uses its major and minor versions as message version.
+It is strongly advised to do the same when creating your own messages by string representation
+or your messages might be ignored.
+<br>
+<br>
+<b><i>Documenting your Custom Command</i></b>
+<br>
+Within a FEP %System there might be FEP Participants, that are supposed to transmit one of your
+custom commands but will not have access to your helper class. Such a FEP Participant could be a
+test automation FEP Participant for example. To enable such FEP Participants to transmit your custom
+command, they will have to manually assemble the body of your command. That is why you need to
+document your custom commands. To do so, please use the template below, so that others can easily
+use your commands.
+
+<table>
+<caption>My Custom Command: my.custom_command</caption>
+<tr><th>Parameter</th> <th>Type</th> <th>Description</th></tr>
+<tr>
+    <td>param1</td>
+    <td>string</td>
+    <td>The description of the first parameter.</td>
+</tr>
+<tr>
+    <td>param2</td>
+    <td></td>
+    <td>The description of the subset, leave the type field empty for subsets of parameters.</td>
+</tr>
+<tr>
+    <td>param2.sub_param1</td>
+    <td>boolean</td>
+    <td>Use dot notation for subsets of parameters</td>
+</tr>
+<tr>
+    <td>param2.sub_param2</td>
+    <td>integer</td>
+    <td>Often it is advised to describe the allowed range of values.</td>
+</tr>
+<tr>
+    <td>param3</td><td>double</td><td>After you are done documenting, you can answer all questions
+    with "Read the documentation!" and will not be bothered any more.</td>
+</tr>
+</table>
+
+<br>
+<br>
+<b><i>Setting the Command Receiver</i></b>
+<br>
+Every command contains a field "receiver" to identify the intended receiver. You can either address
+a specific FEP Participant by setting its name or you can send the command to a group of FEP
+Participants using wildcards, e.g. "*" (every FEP Participant within the FEP %System) "vu.*" (every
+FEP Participant whose name  begins with "vu.") and so on.
+
+*/
+}

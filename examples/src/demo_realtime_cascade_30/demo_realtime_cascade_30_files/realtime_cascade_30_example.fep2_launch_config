@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch_configuration xmlns="fep/xsd/launch_configuration">
+    <schema_version>1.0.0</schema_version>
+    <description>FEP SDK timing example system</description>
+    <contact>aev.support@audi.de</contact>
+    <participants>
+        <participant>
+            <name>TimingMaster30</name>
+            <host>localhost</host>
+            <working_dir>.</working_dir>
+            <arguments>--name $(name)</arguments>                                                   <!--  --mode 1 --factor 0.0 AFAP -->
+            <!-- <arguments>--name $(name) --mode 0</arguments> -->                                 <!-- System Time Mode -->
+            <!-- <arguments>--name $(name) --mode 1</arguments> -->                                 <!-- Simulation Time Mode -->
+            <!-- <arguments>--name $(name) --mode 1 --cycle 500 --factor 0.1</arguments> -->        <!-- Simulation Time Mode (custom configuration) -->
+            <executable>../demo_realtime_cascade_30_timing_master</executable>
+        </participant>
+        <participant>
+            <name>Starter30</name>
+            <host>localhost</host>
+            <working_dir>.</working_dir>
+            <!-- <arguments>--name $(name) --mode 0</arguments> -->                                 <!--  System Time Mode --->
+            <arguments>--name $(name)</arguments>                                                   <!--  --mode 1 Simulation Time Mode --->
+            <executable>../demo_realtime_cascade_30_starter</executable>
+        </participant>
+        
+        <!-- the following part should be done be done by a Code Generator -->
+        <participant>
+            <name>Transmitter30_1</name>
+            <host>localhost</host>
+            <working_dir>.</working_dir>
+            <!-- <arguments>--name $(name) --mode 0 -c 1</arguments> -->                             <!--  System Time Mode --->
+            <arguments>--name $(name) -c 1</arguments>                                               <!--  --mode 1 Simulation Time Mode --->
+            <executable>../demo_realtime_cascade_30_transmitter</executable>
+        </participant>
+        <participant>
+            <name>Transmitter30_2</name>
+            <host>localhost</host>
+            <working_dir>.</working_dir>
+            <!-- <arguments>--name $(name) --mode 0 -c 2</arguments> -->                             <!--  System Time Mode --->
+            <arguments>--name $(name) -c 2</arguments>                                               <!--  --mode 1 Simulation Time Mode --->
+            <executable>../demo_realtime_cascade_30_transmitter</executable>
+        </participant>
+        <participant>
+            <name>Transmitter30_3</name>
+            <host>localhost</host>
+            <working_dir>.</working_dir>
+            <!-- <arguments>--name $(name) --mode 0 -c 3</arguments> -->                             <!--  System Time Mode --->
+            <arguments>--name $(name) -c 3</arguments>                                               <!--  --mode 1 Simulation Time Mode --->
+            <executable>../demo_realtime_cascade_30_transmitter</executable>
+        </participant>
+    </participants>
+</launch_configuration>

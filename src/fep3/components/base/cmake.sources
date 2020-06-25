@@ -1,0 +1,30 @@
+#
+# Copyright @ 2019 Audi AG. All rights reserved.
+# 
+#     This Source Code Form is subject to the terms of the Mozilla
+#     Public License, v. 2.0. If a copy of the MPL was not distributed
+#     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+# 
+# If it is not possible or desirable to put the notice in a particular file, then
+# You may include the notice in a location (such as a LICENSE file in a
+# relevant directory) where a recipient would be likely to look for such a notice.
+# 
+# You may add additional accurate notices of copyright ownership.
+#
+set(COMPONENTS_BASE_DIR fep3/components/base)
+set(COMPONENTS_BASE_INCLUDE_DIR ../include/fep3/components/base)
+
+set(COMPONENTS_BASE_SOURCES
+    ${COMPONENTS_BASE_DIR}/component_registry.cpp
+)
+
+set(COMPONENTS_BASE_SOURCES_PUBLIC
+    ${COMPONENTS_BASE_INCLUDE_DIR}/fep_component.h
+    ${COMPONENTS_BASE_INCLUDE_DIR}/component_intf.h
+    ${COMPONENTS_BASE_INCLUDE_DIR}/component_registry.h
+    ${COMPONENTS_BASE_INCLUDE_DIR}/component_base.h
+)
+
+set(COMPONENTS_BASE_SOURCES ${COMPONENTS_BASE_SOURCES} ${COMPONENTS_BASE_SOURCES_PUBLIC})
+
+source_group(components\\base FILES ${COMPONENTS_BASE_SOURCES})

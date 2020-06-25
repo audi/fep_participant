@@ -1,0 +1,283 @@
+/**
+ *
+ * This file contains the migration guide to FEP SDK 2.0.0
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+
+ namespace fep
+{
+/**
+\page fep_migration Guide for migration to FEP SDK 2.0.0
+
+The FEP SDK version 2.0.0 contains numerous changes regarding functionality and API. This guide
+provides information to help migrating already implemented FEP Participants from older versions and
+fulfill required use cases with the updated FEP Components.
+
+\section fep_automation_interface_migration The new AutomationInterface
+
+The Automation Interface is not a part of the cModule class anymore. The functionalities are now
+part of its own implementation as a class called AutomationInterface in FEP SDK 2.0.0. All methods
+formerly provided by the cModule still exist in the new implementation with minor changes. Methods
+referencing the own cModule class have been removed because they make no sense in context of the new
+Automation Interface. The following table lists all methods whose name or signature have changed:
+
+
+| Old method                    | New method                                             |
+|:-----------------------------:|:------------------------------------------------------:|
+| GetElementName                | Removed                                                |
+| MuteSignal                    | Removed handle version                                 |
+| UnmuteSignal                  | Removed handle version                                 |
+| IsSignalMuted                 | Removed handle version                                 |
+| GetElementVersion             | \ref AutomationInterface::GetParticipantVersion        |
+| GetElementDisplayName         | \ref AutomationInterface::GetParticipantDisplayName    |
+| GetElementDescription         | \ref AutomationInterface::GetParticipantDescription    |
+| GetElementVendor              | \ref AutomationInterface::GetParticipantVendor         |
+| GetElementCompilationDate     | \ref AutomationInterface::GetParticipantCompilationDate|
+| GetElementFEPVersion          | \ref AutomationInterface::GetParticipantFEPVersion     |
+| GetElementPlatform            | \ref AutomationInterface::GetParticipantPlatform       |
+| GetElementContext             | \ref AutomationInterface::GetParticipantContext        |
+| GetElementContextVersion      | \ref AutomationInterface::GetParticipantContextVersion |
+| GetElementHostName            | \ref AutomationInterface::GetParticipantHostName       |
+| GetElementInstanceID          | \ref AutomationInterface::GetParticipantInstanceID     |
+| GetElementTypeID              | \ref AutomationInterface::GetParticipantTypeID         |
+| GetElementSignalList          | \ref AutomationInterface::GetParticipantSignals        |
+| ResolveSignalType             | \ref AutomationInterface::ResolveSignalType            |
+| RegisterSignalDescription     | \ref AutomationInterface::RegisterSignalDescription    |
+| RegisterMappingConfiguration  | \ref AutomationInterface::RegisterMappingConfiguration |
+| CheckElementAvailability      | \ref AutomationInterface::CheckParticipantAvailability |
+| WaitForElementState           | \ref AutomationInterface::WaitForParticipantState      |
+| TriggerEvent                  | \ref AutomationInterface::TriggerEvent                 |
+| GetAvailableElements          | \ref AutomationInterface::GetAvailableParticipants     |
+| GetElementState               | \ref AutomationInterface::GetParticipantState          |
+| GetSystemState                | \ref AutomationInterface::GetSystemState               |
+| WaitForSystemState            | \ref AutomationInterface::WaitForSystemState           |
+| MuteElement                   | \ref AutomationInterface::MuteParticipant              |
+| UnmuteElement                 | \ref AutomationInterface::UnmuteParticipant            |
+| IsElementMuted                | \ref AutomationInterface::IsParticipantMuted           |
+| RenameElement                 | \ref AutomationInterface::RenameParticipant            |
+
+
+\note Each AutomationInterface class instance will create its own cModule instance. Thus, it is
+recommended to use the same AutomationInterface for the whole application life cycle.
+
+\section fep_signal_registration_migration Signal registration with user options
+
+The FEP Signal Registry now uses a struct with signal attributes and configuration options for
+registration instead of listing the attributes in the \ref ISignalRegistry::RegisterSignal method
+signature. The following code snippet shows how to reimplement the call:
+
+\code
+
+fep::Result cRegistrationSnippetElement::OldRegisterMethod()
+{
+    fep::Result nResult = ERR_NOERROR;
+    handle_t hMyHandle = NULL;
+    nResult = GetSignalRegistry()->RegisterSignal("SignalName", "SignalType", fep::SD_Input, hMyHandle);
+    if (isFailed(nResult) || hMyHandle == NULL)
+    {
+        // some kind of error handling
+    }
+    return nResult;
+}
+
+fep::Result cRegistrationSnippetElement::NewRegisterMethodSimple()
+{
+    fep::Result nResult = ERR_NOERROR;
+    handle_t hMyHandle = NULL;
+    nResult = GetSignalRegistry()->RegisterSignal(
+        cUserSignalOptions("SignalName", fep::SD_Input ,"SignalType"), hMyHandle);
+    if (isFailed(nResult))
+    {
+        // some kind of error handling
+    }
+    return nResult;
+}
+
+fep::Result cRegistrationSnippetElement::NewRegisterMethodComplex()
+{
+    fep::Result nResult = ERR_NOERROR;
+    handle_t hMyHandle = NULL;
+    // new structure for signal configuration
+    cUserSignalOptions oSignalOptions;
+    oSignalOptions.SetSignalName("SignalName");
+    oSignalOptions.SetSignalType("SignalType");
+    oSignalOptions.SetSignalDirection(fep::SD_Input);
+    // optional: make signal reliable
+    oSignalOptions.SetReliability(true);
+    // optional: make signal raw (will overwrite signal type)
+    oSignalOptions.SetSignalRaw();
+    if (oSignalOptions.CheckValidity())
+    {
+        nResult = GetSignalRegistry()->RegisterSignal(oSignalOptions, hMyHandle);
+        if (isFailed(nResult)
+        {
+            // some kind of error handling
+        }
+    }
+    return nResult;
+}
+\endcode
+
+\section fep_incident_codes_migration Changes to FEP Incident Codes
+
+The following table shows all removed, added and renamed incident codes:
+
+
+| Incident Code                                             |  Status                                   |
+|:---------------------------------------------------------:|:-----------------------------------------:|
+| FSI_GENERAL_DUMP                                          | Removed                                   |
+| FSI_STM_STATE_FAILED                                      | Removed                                   |
+| FSI_INCIDENT_ASSOC_FAILED                                 | Removed                                   |
+| FSI_PROP_TREE_ADD_EVENT                                   | Removed                                   |
+| FSI_PROP_TREE_CHANGE_EVENT                                | Removed                                   |
+| FSI_PROP_TREE_DELETE_EVENT                                | Removed                                   |
+| FSI_TRANSM_LIMITER_TX_FAILED                              | Removed                                   |
+| FSI_TRANSM_LIMITER_TX_OVERRUN                             | Removed                                   |
+| FSI_TRANSM_LINK_READY                                     | Removed                                   |
+| FSI_TRANSM_LINK_FAILED                                    | Removed                                   |
+| FSI_TRANSM_LINK_TIMEOUT                                   | Removed                                   |
+| FSI_TRANSM_CONNECTION_FAILED                              | Removed                                   |
+| FSI_TRANSM_MSG_DDS_TX_FAILED                              | \ref FSI_TRANSM_MSG_TX_FAILED             |
+| FSI_TRANSM_DDS_TEARDOWN_FAILED                            | Removed                                   |
+| FSI_TRANSM_DDS_STARTUP_FAILED                             | Removed                                   |
+| FSI_TRANSM_DATA_DDS_TX_FAILED                             | \ref FSI_TRANSM_DATA_TX_FAILED            |
+| FSI_TRANSM_TX_INVALID_STATE                               | Removed                                   |
+| FSI_TRANSM_DDS_PROTO_WRONG_SER_MODE                       | \ref FSI_TRANSM_FEP_PROTO_WRONG_SER_MODE  |
+| FSI_TRANSM_DDS_PROTO_CORRUPT_HEADER                       | \ref FSI_TRANSM_FEP_PROTO_CORRUPT_HEADER  |
+| FSI_TRANSM_MESSAGE_MINOR_VERSION_FAILED                   | Removed                                   |
+| FSI_TRANSM_CONNLIB_STARTUP_FAILED                         | Removed                                   |
+| FSI_TRANSM_CONNLIB_TEARDOWN_FAILED                        | Removed                                   |
+| FSI_TRANSM_CONNLIB_CONNECTION_FAILED                      | Removed                                   |
+| FSI_TRANSM_DATA_CONNLIB_TX_FAILED                         | Removed                                   |
+| FSI_MODULE_DESTROYED_AGAIN                                | Removed                                   |
+| FSI_STEP_SCHEDULING_VIOLATION                             | Removed                                   |
+| FSI_HEARTBEAT_SKIPPED                                     | Removed                                   |
+| FSI_CHUNKING_FAILURE                                      | Removed                                   |
+| FSI_INVALID_CHUNK_SIZE                                    | Removed                                   |
+| FSI_DUPLICATE_CHUNK                                       | Removed                                   |
+| FSI_MISSED_CHUNK                                          | Removed                                   |
+| \ref FSI_TIMING_CLIENT_CONFIGURATION_FAIL                 | Added                                     |
+| \ref FSI_TIMING_MASTER_CONFIGURATION_FAIL                 | Added                                     |
+| \ref FSI_TIMING_CLIENT_TRIGGER_SKIP                       | Added                                     |
+| \ref FSI_TIMING_CLIENT_TRIGGER_TIMEOUT                    | Added                                     |
+| \ref FSI_TIMING_CLIENT_NOTIF_FAIL                         | Added                                     |
+| \ref FSI_TIMING_CLIENT_MASTER_MISCONFIGURATION            | Added                                     |
+| \ref FSI_STEP_LISTENER_RUNTIME_VIOLATION                  | Added                                     |
+| \ref FSI_STEP_LISTENER_INPUT_VALIDITY_VIOLATION           | Added                                     |
+| \ref FSI_STEP_LISTENER_TRANSMIT_OUTPUTS_FAIL              | Added                                     |
+| \ref FSI_STEP_LISTENER_TRANSMIT_ACKNOWLEDGEMENT_FAIL      | Added                                     |
+| \ref FSI_TIMING_MASTER_ACKNOWLEDGEMENT_RECEPTION_TIMEOUT  | Added                                     |
+
+\section fep_transmission_env_migration FEP Transmission Driver Selection
+
+Since no bus compatibility is guaranteed between major versions of the FEP SDK, the legacy
+transmission adapter that has been used to enable transmission to FEP SDK versions smaller than
+1.2.0 has been removed. Any participant implemented with a hardcoded transmission layer selection
+will have to be reimplemented. The new enumeration values are \ref TT_RTI_DDS for usage of RTI
+Connext DDS transmission and \ref TT_ZMQ for usage of ZeroMQ transmission. Additionally, the \ref
+fep_env_variable_configuration "environment variable" which was used to select a transmission layer
+has been changed. The variable is now called "FEP_TRANSMISSION_DRIVER" and the accepted values are
+"RTI_DDS" when RTI Connext DDS is to be used and "ZMQ" when ZeroMQ is to be used.
+
+\note Legacy functionality is not supported anymore i.e. FEP SDK 2.0.0 does not work with older FEP
+versions.
+
+\section fep_signal_muting_migration Signal Muting
+
+Muting signals is now only possible remotely, by means of the \ref AutomationInterface "Automation
+Interface", for example the \ref AutomationInterface::MuteParticipant method.
+
+\section fep_wait_for_state_migration WaitForState Method
+
+The cModule class provides a safe and easy to use \ref cModule::WaitForState "WaitForState" method.
+It is suggested to use this FEP SDK implementation to wait for state changes of your local FEP
+Participant.
+
+\section fep_cmake_interface_migration New CMake Interface
+
+It is now easier to integrate FEP SDK into other CMake projects. Either simply use the provided
+"fep_add_executable" macro to create your target or add the CMake target "fep_core" to your
+target_link_libraries call. No other dependencies are required since they are transitively forwarded
+to your targets.
+
+\section fep_cyclic_listener_migration Cyclic listeners
+
+Cyclic listeners were removed in FEP SDK 2.0. Since all they provided is system timers, they are easily replaced
+by the a_util::system::Timer class located in a_util/system/timer.h.
+Have a look at \ref page_demo_automation_interface. This examples does make use of the class and provides a reference to replacing cyclic listeners.
+
+\section fep_timing_migration FEP Timing
+
+FEP Timing has been completely redesigned for FEP SDK 2.0.0 and now provides more possibilities to
+customize the synchronization of time and data between FEP Participants to fulfill a wide range of
+requirements. This enables FEP to satisfy more use cases. The following passages will explain how to
+reimplement FEP Participants to recreate current behaviour with the new FEP Timing components. For
+more details see \ref fep_timing "FEP Timing".
+
+\subsection fep_timing_configuration_migration Configuration
+
+To configure a Timing Master for the system you absolutely <b>HAVE</b> to set the property
+"ComponentConfig.Timing.TimingMaster.strMasterElement" in all participants that are to be
+synchronized. This is also the case if you simply want to use the step listeners of one participant
+only. Autoconfiguration is not supported anymore and leaving the configuration property empty will
+cause an error during initialization if step listeners are registered.
+
+\subsection fep_timing_registration_migration Step Listener Registration
+
+The registration method for step listeners was changed as well. In the old version the step listener
+had to be a class object instance implementing the IStepListener interface. In FEP SDK 2.0.0 you
+simply have to forward a static class member function and calling instance pointer. The following
+example shows the minimal code needed to register a step listener:
+
+\code 
+[...]
+fep::Result cTimingSnippetElement::RegistrationMethod()
+{
+    fep::Result nResult = ERR_NOERROR;
+    nResult = GetTiming()->RegisterStepListener("SimpleStepListener", 
+        StepConfig(100 * 1000), 
+        &cTimingSnippetElement::SimpleListenerCallbackFunc_caller, 
+        this);
+    if (isFailed(nResult))
+    {
+        // some kind of error handling
+    }
+    return nResult;
+}
+[...]
+static void cTimingSnippetElement::SimpleListenerCallbackFunc_caller(void* pInstance, timestamp_t tmSimulation, fep::IStepDataAccess* pStepDataAccess)
+{
+    // Redirection from static const method to implementation
+    reinterpret_cast<cTimingSnippetElement*>(pInstance)->SimpleListenerCallbackFunc(tmSimulation, pStepDataAccess);
+}
+void cTimingSnippetElement::SimpleListenerCallbackFunc(timestamp_t tmSimulation, fep::IStepDataAccess * pStepDataAccess)
+{
+    // Implementation
+}
+\endcode
+
+The above code snippet will register a Step Listener with a 100 ms cycle time. The StepConfig struct
+can also be used to forward additional configuration options for the step listener. For details
+please see the \ref fep_timing "FEP Timing Documentation".
+
+\subsection fep_timing_initialization_migration %System Initialization
+
+Contrary to the former FEP Timing the FEP Timing Master participant <b>HAS</b> to be initialized and
+started after all participants to be controlled by it. The system will not work correctly otherwise
+since the FEP Timing Master will not initialize and throw an error.
+
+**/
+}

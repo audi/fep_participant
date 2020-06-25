@@ -1,0 +1,115 @@
+//
+// Copyright @ 2019 Audi AG. All rights reserved.
+// 
+//     This Source Code Form is subject to the terms of the Mozilla
+//     Public License, v. 2.0. If a copy of the MPL was not distributed
+//     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+// 
+// If it is not possible or desirable to put the notice in a particular file, then
+// You may include the notice in a location (such as a LICENSE file in a
+// relevant directory) where a recipient would be likely to look for such a notice.
+// 
+// You may add additional accurate notices of copyright ownership.
+//
+namespace fep
+{
+
+/**
+*
+@page fep_participant_configuration Configuring FEP Participants
+
+A FEP Participant requires configuration of some properties at creation time.
+The creation of a FEP Participant is done by calling \ref cModule::Create.
+
+
+Configuration Options
+----------------------------------------------------------------------------------------------------
+
+The available configuration options are described by the class \ref cModuleOptions.
+Currently, the following options can be configured:
+- Participant Name (\ref cModuleOptions::SetParticipantName)
+- Domain Id (\ref cModuleOptions::SetDomainId)
+- Transmission Type (\ref cModuleOptions::SetTransmissionType)
+- Used Network Interfaces (\ref cModuleOptions::AppendToNetworkInterfaceList)
+
+Some of these options cannot be changed after the participant's creation. These options are:
+- Domain Id
+- Transmission Type
+- Used Network Interfaces 
+
+\note A valid participant name might only consist of any combination of letters (lower case & 
+     capital), numbers and the characters <c>-</c>, <c>_</c>, <c>+</c> and <c>.</c>.
+
+
+Configuration Usage
+----------------------------------------------------------------------------------------------------
+
+There are different ways to change the configuration:
+- Using API calls (\ref cModuleOptions)
+  \snippet snippets/snippet_module_create/main.cpp ModuleConfigAPI
+- Using command line options (\ref cModuleOptions::ParseCommandLine)
+  \snippet snippets/snippet_module_create/main.cpp ModuleConfigCMD
+  The options are now taken from the command line:
+  \snippet snippets/snippet_module_create/main.cpp ModuleConfigCMD_use
+- The configuration via environment variables is described
+  \subpage fep_env_variable_configuration "here".
+- Arguments can be added to the argument parser by using the SetAdditionalOption() function of
+  cModuleOptions, see also: \snippet snippets/snippet_module_create/main.cpp ModuleConfigCMD_add
+
+\note Do not override the predefined argument options of FEP SDK!
+\snippet snippets/snippet_module_create/main.cpp ModuleConfigCMD_all
+
+
+
+Default Values
+----------------------------------------------------------------------------------------------------
+
+If no configuration is specified, default values are used:
+- The default domain id is 0
+- The default transmission adapter is RTI_DDS
+- The default network interfaces are all available interfaces
+
+The participant name has no default.
+A participant name must be configured for a successful participant creation (\ref cModule::Create).
+
+Configuration Precedence Order
+----------------------------------------------------------------------------------------------------
+The environment variables are only used if no other configuration option has been specified.
+
+It is recommended to set a participant name and allow this name to be overridden by command line
+arguments.
+\snippet snippets/snippet_module_create/main.cpp ModuleConfig_Recommended
+
+In some cases a special participant name might be required. This can be achieved by overriding the
+command line parameters. The typical usage scenario is using more than one FEP Participant within
+a single executable.
+\snippet snippets/snippet_module_create/main.cpp ModuleConfig_TwoModules
+
+Network Interface Selection
+----------------------------------------------------------------------------------------------------
+The network interface can be selected using API calls
+(\ref cModuleOptions::AppendToNetworkInterfaceList) or command line options. In particular, the
+following options exist:
+
+- Using the IP-address of the network interface
+  \snippet snippets/snippet_module_create/main.cpp  ModuleConfigCMD_interface_ip_address
+- Using IP-address ranges
+  \snippet snippets/snippet_module_create/main.cpp  ModuleConfigCMD_interface_ip_range
+- Using an IP-address string with wildcards
+  \snippet snippets/snippet_module_create/main.cpp  ModuleConfigCMD_interface_ip_wildcard
+- Using a hostname
+  \snippet snippets/snippet_module_create/main.cpp  ModuleConfigCMD_interface_hostname
+- Using a network interface name
+  \snippet snippets/snippet_module_create/main.cpp  ModuleConfigCMD_interface_interfacename
+
+
+Multiple interfaces can be separated by comma on the command line:
+\snippet snippets/snippet_module_create/main.cpp ModuleConfigCMD_interface_multiple
+When using the API (\ref cModuleOptions::AppendToNetworkInterfaceList), multiple calls are required.
+\snippet snippets/snippet_module_create/main.cpp  ModuleConfigAPI_interface_multiple
+
+The network interfaces available on a host can be determined using the commands __ifconfig__/__ip__ (Unix/Linux) or __ipconfig__ (Windows).
+
+*/
+
+}

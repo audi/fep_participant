@@ -1,0 +1,415 @@
+//
+// Copyright @ 2019 Audi AG. All rights reserved.
+// 
+//     This Source Code Form is subject to the terms of the Mozilla
+//     Public License, v. 2.0. If a copy of the MPL was not distributed
+//     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+// 
+// If it is not possible or desirable to put the notice in a particular file, then
+// You may include the notice in a location (such as a LICENSE file in a
+// relevant directory) where a recipient would be likely to look for such a notice.
+// 
+// You may add additional accurate notices of copyright ownership.
+//
+\namespace fep
+{
+/**
+\page fep_ddb_component FEP Distributed Data Buffer
+
+This page discusses the following topics:
+- \ref fep_ddb_what  "What is the use case of the Distributed Data Buffer"
+- \ref fep_data_send "Sending Data"
+- \ref fep_data_receive_ddb "Receiving Data"
+
+
+\anchor fep_ddb_what
+What is the Use Case of the Distributed Data Buffer?
+---------------------------------------------------------------------------------------------------
+
+If you want to send a varying number of instances of your data inside a single frame the DDB can be
+used to achive this. Basically the DDB provides you with the capability of sending dynamic sized
+arrays, without actually having to collect and concatenate the instances in an array.  This case is
+displayed below in the "Sending data having multiple instances" illustration. 
+
+
+\anchor fep_data_send
+Sending Data
+----------------------------------------------------------------------------------------------------
+
+To transmit a signal, you need to register that signal first. Call \ref
+ISignalRegistry::RegisterSignal to register your signal. The handle you get, can then be used to
+call \ref IUserDataAccess::TransmitData for sending your signal.  Note the specific purpose of the
+sync flag: since you can send multiple instances of your signal that need to be processed at once,
+you have to set the sync flag to false, unless you send the last instance of your processing step.
+This way you can send an arbitrary amount of instances without having to collect and concatenate the
+instances in an array.
+
+\dotfile fep_ddb_sending_sync.dot "Sending data having multiple instances"
+
+If this use case does not exist for your application and you are sending only one instance of data
+during one calculation cycle, just set the sync flag every time. This is the most common use case
+and therefore described in the introduction to \ref fep_standard_data_transmission "FEP data
+transport".  Additionally, this use case does not require the DDB in any way.
+
+\dotfile fep_ddb_sending_no_sync.dot "Sending data having single instances"
+
+\note
+In order to detect missing frames, FEP internally stores a frame ID and a sample number for each
+instance. When calling \ref IUserDataAccess::TransmitData, both will be set depending on the sync
+flag. Please note that the number of samples inside a frame is limited to 2^16. See also \ref
+fep_data_dection_of_missing_instances "Detection of missing instances"
+
+
+\anchor fep_data_receive_ddb
+Receiving Data Using the Distributed Data Buffer
+----------------------------------------------------------------------------------------------------
+
+The DDB is designed to buffer incoming _FEP User Data Samples_ until a sync flag is received.
+Buffering is performed in a separate thread context to ensure that the _FEP Simulation Bus_ can be
+queried for data as much as possible and no data samples are "missing". Upon encountering a _FEP
+User Data Sample_, it is copied into the write buffer represented by a \ref fep::IDDBFrame "FEP DDB
+Frame".  When a frame is completed, it is switched to the intermediate stock buffer and the delivery
+thread is signalized that a new frame is ready to be picked up. As soon as the read buffer gets
+unblocked, the thread switches the read and stock buffers and hands it over to the user via the \ref
+ISyncListener::ProcessDDBSync() callback. The read buffer is blocked while this callback is
+processed, and when the user actively accesses the current frame by \ref IDDBAccess::LockData().
+While the buffer is blocked, whenever a new frame is completed the write and stock buffers are
+switched. Hence, this triple buffering mechanism allows to always provide the most recent frame to
+the user, no matter how long the user blocks the read buffer when working on the data. The following
+chart illustrates this principle (The red frame indicates a locked buffer):
+
+<div id="fep_data_receive_img" style="float: left;">
+\dot "DDB t=0; Sync received"
+digraph fep_data_ddb_rx0 {
+edge [style="invis"];
+node [shape=box];
+subgraph cluster0 {
+    node[style=filled];
+    color=red;
+    label="Read Buffer";
+    i1 [label="Instance 1"];
+    i2 [label="Instance 2"];
+    i3 [label="Instance 3\nsync"];
+    i0 [label="Instance 0\nsync", style="invis"];
+    i1 -> i2 -> i3 -> i0;
+}
+subgraph cluster1 {
+    node[style=filled];
+    label="Stock Buffer";
+    i4 [label="Instance 4", style="invis"];
+    i5 [label="Instance 5", style="invis"];
+    i6 [label="Instance 6", style="invis"];
+    i7 [label="Instance 11\nsync", style="invis"];
+    i4 -> i5 -> i6 -> i7;
+}
+subgraph cluster2 {
+    node[style=filled];
+    label="Write Buffer";
+    i8 [label="Instance 4"];
+    i9 [label="Instance 5" ];
+    i10 [label="Instance 6" ];
+    i11 [label="Instance 7\nsync"];
+    i8 -> i9 -> i10 -> i11;
+}
+}
+\enddot
+
+\dot "DDB t=1; Write buffer switched"
+digraph fep_data_ddb_rx1 {
+edge [style="invis"];
+node [shape=box];
+subgraph cluster0 {
+    node[style=filled];
+    color=red;
+    label="Read Buffer";
+    i1 [label="Instance 1"];
+    i2 [label="Instance 2"];
+    i3 [label="Instance 3\nsync"];
+    i0 [label="Instance 0\nsync", style="invis"];
+    i1 -> i2 -> i3 -> i0;
+}
+subgraph cluster1 {
+    node[style=filled];
+    label="Write Buffer";
+    i4 [label="Instance 4"];
+    i5 [label="Instance 5"];
+    i6 [label="Instance 6"];
+    i7 [label="Instance 7\nsync"];
+    i4 -> i5 -> i6 -> i7;
+}
+subgraph cluster2 {
+    node[style=filled];
+    label="Stock Buffer";
+    i8 [label="Instance 4", style="invis"];
+    i9 [label="Instance 5", style="invis"];
+    i10 [label="Instance 6" , style="invis"];
+    i11 [label="Instance 11\nsync", style="invis"];
+    i8 -> i9 -> i10 -> i11;
+}
+}
+\enddot
+
+\dot "DDB t=2; Received sync while read buffer blocked"
+digraph fep_data_ddb_rx2 {
+edge [style="invis"];
+node [shape=box];
+subgraph cluster0 {
+    node[style=filled];
+    color=red;
+    label="Read Buffer";
+    i1 [label="Instance 1"];
+    i2 [label="Instance 2"];
+    i3 [label="Instance 3\nsync"];
+    i0 [label="Instance 0\nsync", style="invis"];
+    i1 -> i2 -> i3 -> i0;
+}
+subgraph cluster1 {
+    node[style=filled];
+    label="Write Buffer";
+    i4 [label="Instance 4"];
+    i5 [label="Instance 5"];
+    i6 [label="Instance 6"];
+    i7 [label="Instance 7\nsync"];
+    i4 -> i5 -> i6 -> i7;
+}
+subgraph cluster2 {
+    node[style=filled];
+    label="Stock Buffer";
+    i8 [label="Instance 8"];
+    i9 [label="Instance 9"];
+    i10 [label="Instance 10" ];
+    i11 [label="Instance 11\nsync"];
+    i8 -> i9 -> i10 -> i11;
+}
+}
+\enddot
+
+\dot "DDB t=3; Write buffer switched"
+digraph fep_data_ddb_rx3 {
+edge [style="invis"];
+node [shape=box];
+subgraph cluster0 {
+    node[style=filled];
+    color=red;
+    label="Read Buffer";
+    i1 [label="Instance 1"];
+    i2 [label="Instance 2"];
+    i3 [label="Instance 3\nsync"];
+    i0 [label="Instance 0\nsync", style="invis"];
+    i1 -> i2 -> i3 -> i0;
+}
+subgraph cluster2 {
+    node[style=filled];
+    label="Stock Buffer";
+    i8 [label="Instance 8"];
+    i9 [label="Instance 9"];
+    i10 [label="Instance 10" ];
+    i11 [label="Instance 11\nsync"];
+    i8 -> i9 -> i10 -> i11;
+}
+subgraph cluster1 {
+    node[style=filled];
+    label="Write Buffer";
+    i4 [label="Instance 4", style="invis"];
+    i5 [label="Instance 5", style="invis"];
+    i6 [label="Instance 6", style="invis"];
+    i7 [label="Instance 7\nsync", style="invis"];
+    i4 -> i5 -> i6 -> i7;
+}
+}
+\enddot
+
+\dot "DDB t=4; Lock released: Read buffer switched"
+digraph fep_data_ddb_rx4 {
+edge [style="invis"];
+node [shape=box];
+subgraph cluster2 {
+    node[style=filled];
+    label="Stock Buffer";
+    i8 [label="Instance 8"];
+    i9 [label="Instance 9"];
+    i10 [label="Instance 10" ];
+    i11 [label="Instance 11\nsync"];
+    i8 -> i9 -> i10 -> i11;
+}
+subgraph cluster0 {
+    node[style=filled];
+    label="Read Buffer";
+    i1 [label="Instance 1", style="invis"];
+    i2 [label="Instance 2", style="invis"];
+    i3 [label="Instance 3\nsync", style="invis"];
+    i0 [label="Instance 0\nsync", style="invis", style="invis"];
+    i1 -> i2 -> i3 -> i0;
+}
+subgraph cluster1 {
+    node[style=filled];
+    label="Write Buffer";
+    i4 [label="Instance 4", style="invis"];
+    i5 [label="Instance 5", style="invis"];
+    i6 [label="Instance 6", style="invis"];
+    i7 [label="Instance 7\nsync", style="invis"];
+    i4 -> i5 -> i6 -> i7;
+}
+}
+\enddot
+
+</div>
+
+<div style="clear: left;">
+</div>
+
+To enable the DDB for specific signals, calling \ref cModule::InitDDBEntry registers the signal with
+the _Transmission Layer_ and returns the corresponding _FEP Signal Handle_. The returned \ref
+IDDBAccess reference may be used to register an \ref ISyncListener thread.
+
+\note
+Since the DDB is working with specific fixed signal sizes it does NOT support raw data signals.
+
+When initializing the DDB by calling \ref cModule::InitDDBEntry, the user is required to choose a
+delivery strategy \ref fep::tDDBDeliveryStrategy. It determines how frames with a missing instance
+shall be treated. The possible options are
+
+Delivery Strategy | Effect
+:------- | :---
+\ref fep::DDBDS_DeliverIncomplete | Delivers incomplete frames
+\ref fep::DDBDS_DumpIncomplete | Dumps incomplete frames
+
+The user also has to choose a maximum frame size, as _FEP User Data Samples_ will be preallocated 
+to provide smooth operation.
+
+\warning
+In the context of the DDB, individual frames have to be smaller than 2^16 samples!
+
+<br>
+It is preferable to read signals in \ref SD_Input direction using the DDB for the
+following reasons:
+- Reception on the _Transmission Layer_ and processing in "user-land" is threaded. This means, the
+ reception thread context from the transmission layer is decoupled from both, 
+  - the \ref ISyncListener::ProcessDDBSync() callback and 
+  - the \ref IDDBAccess::LockData() calls.
+This ensures data consistency and data signal completeness on the FEP Bus.
+- Sophisticated incident handling with support for the FEP Incident Handler. For available 
+incident codes refer to the respective FSI_DDB_* codes published in \ref page_aux_builtin_incidents.
+- If the data model is frame-based, the DDB ensures frame consistency through the sync-signal.
+- Sample reception and memory management are RT and MT compliant by design.
+
+Independently of the used access method, the DDB is initialized as illustrated in the following code
+snippet. Please note that \ref cModule::InitDDBEntry() is registering a signal (\ref SD_Input)
+implicitly.
+
+
+\snippet snippet_ddb/snippet_ddb.cpp ProcessDDBSyncInitialization
+
+Both possibilities to access the DDB, \ref ISyncListener::ProcessDDBSync() and \ref
+IDDBAccess::LockData() perform RT and MT compliant locking of the read buffer. Both calls provide
+access to complete \ref fep::IDDBFrame "DDB Frames". The \ref ISyncListener::ProcessDDBSync()
+callback guarantees that each frame is only processed once, whereas \ref IDDBAccess::LockData() is
+applied in a polling-orientated fashion and will return the same frame until the read buffer has
+been updated.  Hence, both meachanisms have different scopes: \ref ISyncListener::ProcessDDBSync()
+may be used for data-triggered processing, and \ref IDDBAccess::LockData() is useful for
+time-triggered processing.
+
+As long as the user blocks the read buffer, it will not be updated with newly received frames.
+Unlocking is performed either implicitly by leaving the  \ref ISyncListener::ProcessDDBSync()
+callback, or has to be performed actively by \ref IDDBAccess::UnlockData(). Nevertheless, the most
+recent frame is stored in the stock buffer and will be delivered to the user as soon as all locks
+are freed.
+
+\note
+After a new frame is stored in the stock buffer, all subsequent calls on \ref IDDBAccess::LockData()
+will be blocked until the frame has been switched to the read buffer.
+
+\note
+When using \ref IDDBAccess::LockData() from several threading contexts, the user is advised to
+unlock the read buffer as early as possible. This reduces the mutual blocking of the processing
+threads and speeds up data processing.
+
+\warning
+Calling \ref IDDBAccess::LockData() from within a \ref ISyncListener::ProcessDDBSync() callback will
+most likely result in a dead-lock since both lock the read buffer. However, it is safe to access the
+read buffer from different threads at the same time using \ref IDDBAccess::LockData().  \ref
+IDDBAccess::LockData() must never be called in the context of a \ref ISyncListener::ProcessDDBSync()
+callback!
+
+\par Error handling
+
+The DDB will throw FEP incidents when the following errors occur:
+Error Code | Severity | Cause
+:------- | :------ | :-----
+\ref FSI_DDB_NOT_INITIALIZED | \ref SL_Critical_Local | Receiving data without properly configured DDB.
+\ref FSI_DDB_RX_OVERRUN | \ref SL_Critical_Local| A received data sample exceeded DDB buffer size. Sample is dropped.
+\ref FSI_DDB_RX_OVERRUN| \ref SL_Critical_Local | Failed to properly enqueue data sample.
+\ref FSI_GENERAL_WARNING | \ref SL_Warning | A received signal handle does not match the DDBs registered one.
+\ref FSI_GENERAL_WARNING | \ref SL_Warning| The user reported an error in the ProcessDDB callback.
+\ref FSI_DDB_RX_ABORT_SYNC | \ref SL_Warning | A frame is incomplete and dumped due to the chosen delivery strategy.
+\ref FSI_DDB_RX_ABORT_SYNC | \ref SL_Warning | Stock buffer is discarded due to a new frame being received.
+\ref FSI_GENERAL_WARNING | \ref SL_Warning | Failed to switch read buffer: stock buffer is empty.
+
+\note
+For details on the FEP Incident Handling mechanism see \ref fep_incident_handling.  There, you will
+find information on how to handle incidents in your FEP participant, and on how to use different
+incident strategies, for example if you get overrun by warnings.
+
+\par Implementing IDDBSyncListener::ProcessDDBSync()
+
+\snippet snippet_ddb/snippet_ddb.cpp ProcessDDBSyncImpl
+
+\par Implementing the LockData() mechanism
+
+\snippet snippet_ddb/snippet_ddb.cpp LockDataAppl
+
+\par Guarding any kind of DDB access mechanism against issues during reception
+
+\snippet snippet_ddb/snippet_ddb.cpp DDBErrorHandling
+
+\anchor fep_data_dection_of_missing_instances
+<br><br><b><i>Detection of missing instances</i></b><br>
+
+As described in \ref fep_data_send "Sending Data", several instances of a signal can be combined
+into a frame, and each frame is finalized by a sync flag. Hence, each "frame" consists of several
+"samples".  In order to detect missing frames, FEP internally stores a frame ID (\c tUInt64) and a
+sample number (\c tUInt16) for each \ref IPreparationDataSample.  When calling \ref
+fep::IUserDataAccess::TransmitData, both values will be set depending on the sync flag.
+
+Sync flag of previous data sample | Frame ID  | Sample number in frame
+:-------                          | :---      | :---
+tTrue                             | increment | reset to 0
+tFalse                            | -         | increment
+
+Both numbers are reset when the FEP participant enters the \ref fep_states_initialization "state \c INITIALIZING ".
+
+\note
+By default, the frame ID and sample number are not accessible by the user's \ref IUserDataSample.
+However, they may be accessed from within the \ref IPreparationDataSample interface by \ref
+IPreparationDataSample::GetFrameId and \ref IPreparationDataSample::GetSampleNumberInFrame.
+
+Upon reception of a signal, the frame ID and sample number are evaluated in the _FEP Data Access_.
+Currently, the following cases are detected as missing frames:
+- The frame ID increases by at least 2
+- The sample number increases by at least 2
+- The frame ID increases without a previously received sync flag
+
+If a missing frame is detected, an incident \ref page_aux_builtin_incidents
+"\c FSI_TRANSM_RX_MISSING_DATASAMPLE " is raised with the severity \ref tSeverityLevel "\c SL_Warning ".
+
+\note
+For details on the FEP Incident Handling mechanism see \ref fep_incident_handling.  There, you will
+find information on how to handle incidents in your FEP participant, and on how to use different
+incident strategies, for example if you get overrun by warnings.
+
+
+\anchor fep_data_reading_before_receiving
+<br>
+<br>
+<b><i>Reading Data Before Receiving Data</i></b>
+<br>
+On registration of a signal using \ref ISignalRegistry::RegisterSignal() an internal data sample is
+created. This data sample is initialized using the default values specified in the DDL. If no
+default value is given the corresponding participant will be zero initialized.
+
+If a data frame is requested using \ref IDDBAccess::LockData() the most recently received data will
+be returned. If no data was received so far the result will be an empty \ref IDDBFrame of frame size
+zero.
+
+*/
+}

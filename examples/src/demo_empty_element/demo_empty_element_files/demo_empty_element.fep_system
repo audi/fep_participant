@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<system xmlns="fep/xsd/system">
+    <schema_version>1.0.0</schema_version>
+    <description>FEP SDK demo empty element example system</description>
+    <version>2.1.1</version>
+    <contact>aev.support@audi.de</contact>
+    <properties />
+    <elements>
+        <element>
+            <name>Demo_Empty_Element</name>
+            <type>DemoEmptyElement</type>
+            <type_version>2.1.1</type_version>
+            <interface_properties />
+            <requirement_resolutions />
+        </element>
+    </elements>
+</system>

@@ -1,0 +1,70 @@
+#######################################################################
+#
+# FEP Participant library Config File
+#
+# Copyright @ 2019 Audi AG. All rights reserved.
+# 
+#     This Source Code Form is subject to the terms of the Mozilla
+#     Public License, v. 2.0. If a copy of the MPL was not distributed
+#     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+# 
+# If it is not possible or desirable to put the notice in a particular file, then
+# You may include the notice in a location (such as a LICENSE file in a
+# relevant directory) where a recipient would be likely to look for such a notice.
+# 
+# You may add additional accurate notices of copyright ownership.
+#
+#
+#######################################################################
+if (FEP_SDK_PARTICIPANT_FOUND)
+    return()
+endif (FEP_SDK_PARTICIPANT_FOUND)
+
+if (EXISTS ${CMAKE_CURRENT_LIST_DIR}/fep_participant-settings.cmake)
+    include(${CMAKE_CURRENT_LIST_DIR}/fep_participant-settings.cmake)
+else()
+    set(FEP_USE_SHARED_RTIDDS ${USE_SHARED_RTIDDS})
+    set(FEP_USE_SHARED_LIBS ${BUILD_SHARED_LIBS})
+endif()
+
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+if(UNIX AND NOT CMAKE_BUILD_TYPE)
+    message(FATAL_ERROR "The CMAKE_BUILD_TYPE has to be specified first!")
+endif(UNIX AND NOT CMAKE_BUILD_TYPE)
+set(FEP_ENABLE_DEPRECATED_PLATFORM_NOMENCLATURE true)
+
+include(${CMAKE_CURRENT_LIST_DIR}/fep_participant-macros.cmake)
+
+if (NOT a_util_FOUND)
+    find_package(a_util REQUIRED)
+    find_package(Clara REQUIRED)
+endif()
+find_package(ddl REQUIRED)
+find_package(pkg_rpc REQUIRED)
+
+if (FEP_USE_SHARED_LIBS)
+    include(${CMAKE_CURRENT_LIST_DIR}/lib/cmake/fep_participant_targets.cmake)
+else()
+    add_library(${FEP_SDK_PARTICIPANT} STATIC IMPORTED)
+    if(MSVC)
+        set_target_properties(${FEP_SDK_PARTICIPANT} PROPERTIES
+                    IMPORTED_LOCATION_DEBUG ${CMAKE_CURRENT_LIST_DIR}/lib/${FEP_SDK_PARTICIPANT}d${fep_participant_VERSION_MAJOR}.${fep_participant_VERSION_MINOR}.lib
+                    IMPORTED_LOCATION_RELEASE ${CMAKE_CURRENT_LIST_DIR}/lib/${FEP_SDK_PARTICIPANT}${fep_participant_VERSION_MAJOR}.${fep_participant_VERSION_MINOR}.lib
+                    IMPORTED_LOCATION_RELWITHDEBINFO ${CMAKE_CURRENT_LIST_DIR}/lib/${FEP_SDK_PARTICIPANT}${fep_participant_VERSION_MAJOR}.${fep_participant_VERSION_MINOR}.lib
+                )
+    else()
+        set_target_properties(${FEP_SDK_PARTICIPANT} PROPERTIES
+                IMPORTED_LOCATION_DEBUG ${CMAKE_CURRENT_LIST_DIR}/lib/lib${FEP_SDK_PARTICIPANT}d${fep_participant_VERSION_MAJOR}.${fep_participant_VERSION_MINOR}.a
+                IMPORTED_LOCATION_RELEASE ${CMAKE_CURRENT_LIST_DIR}/lib/lib${FEP_SDK_PARTICIPANT}${fep_participant_VERSION_MAJOR}.${fep_participant_VERSION_MINOR}.a
+                IMPORTED_LOCATION_RELWITHDEBINFO ${CMAKE_CURRENT_LIST_DIR}/lib/lib${FEP_SDK_PARTICIPANT}${fep_participant_VERSION_MAJOR}.${fep_participant_VERSION_MINOR}.a
+            )
+    endif()
+ 
+    set_target_properties(${FEP_SDK_PARTICIPANT} PROPERTIES
+        INTERFACE_LINK_LIBRARIES "${FEP_SDK_PARTICIPANT_PLATFORM_LIBRARIES};a_util;ddl;pkg_rpc"
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/include"
+        INTERFACE_COMPILE_DEFINITIONS "@_zyre_propagation_define@"
+    )
+endif() 
+
+set(FEP_SDK_PARTICIPANT_FOUND true)

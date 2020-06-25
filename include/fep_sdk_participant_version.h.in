@@ -1,0 +1,47 @@
+/**
+ *
+ * FEP Version Header.
+ *
+ * @file
+
+   @copyright
+   @verbatim
+   Copyright @ 2019 Audi AG. All rights reserved.
+   
+       This Source Code Form is subject to the terms of the Mozilla
+       Public License, v. 2.0. If a copy of the MPL was not distributed
+       with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+   
+   If it is not possible or desirable to put the notice in a particular file, then
+   You may include the notice in a location (such as a LICENSE file in a
+   relevant directory) where a recipient would be likely to look for such a notice.
+   
+   You may add additional accurate notices of copyright ownership.
+   @endverbatim
+ *
+ *
+ */
+
+#ifndef _FEP_SDK_PARTICIPANT_VERSION_HEADER_
+#define _FEP_SDK_PARTICIPANT_VERSION_HEADER_
+
+#define FEP_SDK_PARTICIPANT_VERSION_ID       "fepsdkparticipant"
+#define FEP_SDK_PARTICIPANT_VERSION_MAJOR    @FEP_SDK_PARTICIPANT_VERSION_MAJOR@
+#define FEP_SDK_PARTICIPANT_VERSION_MINOR    @FEP_SDK_PARTICIPANT_VERSION_MINOR@
+#define FEP_SDK_PARTICIPANT_VERSION_PATCH    @FEP_SDK_PARTICIPANT_VERSION_PATCH@
+#define FEP_SDK_PARTICIPANT_VERSION_BUILD    @FEP_SDK_PARTICIPANT_BUILD_NR@
+
+#define FEP_SDK_PARTICIPANT_VERSION_STR      "@FEP_SDK_PARTICIPANT_VERSION_MAJOR@.@FEP_SDK_PARTICIPANT_VERSION_MINOR@.@FEP_SDK_PARTICIPANT_VERSION_PATCH@-@VERSION_FEP_SDK_PARTICIPANT@@BETA_FLAG@"
+
+#define FEP_SDK_PARTICIPANT_VERSION_LABEL    "FEP SDK Participant\n" \
+                                    "Version " FEP_SDK_PARTICIPANT_VERSION_STR "\n" \
+                                    "Build @FEP_SDK_PARTICIPANT_BUILD_NR@\n" \
+                                    "Copyright (c) AUDI AG. " \
+                                    "All rights reserved."
+
+#define FEP_SDK_PARTICIPANT_PLATFORM_STR     "@PLATFORM@"
+
+
+#cmakedefine FEP_SDK_PARTICIPANT_SHARED_LIB
+
+#endif  // _FEP_SDK_PARTICIPANT_VERSION_HEADER_

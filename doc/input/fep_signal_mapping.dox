@@ -1,0 +1,96 @@
+/**
+ *
+ * This file describes the usage of the signal mapping functionality.
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+
+namespace fep
+{
+
+/**
+\page fep_signal_mapping FEP Signal Mapping
+
+FEP Signal Mapping enables the composition of an input signal from other source signals.  This is
+done dynamically during runtime using a configuration format described here: \subpage page_signal_mapping_spec.
+
+During input signal registration, the FEP SDK will instantiate the mapping, if mapping configuration
+is available for the signal. Using the \ref AutomationInterface "Automation Interface" or the \ref
+fep::IPropertyTree, registration of mapping configuration can be done remotely, which allows
+integration of existing FEP Participants into foreign FEP Systems.
+
+![Mapping functionality](Mapping.png)
+
+\section sec_usage Usage
+
+An input signal is mapped transparently if the FEP Participant holds a valid mapping configuration
+for the signal at the time of registration. Mapping configurations can be registered at the FEP
+Participant using \ref ISignalMapping::RegisterMappingConfiguration or remotely in other FEP
+Participants using \ref AutomationInterface::RegisterMappingConfiguration. Using the respective flag
+option arguments of said API calls, the submitted mapping configuration can be merged with any
+existing configuration. \ref ISignalMapping::ClearMappingConfiguration or \ref
+AutomationInterface::ClearMappingConfiguration can be used to clear any registered mapping
+configuration.
+
+Additionally, it is possible to remotely register mapping configurations by means of the FEP
+Property Tree by setting the filepath to a mapping configuration in
+"ComponentConfig.Mapping.strRemoteMappingPath". Multiple configuration files, separated by the
+delimiters ";" and ",", can be set over this path. Note that only signals registered after
+reaching the state FS_INITIALIZING will be mapped using this mechanism.  Already registered mapping
+configurations will be cleared when the property "ComponentConfig.Mapping.strRemoteMappingPath" is
+set to an empty string ("").
+
+\warning Usage of \ref AutomationInterface::RegisterMappingConfiguration and setting mapping
+configurations through the \ref fep::IPropertyTree simultaneously is _NOT_ supported and results
+in undefined behavior.
+
+\note Since signals are mapped transparently during registration, it is possible that the mapping
+configuration hides the presence of a standard FEP Signal. For example, if Participant A provides
+output signal S and Participant B tries to register S as an input signal, B will not see the
+physical signal S if it has a valid mapping configuration for signal S. In other words, during
+registration, mapped signals have a higher priority than standard signals.
+
+As stated before, during input signal registration, the mapping configuration database is queried
+for the signal and is used to map the signal. Previously registered signals remain unaffected by any
+change to the mapping configuration database.
+
+\note All referenced types inside of a mapping configuration have to be known to the signal registry
+of the FEP Participant during signal registration. Clearing the signal description database (\ref
+ISignalRegistry::ClearSignalDescriptions) will automatically clear the entire mapping configuration
+database! The consistency check will be performed during the first attempted registration of a
+mapped signal. In case of failure, an incident (\ref fep::FSI_MAPPING_CONFIG_DDL_INCONSISTENCY) will
+be raised with a detailed error description and the registration of the mapped signal will fail.
+
+\note Upon any unsuccessful mapping configuration registration attempt, an incident (\ref
+fep::FSI_MAPPING_CONFIG_INVALID) will be raised with a detailed error description.
+
+\note During a restart (in the Cleanup callback of the state machine) all registered mapping
+configurations will be cleared automatically.
+
+\note The registered mapping is read only by "RegisterSignal()". So, if the participant does not
+unregister its signal in ProcessIdleEntry and register them in ProcessInitializingEntry (common
+behavior for FEP participants), the map file will not be read in FS_IDLE, even if the user modifies
+the path in the property "ComponentConfig.Mapping.strRemoteMappingPath". If the participant
+follows the standard behavior and registers its signals every time in ProcessInitializingEntry, the
+mapping will be read by each initialisation, even if the path was not modified (so the user can make
+modifications in the file, save it, and they will be taken into account by the next
+initialisation).
+
+\section sec_features Features
+
+Please see \subpage page_signal_mapping_spec for a list of features.
+
+*/
+}

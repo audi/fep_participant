@@ -1,0 +1,340 @@
+/**
+ *
+ * This file describes the usage properties.
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+
+ 
+/**
+\page fep_properties The FEP Property Tree
+
+Every FEP Participant inherits a component called FEP Property Tree from the underlying FEP Module.
+It can be accessed using the \ref fep::cModule::GetPropertyTree method. <br>
+
+The purpose of the property tree is to store any static data that does not change periodically
+during runtime. This can be configuration data, additional information about a simulation (e.g.
+physical dimension of objects) or other types of meta data. Abusing the property tree by storing
+frequently updated simulation data is not recommended.
+
+Data inside the property tree is stored in properties. Those properties are arranged in a tree-like
+structure and can therefore represent hierarchical units of information. A property which is a child
+of another property is called a subproperty. To access a property in the property tree, you need to
+know the path to that property. The path is constructed of all parent properties of your target
+property, separated by a ".". Here's an example:
+<br>
+<pre>"FunctionConfig.sVU.sScenario.ui32EgoId"</pre>
+<br>
+FunctionConfig is the top-level property in the path. It has a subproperty called sVU which itself
+has a subproperty sScenario which contains ui32EgoId.
+
+The following chapters describe the main features of the FEP Property Tree:
+- \ref sec_properties "Properties"
+    - \ref subsec_arrays "Storing arrays inside properties"
+    - \ref subsec_subproperties "Using sub-properties"
+- \ref sec_property_callbacks "Monitoring property changes"
+- \ref sec_remote_properties "Accessing remote properties"
+    - \ref subsec_remote_properties "Straight usage of remote properties"
+    - \ref sec_mirrored_properties "Mirroring properties of another FEP Participant"
+- \ref sec_participant_header "Standardized participant header"
+
+\anchor sec_properties
+Properties
+----------------------------------------------------------------------------------------------------
+
+FEP properties are being added, set, and managed through the \ref fep::IPropertyTree and \ref
+fep::IPropertyTreeBase interfaces (a general base class), provided by a call to \ref
+fep::cModule::GetPropertyTree. The PropertyTree is able to host string, boolean, integer (tInt32)
+and floating-point (tFloat64) type properties.
+
+Additionally, properties can store arrays of elements of each of the aforementioned types. Other
+types of properties are \b not supported. tFloat32 types may easily be accommodated by the tFloat64
+type property while smaller integer types like tInt8/16 or unsigned variants have to be stored
+inside tInt32 properties.
+
+Initial creation of a property is usually done using \ref fep::IPropertyTreeBase::SetPropertyValue.
+If you want to access a property directly or use arrays you can get the property instance (\ref
+fep::IProperty) using \ref fep::IPropertyTreeBase::GetProperty.
+
+\snippet snippets/snippet_properties/snippet_properties.cpp WorkingProperties
+
+\note Float and integer properties are always usable interchangeably. This means that a property
+that is set to a float value can be read using the integer fep::IPropertyTree::GetPropertyValue or
+\ref fep::IProperty::GetValue variants and the other way around. Keep in mind though that reading a
+tFloat64 type value as a tInt32 value can cause dramatic precision loss due to the conversion.
+Always read a property using the correct overloaded versions of the aforementioned methods if
+numeric precision is required.
+
+\warning Just like other FEP Components provided by the FEP Module, the FEP Property Tree will
+         _not_ be available to the inheriting FEP Participant before \ref fep::cModule::Create() has
+         been called! In a standard FEP setup, the best place to set initial property values is in
+         one of the provided FEP State callbacks (see examples on \ref fep_first_participant).
+
+\section subsec_arrays Storing arrays inside properties
+
+Properties can store more than just one value of the supported types. For this functionality, \ref
+fep::IProperty provides \ref fep::IProperty::IsArray and \ref fep::IProperty::GetArraySize utility
+methods and the central \ref fep::IProperty::AppendValue method to add more than one value. As
+properties always have at least one value stored inside them, the first value of an array has to be
+inserted using the usual \ref fep::IProperty::SetValue or fep::IPropertyTree::SetPropertyValue
+methods. After the first element is stored, additional values (<b>of the same type</b>) can be
+appended using \ref fep::IProperty::AppendValue. Appending values to an array will notify any
+registered property listeners of the change.
+
+To access individual elements of an array, all \ref fep::IProperty::GetValue overloads provide
+an optional (zero-based) index parameter.
+
+For convenience, \ref fep::IPropertyTree provides methods \ref fep::IPropertyTree::SetPropertyValues
+which allow to set arrays of values at once. They take a pointer to the first element and the size
+of the array as arguments. As is shown in the example below, this allows the user to set
+Property-Arrays either from raw C-Arrays or from std::vector.
+
+@warning Note that providing a size larger than the actually reserved space in the array may result
+in undefined behavior, including but not limited to read access violations or segfaults.
+
+\snippet snippets/snippet_properties/snippet_properties.cpp PropertyArrays
+
+\note Because the type of properties may change and all array elements must be of the same type,
+calling \ref fep::IProperty::SetValue or \ref fep::IPropertyTreeBase::SetPropertyValue after an
+array has been set up using \ref fep::IProperty::AppendValue will reset the property to be
+single-value again!
+
+\section subsec_subproperties Using Sub-properties
+
+FEP Sub-properties are being delimited by a '.' character and may be nested indefinitely:
+
+\snippet snippets/snippet_properties/snippet_properties.cpp Subproperties
+
+\note
+A FEP Module's property tree may only be referenced directly within the inheriting FEP Participant
+itself. External instances cannot modify properties directly but may request a FEP Participant to
+adapt specific values through issuing a FEP SetProperty command (see @ref fep_commands) addressed to
+a specific FEP Participant. If the property in question does not only apply to a single FEP
+Participant but is relevant either to an entire FEP system or a collection of FEP Participants,
+wildcards may be used as well (see @ref fep_messages for details). For information about how to
+access remote properties and their values see \ref sec_remote_properties and \ref
+sec_mirrored_properties "Mirroring properties of another FEP Participant".
+
+\anchor sec_property_callbacks
+## Monitoring Property changes ##
+----------------------------------------------------------------------------------------------------
+
+FEP allows monitoring Properties and all adjacent properties along its path for changes, newly added
+properties, and the deletion thereof. This monitor mechanism is based on callbacks provided by the
+FEP PropertyListener interface.
+
+This class listens to changes in the property tree:
+
+\snippet snippets/snippet_properties/snippet_properties.h PropertyListenerClass
+
+This code will now change the property tree.
+
+\snippet snippets/snippet_properties/snippet_properties.cpp PropertyListener
+
+The callbacks always provide three parameters:
+    - poProperty: The property that the listener was registered on
+    - poAffectedProperty: The property that is affected by this change (can be poProperty or a
+      subproperty)
+    - strRelativePath: The relative path of the affected property (relative to poProperty)
+
+\note Any operation affecting an individual property will result in the corresponding callback
+notifications for \e each parent down to the root Properties so there is no need to register to each
+individual property separately. Since each Property provides its own full path, name, and value, it
+is recommended to register a listener only to the bottom most, relevant property.
+
+\anchor sec_remote_properties
+## Accessing remote properties ##
+----------------------------------------------------------------------------------------------------
+FEP also allows FEP Participants to gain access to properties owned by other FEP Participants. There
+are two mechanisms to consider.
+
+\section subsec_remote_properties Straight Usage of Remote Properties
+Remote properties can be used by calling \ref fep::IPropertyTree::GetRemoteProperty
+"fep::IPropertyTree::GetRemoteProperty()", \ref fep::IPropertyTree::SetRemotePropertyValue
+"fep::IPropertyTree::SetRemotePropertyValue()" and \ref fep::IPropertyTree::SetRemotePropertyValues
+"fep::IPropertyTree::SetRemotePropertyValues()".
+
+\anchor subsec_remote_properties_read
+<br>
+<i>Reading Remote Properties</i>
+<br>
+
+A call to \ref fep::IPropertyTree::GetRemoteProperty "GetRemoteProperty()"
+method returns a \ref fep::IProperty "IProperty" pointer, just like local properties.
+There are however subtle differences: Remote properties have no parent property and their path is
+rooted at their own name. The returned property instances live outside any other property of the
+property tree, they are stand-alone. This also means that to gain access to their sub-properties,
+you will have to use \ref fep::IProperty::GetSubProperties "fep::IProperty::GetSubProperties()".
+
+\note The ownership of the property instance returned by \ref fep::IPropertyTree::GetRemoteProperty
+      "GetRemoteProperty()" is given to the caller.  Thus you will have to delete the property
+      yourself, as the property tree does not know how long it is used and how long the property
+      needs to stay alive. The example below uses C++ \c std::auto_ptr to automate the destruction
+      of the pointer after the scope is left.
+
+\snippet snippets/snippet_properties/snippet_properties.cpp RemotePropertiesA
+
+The nature of remote properties requires communication of the involved FEP Participants. \ref
+fep::IPropertyTree::GetRemoteProperty "GetRemoteProperty()" is therefore guarded by a timeout
+parameter. If the timeout occures before the remote FEP Participant has answered with the requested
+property, the call will return with the respective error code.
+
+When setting Remote Properties with the method \ref fep::IPropertyTree::SetRemotePropertyValue or
+\ref fep::IPropertyTree::SetRemotePropertyValues it is also possible to make a synchronous call of
+each of these methods by using the tmTimeout parameter. A synchronous call will wait until an
+acknowledgement is received. If the acknowledgement doesn't arrive during the given timeout, the
+function will return an fep::ERR_TIMEOUT error.
+
+\note The property may be set at a later time, if an fep::ERR_TIMEOUT error has occurred.
+
+Remote properties are one-time copies of their real origin properties in the respective FEP
+Participant. Therefore, they will not be updated when the real property changes. If you require
+up-to-date property values, have a look at \ref sec_mirrored_properties "Mirroring properties of
+another FEP Participant".
+
+\anchor subsec_remote_properties_write 
+<br>
+<i>Writing Remote Properties</i>
+<br>
+
+By calling \ref fep::IPropertyTree::SetRemotePropertyValue "SetRemotePropertyValue()" any Remote
+Property can easily set to any value. Contrary to \ref fep::IPropertyTree::GetRemoteProperty
+"GetRemoteProperty()" the usage of wildcards is supported by \ref
+fep::IPropertyTree::SetRemotePropertyValue "SetRemotePropertyValue()", i.e. by addressing * you can
+set a value for all available FEP Participants.
+
+If you try to set a property, that does not exist, it will be created automatically.
+
+Similarly, the method \ref fep::IPropertyTree::SetRemotePropertyValues "SetRemotePropertyValues()"
+allows you to set a complete array of values at a remote destination. It's arguments are a pointer
+to the first element in the array and the array size.
+
+@warning Note that providing a size larger than the actually reserved space in the array may result
+in undefined behavior, including, but not limited to read access violations or segfaults.
+
+\snippet snippets/snippet_properties/snippet_properties.cpp RemotePropertiesB
+
+As you can see, both \ref fep::IPropertyTree::SetRemotePropertyValue "SetRemotePropertyValue()" and
+\ref fep::IPropertyTree::SetRemotePropertyValues "SetRemotePropertyValues()" do not expect you to
+give a timeout. Also, the return value does only indicate whether the corresponding command was \b
+sent successfully. This means, that you have to check manually if the property was changed/created
+for any receiving FEP Participant - e.g. by \ref subsec_remote_properties_read "reading the remote
+property". However, when using RTI DDS transport by setting the \ref fep::tTransmissionType to \ref
+fep::TT_RTI_DDS delivery, a reliable transmission is guaranteed.
+
+\section sec_mirrored_properties Mirroring properties of another FEP Participant The second method
+to access other FEP Participant's properties is by mirroring them into your own property tree.
+
+\snippet snippets/snippet_properties/snippet_properties.cpp MirroredProperties
+
+\ref fep::IPropertyTree::MirrorRemoteProperty inserts the remote property (and all its
+subproperties) into the local property tree and activates a subscription at the provider FEP
+Participant. Any changes to the original property in the provider FEP Participant will then be
+unidirectionally & transparently mirrored into the local copy. Local changes to the mirrored
+property will _not_ be mirrored back to the remote FEP Participant and possibly overwritten when new
+updates are received from the provider FEP Participant.
+<br>
+Deleting any mirrored (sub)properties while the subscription is still active is not recommended as
+they will not be restored when new updates from the provider FEP Participant arrive! In general, you
+should always unmirror any mirrored properties as soon as updates are no longer required by your
+application / FEP Participant to reduce network, CPU and memory load. Use \ref
+fep::IPropertyTree::UnmirrorRemoteProperty for this.
+<br>
+If the property is deleted in the provider FEP Participant, the subscription will be removed in both
+participants after the deletion has been mirrored on the local side.
+<br>
+If the subscriber FEP Participant goes offline after a property was mirrored from some provider FEP
+Participant, update messages from the provider FEP Participant will not be received and the property
+will not be up-to-date. In the event of a restart of the subscriber FEP Participant, e.g., after a
+crash, a re-registration of previously registered properties is possible. If the provider FEP
+Participant gets disconnected from the FEP Bus, property change notifications will obviously not be
+received by any subscriber FEP Participant anymore.
+<br>
+\note Please keep in mind that neither \ref fep::IPropertyTree::GetRemoteProperty nor
+\ref fep::IPropertyTree::MirrorRemoteProperty support wildcards!
+
+\note When mirroring a remote property, all its subproperties will be mirrored as well. Hence, there
+is no necessity to manually mirror each individual property. In fact, this can lead to unintended
+behavior as update callbacks might be called several times for some properties.
+
+\anchor sec_participant_header
+## Standardized participant header ##
+----------------------------------------------------------------------------------------------------
+Inside the PropertyTree of \e every FEP Module there is a standardized area which contains
+general information about the inheriting FEP Participant. This is called "participant header".
+
+By using the participant header every participant enables other participants of the FEP %System to
+retrieve information about basic requirements, e.g. "Is the required version of all participants
+available that are required for my user function?". Since the developer of a participant is the
+only person who knows the details about the requirements, he is obliged to provide this information.
+
+\note By default the values for "Participant name", "Platform", and "Compilation date" are filled
+automatically by the compiler.
+
+The content of the participant header is validated during startup of the participant. If at least
+one invalid property is detected inside the participant header, a warning will be raised.
+
+\note All participant header properties must be set and their values can not be empty.
+
+The following properties are created by default and have to be filled by the
+developer:
+
+\li Root node of the participant header: \c Header
+\li Participant version (Path: \c Header.ElementVersion)
+\li Participant name (Path: \c Header.ElementName)
+\li Participant description (Path: \c Header.ElementDescription)
+\li FEP version the participant was developed against (Path: \c Header.FEPVersion)
+\li Platform of the compilation (Path: \c Header.Platform)
+\li Runtime context (e.g. runs on ADTF/Matlab/standalone/etc., path: \c Header.ElementContext)
+\li Runtime context version (e.g. ADTF version, path: \c Header.ElementContextVersion)
+\li Participant vendor (Path: \c Header.ElementVendor)
+\li Displayed participant name (Path: \c Header.ElementDisplayName)
+\li Compilation date (Path: \c Header.ElementCompilationDate)
+\li Current participant state (Path: \c Header.CurrentState)
+\li Hostname of the participant creator  (Path: \c Header.Host)
+\li A autogenerated UUID for the participant (Path: \c Header.InstanceID)
+\li A userdefined UUID for the participant (Path: \c Header.TypeID)
+
+\note The TypeID property has to be set by the developer of a participant, otherwise a warning
+incident is thrown (hint: https://www.uuidgenerator.net/). This attribute should be a unique
+identifier reference per participant and helps to identify the type of a participant. A FEP
+Participant should get a new TypeID if the major version of the fep participant changes or if the
+previous version of the participant is incompatible.
+
+\anchor sec_remote_properties_limits
+Limitations of remote properties
+----------------------------------------------------------------------------------------------------
+
+When accessing remote properties using \ref fep::IPropertyTree::GetRemoteProperty or \ref
+fep::IPropertyTree::MirrorRemoteProperty the property tree including all sub-properties is
+transmitted. For the transmission the property tree is serialized to a transmission format.
+
+Currently the amount of and size of properties is limited. As a rule of thumb the total content size
+of all properties should not exceed 1000000 bytes. This refers to a single property value as well
+as to the complete property tree.
+
+Examples:
+\li Single property with a key of 100 bytes and a content of 999900 bytes.
+\li 1000 properties with maximum key size of 100 bytes and maximum value size of 900 bytes.
+\li Variations of the above examples as long as the sum of bytes of all properties does not exceed
+    1000000 bytes.
+
+\anchor sec_structure_of_property_tree
+Structure of the FEP Configuration Area
+----------------------------------------------------------------------------------------------------
+See \subpage fep_configs
+
+*/
+

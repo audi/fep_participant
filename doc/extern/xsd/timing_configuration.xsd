@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<xs:schema xmlns:timing="timing" attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="timing">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="header">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="author" type="xs:string" />
+              <xs:element name="date_creation" type="xs:string" />
+              <xs:element name="date_change" type="xs:string" />
+              <xs:element name="description" type="xs:string" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="participants">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="participant">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="steps">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="step">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="inputs">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="input">
+                                        <xs:complexType>
+                                          <xs:attribute name="name" type="xs:string" use="required" />
+                                          <xs:attribute name="validAge_sim_us" type="xs:unsignedByte" use="required" />
+                                          <xs:attribute name="delay_sim_us" type="xs:unsignedByte" use="optional" />
+                                          <xs:attribute name="inputViolationStrategy" type="xs:string" use="required" />
+                                        </xs:complexType>
+                                      </xs:element>
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                                <xs:element name="outputs">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="output">
+                                        <xs:complexType>
+                                          <xs:attribute name="name" type="xs:string" use="required" />
+                                        </xs:complexType>
+                                      </xs:element>
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                              <xs:attribute name="name" type="xs:string" use="required" />
+                              <xs:attribute name="cycleTime_sim_us" type="xs:unsignedByte" use="required" />
+                              <xs:attribute name="maxRuntime_us" type="xs:unsignedByte" use="optional" />
+                              <xs:attribute name="maxInputWaittime_us" type="xs:unsignedByte" use="optional" />
+                              <xs:attribute name="runtimeViolationStrategy" type="xs:string" use="required" />
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="inputs">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="input">
+                            <xs:complexType>
+                              <xs:attribute name="name" type="xs:string" use="required" />
+                              <xs:attribute name="backLogSize" type="xs:unsignedByte" use="required" />
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="name" type="xs:string" use="required" />
+                  <xs:attribute name="systemTimeout_s" type="xs:unsignedByte" use="required" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

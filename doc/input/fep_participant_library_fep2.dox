@@ -1,0 +1,57 @@
+//
+// Copyright @ 2019 Audi AG. All rights reserved.
+// 
+//     This Source Code Form is subject to the terms of the Mozilla
+//     Public License, v. 2.0. If a copy of the MPL was not distributed
+//     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+// 
+// If it is not possible or desirable to put the notice in a particular file, then
+// You may include the notice in a location (such as a LICENSE file in a
+// relevant directory) where a recipient would be likely to look for such a notice.
+// 
+// You may add additional accurate notices of copyright ownership.
+//
+/**
+\page fep_participant_library_fep2 FEP 2
+
+The FEP Module, which is the base of every FEP Participant, contains some default components
+provided by the FEP Library. These components are named FEP Components and make the basic features
+of FEP available to every FEP Participant. The following pages give you some information about the
+most important FEP Components.
+
+@section fep_participant_module FEP 2 Module 
+
+\par Important FEP 2 components
+
+- \ref fep_state_machine "FEP State Machine"
+- \ref fep_properties "FEP Property Tree"
+- \ref fep_configs "FEP Configuration Areas"
+- \ref fep_incident_handling "FEP Incident Handler"
+- \ref fep_signal_registry "FEP Signal Registry"
+- \ref fep_data_receive_ddb "FEP Distributed Data Buffer"
+- \ref page_fep_timing "FEP Timing Interface"
+- \ref fep_signal_mapping "FEP Signal Mapping"
+- \ref fep::AutomationInterface "FEP Automation Interface"
+- \ref fep_transmission "FEP Transmission Adapter"
+- \ref fep_rpc "FEP RPC Service"
+
+See them all: 
+\li \subpage fep_participant_library_module
+
+@subsection fep_participant_module_getting_started Getting started within FEP 2
+
+\note
+FEP Participants should parse command line options provided to the main function of the executable.
+This feature is described in \ref fep_participant_configuration.
+
+- \ref fep_first_participant
+- \ref sec_participant_header "Standardized participant header"
+- \ref fep_integrate_other_participants
+- \ref fep_participant_configuration
+- \ref fep_participant_incident_guidelines
+- \ref fep_data
+- \ref fep_messages
+- \ref fep_realtime
+- \ref fep_best_practice 
+
+*/ 

@@ -1,0 +1,38 @@
+[
+    // returns the current state of the state machine as integer
+    // see fep::tState and @ref fep_state_machine for more information
+    {
+        "name": "getState",
+        "returns": 1
+    },
+    // returns if the restartrequest is valid
+    // see fep::tState and @ref fep_state_machine for more information
+    {
+        "name": "initialize",
+        "returns": true
+    },
+    /// returns if the restartrequest is valid
+    // see fep::tState and @ref fep_state_machine for more information
+    {
+        "name": "start",
+        "returns": true
+    },
+    // returns if the restartrequest is valid
+    // see fep::tState and @ref fep_state_machine for more information
+    {
+        "name": "stop",
+        "returns": true
+    },
+    // returns if the restartrequest is valid
+    // see fep::tState and @ref fep_state_machine for more information
+    {
+        "name": "shutdown",
+        "returns": true
+    },
+    // returns if the restartrequest is valid
+    // see fep::tState and @ref fep_state_machine for more information
+    {
+        "name": "restart",
+        "returns": true
+    }
+]

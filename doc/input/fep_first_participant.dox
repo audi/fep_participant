@@ -1,0 +1,96 @@
+/**
+ *
+ * This file describes the creation of a first FEP Participant.
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+
+/**
+\page fep_first_participant Examples: Creating FEP Participants
+
+FEP Participants can be used in multiple ways. A FEP Participant can be either self-driven or driven
+by an external component. This external component (subsequently referred to as "Master") may either
+be an independent FEP Participant itself executing a predetermined sequence of commands or may as
+well be any form of GUI which is attached to the FEP Bus as a part of the respective FEP %System.
+
+\note
+ADTF Filter can not be FEP Participants, i.e. you can use a ADTF configuration together with the FEP ADTF Interfaces
+connected to the FEP Bus.
+That way you get FEP Participants that are part of an ADTF FilterGraph. However, since FEP itself is
+independent from ADTF, this documentation does not cover FEP ADTF Participants.  See the
+FEP ADTF Toolbox and its documentation for information related to this topic.
+
+First of all, see @subpage fep_examples_build to build examples. 
+
+The following Examples are part of FEP SDK:
+
+- \subpage page_empty_participant <br>
+As a first starting point, a very simple empty FEP Participant has been implemented in this example.
+This example will show you the minimal implementation needed to run a FEP Participant, how to
+configure a FEP Participant on the command line and how to use the FEP State Machine.
+<br><br>
+
+- \subpage page_remote_properties_participant <br>
+Another simple and stand-alone FEP Participant is shown in this example. This FEP Participant
+implements a useful application that can remotely read properties from another FEP Participant in
+the FEP %System.
+<br><br>
+
+- \subpage page_fep_demo_incident <br>
+FEP comes with an advanced incident handling mechanism which behaves similar to an exception
+handling extension. A full description can be found at \ref fep_incident_handling. The principle of
+handling and invoking \b incidents with the FEP SDK is demonstrated in this example.
+<br><br>
+
+- \subpage page_fep_demo_error_recovery <br>
+This is a complex example that shows how to use a self-driven master FEP Participant to fix and
+recover from error conditions happening in slave FEP Participants controlled by remote events.
+<br><br>
+
+- \subpage page_diagnostics_participant <br>
+This example serves as a starting point to implement various diagnostic tasks.
+<br><br>
+
+- \subpage page_demo_signal_mapping <br>
+This example demonstrates the usage of signal mapping.
+<br><br>
+
+- \subpage demo_timing <br>
+This example demonstrates the usage of FEP 2 Legacy Timing.
+<br><br>
+
+- \subpage demo_timing_30 <br>
+This example demonstrates the usage of FEP 3 Timing.
+<br><br>
+
+- \subpage page_demo_service <br>
+This example demonstrates the usage of FEP Services.
+<br><br>
+
+- \subpage page_demo_dynamic_data <br>
+This example demonstrates sending and receiving of a raw string.
+<br><br>
+
+- \subpage page_demo_timing_master_external_clock <br>
+This example demonstrates how to use a custom continuous or discrete clock as main clock for
+a self-driven timing master FEP Participant.
+<br><br>
+
+- \subpage demo_realtime_cascade_30 <br>
+This example demonstrates the usage of a cascade using FEP Timing 30.
+<br><br>
+
+
+*/

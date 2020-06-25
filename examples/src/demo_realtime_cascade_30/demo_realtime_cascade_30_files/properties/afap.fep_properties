@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<property_file xmlns="fep/xsd/properties">
+    <schema_version>1.0.0</schema_version>
+    <properties>
+    
+         <!-- ************** -->
+         <!-- TimingMaster30 -->
+         <!-- ************** -->
+         
+        <property>
+            <name>TimingMaster30/FEP_TimingMaster/TriggerMode</name>
+            <value>FIXED_TIME_STEPS</value>
+            <type>string</type>
+        </property>
+        <property>
+            <name>TimingMaster30/FEP_TimingMaster/CycleTime</name>
+            <value>100</value>
+            <type>int32</type>
+        </property>
+        <property>
+            <name>TimingMaster30/FEP_TimingMaster/TimeFactor</name>
+            <value>0.0</value>
+            <type>float</type>
+        </property>    
+        
+         <!-- ************** -->
+         <!-- Starter30 -->
+         <!-- ************** -->
+        
+        <property>
+            <name>Starter30/FEP_TimingClient/TriggerMode</name>
+            <value>FIXED_TIME_STEPS</value>
+            <type>string</type>
+        </property>
+         <property>
+            <name>Starter30/FEP_TimingClient/SyncCycleTime</name>
+            <value>10</value>
+            <type>int32</type>
+        </property>      
+        
+         <!-- ************** -->
+         <!-- Transmitter30_1 -->
+         <!-- ************** -->
+        
+        <property>
+            <name>Transmitter30_1/FEP_TimingClient/TriggerMode</name>
+            <value>FIXED_TIME_STEPS</value>
+            <type>string</type>
+        </property>
+        <property>
+            <name>Transmitter30_1/FEP_TimingClient/SyncCycleTime</name>
+            <value>10</value>
+            <type>int32</type>
+        </property>
+        
+         <!-- ************** -->
+         <!-- Transmitter30_2 -->
+         <!-- ************** -->
+        
+        <property>
+            <name>Transmitter30_2/FEP_TimingClient/TriggerMode</name>
+            <value>FIXED_TIME_STEPS</value>
+            <type>string</type>
+        </property>
+        <property>
+            <name>Transmitter30_2/FEP_TimingClient/SyncCycleTime</name>
+            <value>10</value>
+            <type>int32</type>
+        </property>
+        
+         <!-- ************** -->
+         <!-- Transmitter30_3 -->
+         <!-- ************** -->
+        
+         <property>
+            <name>Transmitter30_3/FEP_TimingClient/TriggerMode</name>
+            <value>FIXED_TIME_STEPS</value>
+            <type>string</type>
+        </property>
+        <property>
+            <name>Transmitter30_3/FEP_TimingClient/SyncCycleTime</name>
+            <value>10</value>
+            <type>int32</type>
+        </property>
+        
+     </properties>
+</property_file>
+

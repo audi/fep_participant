@@ -1,0 +1,27 @@
+[
+    // returns a comma seperated list of all RPC objects of the element
+    {
+        "name": "GetObjects",
+        "returns": "Object1,Object2"
+    },
+
+    // returns the interface id of a RPC object
+    {
+      "name": "GetRPCIIDsForObject",
+      "params": {
+        "strObject": "Object1"
+      },
+      "returns": "InterfaceID1,InterfaceID2" 
+    },
+
+    // returns the interface defintion of a RPC object and its interface id
+    {
+      "name": "GetRPCInterfaceDefinition",
+      "params": {
+        "strObject": "Object1",
+        "strIID": "rpc.iid"
+      },
+      "returns": "rpc_definition" 
+    }
+
+]

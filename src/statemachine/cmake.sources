@@ -1,0 +1,39 @@
+#
+# Copyright @ 2019 Audi AG. All rights reserved.
+# 
+#     This Source Code Form is subject to the terms of the Mozilla
+#     Public License, v. 2.0. If a copy of the MPL was not distributed
+#     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+# 
+# If it is not possible or desirable to put the notice in a particular file, then
+# You may include the notice in a location (such as a LICENSE file in a
+# relevant directory) where a recipient would be likely to look for such a notice.
+# 
+# You may add additional accurate notices of copyright ownership.
+#
+set(STATEMACHINE_SOURCES
+    statemachine/fep_state.cpp
+    statemachine/fep_state_change_notifier.cpp
+    statemachine/fep_state_entry_listener.cpp
+    statemachine/fep_state_exit_listener.cpp
+    statemachine/fep_state_request_listener.cpp
+    statemachine/fep_statemachine.cpp
+    statemachine/fep_statemachine_common.h
+    
+    statemachine/fep_state_change_notifier.h
+    statemachine/fep_state_event_worker.h
+    statemachine/fep_statemachine.h
+    
+    ../include/fep3/base/states/fep2_state.h
+    ../include/fep3/rpc_components/legacy/state_machine/state_machine_rpc_intf_def.h
+    ../include/statemachine/fep_state_entry_listener.h
+    ../include/statemachine/fep_state_entry_listener_intf.h
+    ../include/statemachine/fep_state_exit_listener.h
+    ../include/statemachine/fep_state_exit_listener_intf.h
+    ../include/statemachine/fep_state_intf.h
+    ../include/statemachine/fep_state_request_listener.h
+    ../include/statemachine/fep_state_request_listener_intf.h
+    ../include/statemachine/fep_statemachine_intf.h
+)
+
+source_group(components_20\\statemachine FILES ${STATEMACHINE_SOURCES})

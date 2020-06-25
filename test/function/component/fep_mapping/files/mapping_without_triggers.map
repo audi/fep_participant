@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<mapping>
+    <header>
+        <language_version>1.00</language_version>
+        <author>AUDI AG</author>
+        <date_creation>2016-Jun-08</date_creation>
+        <date_change>2016-Jun-08</date_change>
+        <description>testing mapping without trigger configuration</description>
+    </header>
+    <sources>
+        <source name="LightOrientation" type="tFEP_VU_Coord" />
+        <source name="LightPos" type="tFEP_VU_PointCartesian" />
+        <source name="SourceObject" type="tObject" />
+    </sources>
+    <targets>
+        <target name="LightSource" type="tFEP_VU_LightSource">
+            <assignment to="f64SimTime" function="simulation_time()" />
+            <assignment to="ui32Id" constant="1" />
+            <assignment to="ui8State" function="trigger_counter(3)" />
+            <assignment to="sPosIntertial.f64X" from="LightPos.f64X" transformation="cm_to_m" />
+            <assignment to="sPosIntertial.f64Y" from="LightPos.f64Y" transformation="cm_to_m" />
+            <assignment to="sPosIntertial.f64Z" constant="0" />
+            <assignment to="sPosIntertial.f64H" from="LightOrientation.f64H" />
+            <assignment to="sPosIntertial.f64P" from="LightOrientation.f64P" />
+            <assignment to="sPosIntertial.f64R" from="LightOrientation.f64R" />
+        </target>
+        <target name="Object" type="tObjectObsolete">
+            <assignment to="objectType" from="SourceObject.objectType" transformation="table1" />
+        </target>
+    </targets>
+    <transformations>
+        <polynomial name="cm_to_m" a="0" b="0.01" />
+        <enum_table name="table1" from="tObjectType" to="tObjectTypeObsolete" default="OT_Undefined" >
+            <conversion from="OT_Car" to="OT_Vehicle"/>
+            <conversion from="OT_Truck" to="OT_Vehicle"/>
+            <conversion from="OT_Van" to="OT_Vehicle"/>
+            <conversion from="OT_Motorbike" to="OT_Vehicle"/>
+            <conversion from="OT_Bicycle" to="OT_Vehicle"/>
+            <conversion from="OT_Pedestrian" to="OT_Human"/>
+            <conversion from="OT_Animal" to="OT_Animal"/>
+        </enum_table>
+    </transformations>
+</mapping>

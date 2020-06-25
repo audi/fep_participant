@@ -1,0 +1,820 @@
+/**
+ *
+ * This file describes the usage of the FEP State Machine.
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+namespace fep
+{
+/* ########################################################################## */
+/* Main Page "The FEP State Machine" */
+/* ########################################################################## */
+/**
+\page fep_state_machine The FEP State Machine
+
+Every FEP Module's life cycle, and thus every FEP Participant's life cycle, is controlled by the FEP
+State Machine that is part of the FEP Module and thus inherited to every FEP Participant.
+
+The following state chart shows which states are available and which events will trigger the state
+transitions. The solid transitions are used within the regular life cycle of a FEP Participant; the
+dashed transitions are supported, but should not be used during regular operation. \dotfile
+fep_state_machine_img.dot "The FEP State Machine"
+
+For a detailed explanation of the states and recommendations what to do in which state see 
+@subpage fep_states.
+
+
+Using The State Machine
+----------------------------------------------------------------------------------------------------
+
+The FEP State Machine is available right after \ref cModule::Create() was called. It can be accessed
+via the interface \ref IStateMachine "IStateMachine" as returned by \ref cModule::GetStateMachine().
+
+\note Unlike state machines from other products, the FEP State Machine does not automatically
+perform any state transitions. Only the inital state \c STARTUP is entered automatically during
+creation.
+
+\warning The current version of FEP has a known issue regarding the parallel reception of multiple
+FEP Messages within callbacks: If you try to receive / wait for FEP Messages via the FEP Service
+Bus, i.e. all FEP Notifications and FEP Commands, while being in a callback that was triggered by
+the FEP Service Bus (for example command and notification listeners), you might be affected by this
+problem.  Most likely you "just" receive a timeout, but you might also run into an deadlock -
+depending on your implementation. Note, that this also affects usage of most of the \c IAI methods.
+
+<br>
+<br>
+<b><i>Accessing the FEP State Machine</i></b>
+<br>
+As mentioned above, the FEP State Machine offers the interface \ref IStateMachine "IStateMachine".
+This interface allows interaction with the FEP State Machine directly, i.e. to pass events (see
+chart above for available events) to the FEP State Machine, to query the current state and register
+state listeners.
+
+<br>
+<br>
+<b><i>Triggering state transitions</i></b>
+<br>
+There are two possible ways to trigger state transitions:
+\li locally by calling an event method from \ref IStateMachine "IStateMachine",
+\li remotely by sending a control command to another FEP Participant.
+
+If the given event is defined for the current state, i.e., there is a transition defined for the
+given event and the current state, the FEP State Machine will change the state accordingly.
+
+\note Invalid events will be ignored by the state machine!
+
+See \subpage fep_state_events for more information on how to use events for changing states.
+
+<br>
+<br>
+<b><i>Reacting to state transitions</i></b>
+<br>
+Whenever a state change is performed, the FEP State Machine will check for registered listeners. To
+get a callback by the FEP State Machine, a FEP Participant has to implement a specific interface and
+register as a listener.
+
+The FEP State Machine allows the registration of the following listener types:
+\li \ref IStateRequestListener for state request callbacks
+\li \ref IStateEntryListener for state entry callbacks and for CleanUp callbacks
+\li \ref IStateExitListener for state exit callbacks
+
+See \subpage fep_state_callbacks for details on the different kind of callbacks and how to register
+as a listener to the FEP State Machine.
+
+*/
+/* ########################################################################## */
+/* Page "The FEP States" */
+/* ########################################################################## */
+/**
+\page fep_states The FEP States
+
+This page describes the available states of \ref fep_state_machine and gives some recommendations
+what to do when. It also provides you a brief overview of what is done by FEP in the background. For
+more generic information on which callback should be used for what purpose see \ref
+fep_state_callbacks (it might be usefull to be understood this first). For more information on how
+to use events for changing states and some additional recommendations see \ref fep_state_events.
+
+\note \c StartupDoneEvent, \c InitDoneEvent and \c ErrorEvent are the only events your participant
+should trigger itself. All other events should be triggered by an external master participant (for
+example the FEP Control GUI). The only reason to trigger any other state transitions is that you are
+a stand-alone participant. This however is very unlikely. Only master participants should be
+stand-alone (like for example the FEP Control GUI).
+
+\section fep_states_startup STARTUP
+
+<br>
+<b><i>What is the purpose of the STARTUP state?</i></b>
+<br>
+This is the inital state. It will be entered automatically during the creation of a FEP
+Module/Participant, but may also be used to reset a FEP Participant during runtime.
+
+<br>
+<b><i>What else happens in the background?</i></b>
+<br>
+When entering this state all FEP Core components are available so you can start using them.
+
+<br>
+<b><i>What should I do in this state?</i></b>
+<br>
+This is the state to setup anything that is persistent over the entire participant life cycle.
+The registration of Signal Descriptions (DDL) is done here. Create any object instances you need to
+enter the state \c IDLE, i.e. all objects needed for basic operation. Also the participant header in
+the property tree should be filled here - see \ref sec_participant_header - as the incident handler
+will raise a warning otherwise. If you have any other listeners to be registered at the FEP State
+Machine, this should also be done in this state.
+
+When you are done starting up, trigger the event \c StartupDoneEvent by calling \ref
+IStateMachine::StartupDoneEvent so that the FEP State Machine will change to the next state.  You
+can do so by calling 
+
+\snippet snippets/snippet_state_machine/snippet_state_machine.cpp Startup
+
+\note The \c StartupDoneEvent is an exclusively local event. This means that this event can NOT be
+triggered by any other FEP Participant using control commands. Therefore this event must always be
+raised by the FEP Participant itself!
+
+You should \e not do any clean up operations (\c RestartEvent) here, as these should be done in the
+\ref fep_states_cleanup.
+
+\note The state \c FS_STARTUP does not have a \c Process<State>Request callback!
+
+<i>State Entry Callback: \c ProcessStartupEntry</i><br/>
+\li create objects needed for state \c IDLE
+\li fill participant header in property tree
+\li register listeners to FEP State Machine (if applicable)
+\li register signal descriptions (DDL)
+\li setup everything that is persistent in the Participants life cycle
+\li raise a \c StartupDoneEvent
+
+\note Normal error handling is not possible when entering state \c FS_STARTUP. Errors in \c
+FS_STARTUP, that can not be handled in the StartupEntry callback, should always be treated as
+critical errors. It is not possible to enter the state \c FS_ERROR from \c FS_STARTUP, instead the
+participant should raise an incident detailing the error and be shut down using a \c ShutdownEvent
+(and possibly be restarted by another process). Returning an error code other than \c ERR_NOERROR
+should be avoided in most cases, as this will raise an error during the creation of the FEP State
+Machine and will most likely result in the participant not being initialized correctly.
+
+<i>State Exit Callback: \c ProcessStartupExit</i><br/>
+You can use this callback if you need it, but we do not have any idea what should be needed to be
+done here.
+
+
+\section fep_states_idle IDLE
+<br>
+<b><i>What is the purpose of the IDLE state?</i></b>
+<br>
+During this state, the FEP Participant might receive configuration information and store it in the
+property tree. If other participants must be configured via their property tree this is the state to
+do so (SetRemoteProperty).
+
+<br>
+<b><i>What else happens in the background?</i></b>
+<br>
+Any configuration received from other FEP Participants in the background will be automatically
+stored in the property tree. Also the participant header will be checked when entering the state -
+if you did not fill it properly in the previous state, a warning will be raised by the incident
+handler.
+
+<br>
+<b><i>What should I do in this state?</i></b>
+<br>
+You should do nothing, not even react or evaluate information received during this state.
+
+_Stand Alone Mode_ (uncommon): If you are operating in _Stand Alone Mode_ and the previous state was
+\c STARTUP, you have to trigger the event \c InitializeEvent by calling \ref
+IStateMachine::InitializeEvent so that the FEP State Machine will change to the next state. You can
+do so by calling
+\snippet snippets/snippet_state_machine/snippet_state_machine.cpp
+
+InitEvent If the previous state was \c RUNNING and you intend to shutdown your FEP Participant, you
+should trigger the event \c ShutdownEvent. It is up to you what you do when the state \c IDLE was
+entered by an \c ErrorFixedEvent - but keep in mind that you might get a recursion (and thus a
+deadlock) if you always simply raise an \c InitializeEvent when entering this state.
+
+<i>State Request Callback: \c ProcessIdleRequest</i><br/>
+You should not deny entering this state, thus this method should basically only return \c
+ERR_NOERROR.
+
+<i>State Entry Callback: \c ProcessIdleEntry</i><br/>
+If the argument eOldState!=FS_STARTUP you should clean up and prepare your participant for the next
+run cylce (\c INITIALIZING -> \c READY -> \c RUNNING). This includes unregistering signals and
+listeners that were registered in FS_Initialize.
+
+_Stand Alone Mode_ only (uncommon): raise an \c InitializeEvent if previous state was \c STARTUP,
+and \c ShutdownEvent if previous state was \c RUNNING.
+
+<i>State Exit Callback: \c ProcessIdleExit</i><br/>
+We recommend to do nothing here -> basically return \c ERR_NOERROR.
+
+
+\section fep_states_initialization INITIALIZATION
+<br>
+<b><i>What is the purpose of the INITILIZATION state?</i></b>
+<br>
+During this state, a FEP Participant will initialize itself.
+
+<br><b><i>What else happens in the background?</i></b><br>
+Nothing in particular.
+
+<br>
+<b><i>What should I do in this state?</i></b>
+<br>
+All previously received configurations should be processed in this state. In addition you should
+register all signals your want to exchange with other Participants \snippet
+snippets/snippet_state_machine/snippet_state_machine.cpp RegisterSignal and configure them if
+needed.
+
+This is the right moment to register all other listeners such as \c IPropertyListener, \c
+ISyncListener, \c ICommandListener and \c INotificationListener. This way you can asynchronously
+process more information without leaving the current state, as long as the event \c InitDoneEvent
+was not raised.
+
+\note Everything you set up here, needs to be cleaned up in ProcessIdleEntry!
+
+Finally you should create all object instances and connections you need for running.
+
+When you are done with initializing, trigger the event \c InitDoneEvent by calling \ref
+IStateMachine::InitDoneEvent so that the FEP State Machine will change to the next state (you can do
+so by calling
+\snippet snippets/snippet_state_machine/snippet_state_machine.cpp InitDoneEvent
+
+\note Just like the \c StartupDoneEvent, \c InitDoneEvent is an exclusively local event and can
+therefore not be triggered using control commands. It must be triggered locally by the FEP
+Participant itself (usually at the end of the \c INITIALIZING state entry callback).
+
+<i>State Request Callback: \c ProcessInitializingRequest</i><br/>
+You should not deny entering this state, thus this method should basically only return \c 
+ERR_NOERROR.
+
+<i>State Entry Callback: \c ProcessInitializingEntry</i><br/>
+\li process all previously received information
+\li register all signals
+\li register all remaining listeners
+\li create objects (as possible)
+\li prepare additional task or thread (if needed)
+\li establish all connections (as possible)
+\li raise a \c InitDoneEvent (if you are ready)
+
+<i>State Exit Callback: \c ProcessInitializingExit</i><br/>
+If, for any reason, you were neither able to do so in state entry callback nor in a specific
+callback (e.g. property added/changed callback):
+\li create missing objects
+\li establish missing connections
+
+This case is rather the exception. This callback is called after the ReadyRequest callback! If you
+agreed to the state transition request, you usally should be ready to perform this transition rather
+quickly.
+
+In all other cases we recommend to do nothing here -> basically return \c ERR_NOERROR.
+
+
+\section fep_states_ready READY
+<br>
+<b><i>What is the purpose of the READY state?</i></b>
+<br>
+
+Entering this state, the FEP Participant signalizes its readiness for the state \c RUNNING, thus
+this is the "I am waiting for all the other participants" state. In other words this state enables
+synchronization of all participants after initialization.
+
+<br>
+<b><i>What else happens in the background?</i></b>
+<br>
+Some other FEP Participants might still be initializing. You will not be able to register new
+signals to the \c ITransmissionAdapter any longer.
+
+<br>
+<b><i>What should I do in this state?</i></b>
+<br>
+
+Your FEP Participant has already processed all needed information and should now be ready. Entering
+this state should not trigger any big processing jobs. Actually it should not trigger anything!
+Everything should have been prepared in \c INITIALIZING. This is the last state before state \c
+RUNNING.
+
+<i>State Request Callback: \c ProcessReadyRequest</i><br/>
+Here you should check if you have everything you need to be able to change to state \c RUNNING
+later. Please keep in mind, that the state exit callback for state \c INITIALIZING is called \e
+after this callback!
+
+<i>State Entry Callback: \c ProcessReadyEntry</i><br/>
+We recommend to do nothing here -> basically return \c ERR_NOERROR.
+
+_Stand Alone Mode_ only: raise a \c StartEvent 
+
+<i>State Exit Callback: \c ProcessReadyExit</i><br/>
+We recommend to do nothing here -> basically return \c ERR_NOERROR.
+
+
+\section fep_states_running RUNNING
+<br>
+<b><i>What is the purpose of the RUNNING state?</i></b>
+<br>
+This is the state for regular operation. The actual simulation is done here. This is also the state
+for sending and receiving data.
+
+<br>
+<b><i>What else happens in the background?</i></b>
+<br>
+All FEP Components are in regular operation mode now, all connections and network discovery is done.
+
+<br>
+<b><i>What should I do in this state?</i></b>
+<br>
+
+If your FEP Participant is using any additional threads, enable the execution when entering
+this state. You should have prepared your FEP Participant during initialization so that starting
+your task's execution is taking a very short time only. Remember: other FEP Participant's tasks may
+depend on your FEP Participant so do not let them wait.
+
+All operations needed to be done during regular operation - answering to received data, making some
+calculations, sending notifications, ... - should be done in this state as well.
+
+In case your FEP Participant is operating in _Stand Alone Mode_ you should also think about how and
+when you will leave this state by triggering the \c StopEvent.
+
+<i>State Request Callback: \c ProcessRunningRequest</i><br/>
+You should not deny entering this state, thus this method should basically only return \c
+ERR_NOERROR. (You need to check everything in your state request callback for state \c READY
+!)
+
+<i>State Entry Callback: \c ProcessRunningEntry</i><br/>
+\li set task or thread to RUN (if applicable)
+
+<i>State Exit Callback: \c ProcessRunningExit</i><br/>
+\li suspend your task or thread (if applicable)
+
+
+\section fep_states_error ERROR
+<br>
+<b><i>What is the purpose of the ERROR state?</i></b>
+<br>
+This state indicates that something went wrong. Enter this state if a serious problem occurs during
+regular operation. This state can be reached from every other state, except \c STARTUP and \c
+SHUTDOWN. Please note, that this state is not automatically entered if any state callback returns an
+error.
+
+<br>
+<b><i>What else happens in the background?</i></b>
+<br>
+If you do not invoke any FEP Core components for your error strategy, FEP Core will do nothing
+special.
+
+<br>
+<b><i>What should I do in this state?</i></b>
+<br>
+If you are able to handle the error, do so. Then trigger the event \c ErrorFixedEvent so that the
+FEP State Machine changes state to \c IDLE  and your FEP Participant can be used again. If it is not
+possible to fix the error, provide some information about the error - you can do this using the \ref
+fep_incident_handling or \ref fep_messages. Anyway, raising an incident using the FEP Incident
+handler is recommended even if the error can be fixed.
+
+<i>State Request Callback: \c ProcessErrorRequest</i><br/>
+\li Do not deny this!
+
+<i>State Entry Callback: \c ProcessErrorEntry</i><br/>
+\li raise an incident using the FEP Incident Handler
+\li fix error (if possible)
+\li raise \c ErrorFixedEvent (if error was fixed)
+
+<i>State Exit Callback: \c ProcessErrorExit</i><br/>
+We recommend to do nothing here -> basically return \c ERR_NOERROR.
+
+
+\section fep_states_shutdown SHUTDOWN
+<br
+><b><i>What is the purpose of the SHUTDOWN state?</i></b>
+<br>
+This is the last state of every "power cycle". It is simply used as a save state to quit the main 
+function and end the FEP %System, i.e. all FEP Participants. Use \ref cModule::IsShutdown in your 
+main function to check if a FEP Participant is ready to be destroyed.
+
+<br>
+<b><i>What else happens in the background?</i></b>
+<br>
+This state is used as the final state of a FEP Participant. It will always be reached during
+destruction, but can also be entered manually.
+
+<br>
+<b><i>What should I do in this state?</i></b>
+<br>
+
+All needed clean up operations should be done in the \ref fep_states_cleanup, thus most of the time
+there should be nothing left to do in this state. Only in some rare cases, when it is impossible to
+implement it in the CleanUp callback, it might be necessary to do some additional clean up here. A
+transition to the shutdown state can be used to signal the end of the FEP Participant, e.g. by
+reacting to the resulting \ref fep_notification_state "State Notifications".
+
+\note
+The shutdown state will always be reached when destroying a FEP Participant (and thus the
+underlying FEP Module) as the FEP State Machine is shut down.
+
+<i>State Request Callback: \c ProcessShutdownRequest</i><br/>
+You should not deny entering this state, thus this method should basically only return \c
+ERR_NOERROR.
+
+<i>State Entry Callback: \c ProcessShutdownEntry</i><br/>
+If you are proceeding from FS_ERROR, you need to do the clean ups that are otherwise done in
+ProcessIdleEntry! If really needed (!) you can make some additional clean up operations here.
+
+<i>State Exit Callback: \c ProcessShutdownExit</i><br/>
+Do not implement this callback! It is a legacy callback and must not be implemented. If implemented
+it will not be called by the state machine!
+
+
+\section fep_states_cleanup CleanUp Callback
+<br>
+<b><i>What is the purpose of the CleanUp callback?</i></b>
+<br>
+The CleanUp callback is NOT a state, but will be executed whenever a \c RestartEvent or a \c
+ShutdownEvent is raised (see \ref fep_state_callbacks for details). It's purpose is to have ONE code
+section where everything is cleaned up, to provide (in the case of a restart) a clean environment in
+the resulting \c STARTUP state.
+
+<br>
+<b><i>What else happens in the background?</i></b>
+<br>
+All FEP Components will reset their configuration to default values during CleanUp. This means that
+you will have to reapply any customizations in the appropriate state callback.
+
+<br>
+<b><i>What should I do in this callback?</i></b>
+<br>
+Delete/Unregister/Destroy every resource allocated before. This includes but is not limited to:
+
+\li Data Listeners
+\li State Machine Listeners (Entry, Exit, Request)
+\li Property Listeners
+\li Mirrored Property subscriptions
+\li Command and Notification Listeners
+\li Customized and custom Incident strategies
+\li You are responsible for the Function Configuration Area in the Property Tree! This means you
+    should delete all properties in it! This includes Mirrored Properties, as unsubscribing does
+    not delete the local copy.
+
+\note
+Resources allocated during \c INITIALIZATION (such as signals or DDB entries) should be cleaned up
+in \c IDLE.
+
+\warning
+Keep in mind, that some resources might not have been allocated when CleanUp occurs as this callback
+could be called for various events. Ensure, you callback does not crash when trying to delete a non
+existing object.
+
+*/
+/* ########################################################################## */
+/* Page "Event Handling & Changing States" */
+/* ########################################################################## */
+/**
+
+\page fep_state_events Event Handling & Changing States
+This page gives some information and examples on how events can be used for changing states,
+distingushing the following topics:
+- \ref events_preface "General information"
+- \ref fep_state_events_local "Local Events"
+- \ref events_remote "Remote Events"
+
+
+\anchor events_preface
+Preface
+----------------------------------------------------------------------------------------------------
+
+\warning
+The current version of FEP has a known issue regarding the parallel reception of multiple FEP Messages
+within callbacks: If you try to receive / wait for FEP Messages via the FEP Service Bus, i.e. all
+FEP Notifications and FEP Commands, while being in a callback that was triggered by the FEP Service
+Bus (for example Command and Notification Listeners), you might be affected by this problem. Most
+likely you "just" receive a timeout, but you might also run into an deadlock - depending on your
+implementation.  Note, that this also affects usage of most of the \c IAI methods.
+
+<br>
+<br>
+<b><i>Handling of Events</i></b>
+<br>
+Events are queued when triggered by one of the \<Transition\>Event() methods of the FEP State
+Machine interface. They are then processed asynchronously by an internal worker thread, one by one
+in the order in which they were issued.
+
+\note
+Remote events, caused by an external control command using \ref AutomationInterface::TriggerEvent or
+\ref IStateMachine::TriggerRemoteEvent, are simply enqueued alongside any local events. This means
+there is no special treatment for these kind of events.
+
+When an event is processed and if the respective state transition is defined by the FEP State
+Machine, the current state is changed appropriately. The actual process of changing states will
+trigger all registered state listener callbacks, in the following order:
+
+-# state request listener: \c Process<State>Request<br/>
+(if at least one error occurred, the change is stopped and the event queue is cleared)
+-# state exit listeners: \c Process<State>Exit
+-# the state is changed here
+-# state cleanup listener: \c CleanUp<br/>
+(only for \c Restart- and \c ShutdownEvent)
+-# state entry listeners: \c Process<State>Entry
+
+For more details on the calling order of state callbacks see the graph \ref dot_fep_state_callbacks
+"State Callback Sequence". Note, that all callbacks of one type will be called, no matter if an
+error code was returned by one or more callbacks. The first encountered error code from a state
+request listener will be reported in a non-critical incident (Code 100). The FEP State Machine will
+not act on its own, e.g. by changing into state ERROR.
+
+We recommend, that the part of your FEP Participant that denied the state change (request listener)
+or failed (entry, clean-up or exit listener), provides information about what went wrong. You can do
+this using the \ref fep_incident_handling or \ref fep_messages.
+
+<br>
+<br>
+<b><i>The asynchronous nature of state events</i></b>
+<br>
+As stated before, issuing events to the FEP State Machine is a non-blocking operation, i.e. the
+respective \<Transition\>Event() (from \ref IStateMachine "the state machine interface") method call
+will return immediately. The actual change is defered to a background worker thread, which will
+process the events one by one.
+
+This implies that after an event call to the FEP State Machine returns to the caller, the state
+change will usually not have taken place yet. To avoid any problems with this behavior, use the
+listener infrastructure provided by the FEP SDK in _all_ of your FEP Participants!
+
+When the FEP State Machine is started up by the respective \ref cModule::Create call, it will enter
+the STARTUP state automatically. After this change though, \ref cModule::Create will return and the
+FEP State Machine will continue working concurrently, as described above. In the code initially
+creating the FEP Module instance in your FEP Participant, you can use the provided \ref
+cModule::WaitForShutdown method to block your code until the final state SHUTDOWN is reached.
+
+In a typical stand-alone FEP Participant, the main method will therefore usually consist of a the
+\ref cModule::Create call followed by the aforementioned blocking \ref cModule::WaitForShutdown
+call.
+
+
+\anchor fep_state_events_local
+Local Events
+----------------------------------------------------------------------------------------------------
+
+Every FEP Participant can trigger local events to the FEP Module's FEP State Machine. During \ref
+fep_state_events_remote_deny "Stand Alone Mode" the FEP Participant has to trigger \e all events by
+itself. Even if there is a "global master FEP Participant" triggering the events for another FEP
+Participant using control commands, there are still some events that can only be triggered locally
+by every mode itself.
+
+\note Some events can \e not be triggered by a remote event:
+\li \c StartupDoneEvent
+\li \c InitDoneEvent
+\li \c ErrorEvent
+
+These events always have to be triggered by each FEP Participant itself, even if they are not
+running in _Stand Alone Mode_. To trigger a local event simply call the corresponding method of \ref
+IStateMachine "IStateMachine" for the FEP Module's FEP State Machine.
+
+\snippet snippets/snippet_state_machine/snippet_state_machine.cpp LocalEvent
+
+The code above is simplified and would bring up a FEP Participant to state \c RUNNING. This just
+demonstrates how the event methods are named. Don't use it like that, you need to check for errors!
+Furthermore the following event methods exist:
+
+\snippet snippets/snippet_state_machine/snippet_state_machine.cpp MoreEvents
+
+Always keep in mind, that every event is a nonblocking call, it only enqueues the event into an
+internal event queue and returns. See \ref fep_state_callbacks for details about available state
+callbacks.
+
+
+\anchor events_remote
+Remote Events
+----------------------------------------------------------------------------------------------------
+
+Regarding remote events you have to understand the following topics:
+- \ref fep_state_events_remote_trigger "Triggering Remote Events"
+- \ref fep_state_events_remote_deny "Denying Remote Events (Stand Alone Mode)"
+- \ref fep_state_events_remote_notifications "Event Changed Notification"
+
+\anchor fep_state_events_remote_trigger
+<br>
+<br>
+<b><i>Triggering Remote Events</i></b>
+<br>
+It is possible to trigger events remotely inside other FEP Participants. This enables individual FEP
+Participants to act as execution master and control other modules in the FEP network.
+
+\note Some events can \e not be triggered by a remote event, as stated before:
+\li \c StartupDoneEvent
+\li \c InitDoneEvent
+\li \c ErrorEvent
+
+These events can only be triggered by each FEP Participant itself, as the conditions triggering them
+usually cannot be sensed remotely.
+
+Remote events are triggered using \ref AutomationInterface::TriggerEvent or \ref
+IStateMachine::TriggerRemoteEvent. The following code shows a small example how to use the
+automation interface to control other FEP Participants:
+
+\snippet snippets/snippet_state_machine/snippet_state_machine.cpp RemoteEvent
+
+\anchor fep_state_events_remote_deny
+<br>
+<br>
+<b><i>Denying Remote Events (Stand Alone Mode)</i></b>
+<br>
+Every FEP Participant can be operated in _Stand Alone Mode_. If a FEP Participant is configured to
+operate in this mode, any state events received by a remote FEP Participant will be discarded. Only
+events raised locally will be considered by the FEP State Machine.
+
+You can set a FEP Participant to _Stand Alone Mode_ either by setting the corresponding Property
+within \ref fep_configs to \c tTrue ...
+
+\snippet snippets/snippet_state_machine/snippet_state_machine.cpp StandAloneModeA
+
+... or by calling the convenience function \ref cModule::SetStandAloneModeEnabled with argument \c
+tTrue.
+
+\snippet snippets/snippet_state_machine/snippet_state_machine.cpp StandAloneModeB
+
+\note
+_Stand Alone Mode_ can be disabled by other FEP Participants via reconfiguring the Component Config
+Property by remote.
+
+\anchor fep_state_events_remote_notifications
+<br>
+<br>
+<b><i>Event Changed Notification</i></b>
+<br>
+Every FEP Participant, regardless of _Stand Alone Mode_, will send a _State Notification_ to \e *
+for every state change.
+
+\code
+strMessageContent: "{
+        "Notification" : {
+                "Type" : "state",
+                "State" : "FS_STARTUP"
+        },
+        "Header" : {
+                "LanguageVersion" : 1,
+                "Sender" : "myElement",
+                "Receiver" : "*",
+                "Timestamp" : 1234512345
+        }
+}"
+\endcode
+
+By listening to these notifications your FEP Participant is able to recognize the success of a
+triggered remote event. See \ref fep_notification_state "State Notifications" for more information
+about state notifications.
+
+*/
+/* ########################################################################## */
+/* Page "The State Callbacks" */
+/* ########################################################################## */
+/**
+\page fep_state_callbacks The State Callbacks
+
+This page describes the different kinds of callbacks supported by the \ref fep_state_machine and
+gives an example on how to register as listener. Currently FEP supports the following state
+callbacks:
+- \ref fep_stm_request_callback "State Request Callbacks"
+- \ref fep_stm_entry_callback "State Entry Callbacks"
+- \ref fep_stm_exit_callback "State Exit Callbacks"
+- \ref fep_stm_cleanup_callback "CleanUp callbacks"
+
+
+\anchor fep_stm_callbacks_general_info
+Preface
+----------------------------------------------------------------------------------------------------
+
+<i>Registration needed</i>
+
+Callbacks are not automatically called after implementing a listener interface. To get a callback to
+be considered by the FEP State Machine it has to be registered there. It is also possible to
+unregister a callback if it is not longer needed.
+
+\note
+\ref cModule is already registered as state entry listener after \ref cModule::Create() was called,
+thus it does not need to be registered manually at the FEP State Machine. This also effects all
+classes deriving from \ref cModule. Remember to call the base class implementation when overriding
+any state entry callbacks in your FEP Participant.
+
+<i>No concurrent calls</i>
+
+Always keep in mind: callbacks will \e not be called concurrently. As long as one of your callback
+methods is blocking, no other callback will be executed by the FEP State Machine!
+
+\attention
+A blocking callback method prevents the FEP State Machine from operating as expected!
+
+\warning
+The current version of FEP has a known issue regarding the parallel reception of multiple FEP
+Messages within callbacks: If you try to receive / wait for FEP Messages via the FEP Service Bus,
+i.e. all FEP Notifications and FEP Commands, while being in a callback that was triggered by the FEP
+Service Bus (for example Command and Notification Listeners), you might be affected by this problem.
+Most likely you "just" receive a timeout, but you might also run into an deadlock - depending on
+your implementation. Note, that this also affects usage of most of the \c IAI methods.
+
+<i>Multiple registration</i>
+
+You may register as many callbacks as you need, i.e. you may register multiple listeners for the
+same kind of callback as well as you can register the same listener multiple times.
+
+<i>Registration of callbacks within a callback</i>
+
+When registering additional listeners with the FEP State Machine during a state callback, please
+keep in mind that the next state these listeners will be considered for, will be the next state the
+FEP State Machine will change to. So if your additional listeners need to also be put through the
+current state, you will have to call the corresponding methods yourself.
+
+<i>Empty callback implementations</i>
+
+If you need only one callback from one of the \c IState<Type>Listener interfaces you can use the
+corresponding \c cState<Type>Listener class as a parent class for your FEP Participant and only
+implement (and thus override) the methods you need. These base implementations will simply return \c
+ERR_NOERROR for all interface methods.
+
+
+\anchor fep_stm_request_callback
+State Request Callbacks
+----------------------------------------------------------------------------------------------------
+
+The state request listener will be called \e before a state change. If all request listeners return
+\c ERR_NOERROR, the state change will be performed. If at least one state request listener does
+return an error, the state change will not be performed. Anyway, \e all state request listeners will
+be executed regardless if an error occurred or not.
+
+Usually the state request listener should be used to make sure the FEP Participant is ready for the
+state change. If for example a FEP Participant does not have all information it needs to initialize,
+it should deny the request for changing from state \c IDLE to state \c INITIALIZING.
+
+The interface \ref IStateRequestListener defines methods \c Process<state>Request() for all states.
+To use this kind of callback let your FEP Participant implement the interface and register it to the
+state machine by calling \ref IStateMachine::RegisterStateRequestListener. As mentioned before, you
+may choose to inherit from \ref cStateRequestListener and only override the required callbacks
+instead of manually implementing all pure virtual methods from \ref IStateRequestListener
+
+
+\anchor fep_stm_entry_callback
+State Entry Callbacks
+----------------------------------------------------------------------------------------------------
+
+The state entry callbacks will be called right after all state exit callbacks and possibly the
+cleanup callback returned.
+
+The state entry callback should be used for everything that has to be done in the new state and can
+already be done when entering the state, e.g. the participant header can be filled when entering the
+state \c STARTUP. For FEP Participants in _Stand Alone Mode_ this is also a good place to trigger
+the event needed to enter the next state.
+
+The interface \ref IStateEntryListener defines methods \c Process<State>Entry for all states. To use
+this kind of callback let your FEP Participant implement the interface and register it to the state
+machine by calling \ref IStateMachine::RegisterStateEntryListener. See \ref cStateEntryListener for
+a class that default-implements the required interface.
+
+
+\anchor fep_stm_exit_callback
+State Exit Callbacks
+----------------------------------------------------------------------------------------------------
+
+The state exit callbacks will be called \e after all state request callbacks finished successfully,
+i.e. all state request callbacks returned \c ERR_NOERROR, but \e before the state entry callback of
+the new state is called. E.g.:
+-# event \c InitializingEvent was raised
+-# \c ProcessIdleRequest callbacks are called
+-# if any error is returned by the state request callbacks, we abort and return the first error
+-# \c ProcessIdleExit callbacks are called
+-# \c ProcessInitalizingEntry callbacks are called
+-# if any error is returned by the state exit or state entry callbacks, we return it (otherwise \c 
+ERR_NOERROR)
+
+Usually the state exit callbacks are used to process any configuration or information that was
+received during the state but not processed immediately.
+
+The interface \c IStateExitListener defines methods \c Process<State>Exit for all states. To use
+this kind of callback implement the interface and register it to the state machine by calling \c
+IStateMachine::RegisterStateExitListener. Again, \ref cStateExitListener provides a default
+implementation.
+
+
+\anchor fep_stm_cleanup_callback
+CleanUp callbacks
+----------------------------------------------------------------------------------------------------
+
+The cleanup callbacks are called whenever the state \c STARTUP is entered by a \c RestartEvent or
+the state \c SHUTDOWN should be entered by a \c ShutdownEvent. They are called after the \c
+Process<State>Exit, but before the \c Process<State>Entry callbacks.
+
+The interface \c IStateEntryListener defines a method \c CleanUp. To use this kind of callback
+implement the interface and register it to the state machine by calling \c
+IStateMachine::RegisterStateEntryListener. The method is, obviously, also default-implemented in
+\ref cStateEntryListener
+
+\anchor dot_fep_state_callbacks
+\dotfile fep_state_callbacks.dot "State Callback Sequence"
+*/
+}

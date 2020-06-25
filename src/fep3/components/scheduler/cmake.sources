@@ -1,0 +1,76 @@
+#
+# Copyright @ 2019 Audi AG. All rights reserved.
+# 
+#     This Source Code Form is subject to the terms of the Mozilla
+#     Public License, v. 2.0. If a copy of the MPL was not distributed
+#     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+# 
+# If it is not possible or desirable to put the notice in a particular file, then
+# You may include the notice in a location (such as a LICENSE file in a
+# relevant directory) where a recipient would be likely to look for such a notice.
+# 
+# You may add additional accurate notices of copyright ownership.
+#
+# subtle difference: on unix the command silently fails if the output directory does not exist...
+file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/scheduler)
+
+jsonrpc_generate_server_stub(${PROJECT_SOURCE_DIR}/include/fep3/rpc_components/scheduler/scheduler.json
+                             fep::rpc_stubs::RPCSchedulerService
+                             ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/scheduler/scheduler_service.h)
+jsonrpc_generate_client_stub(${PROJECT_SOURCE_DIR}/include/fep3/rpc_components/scheduler/scheduler.json
+                             fep::rpc_stubs::RPCSchedulerClient
+                             ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/scheduler/scheduler_service_client.h)
+
+set(SCHEDULER_SOURCES_PUBLIC ${PROJECT_SOURCE_DIR}/include/fep3/components/scheduler/scheduler_service_intf.h)
+
+set(SCHEDULER_RPC_SOURCES_PUBLIC ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/scheduler/scheduler_service_client.h
+                                 ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/scheduler/scheduler_service.h
+                                 ${PROJECT_SOURCE_DIR}/include/fep3/rpc_components/scheduler/scheduler.json
+                                 ${PROJECT_SOURCE_DIR}/include/fep3/rpc_components/scheduler/scheduler_service_rpc_intf_def.h)
+
+set(SCHEDULER_SOURCES_PRIVATE_COMMON
+    fep3/components/scheduler/local_scheduler_service.cpp
+    fep3/components/scheduler/local_scheduler_service.h
+    fep3/components/scheduler/scheduler_service_intf.cpp
+	fep3/components/scheduler/job_runtime_check.cpp
+	fep3/components/scheduler/job_runtime_check.h
+)
+
+set(SCHEDULER_SOURCES_PRIVATE_CLOCKBASED 
+    fep3/components/scheduler/clock_based/local_clock_based_scheduler.cpp
+    fep3/components/scheduler/clock_based/local_clock_based_scheduler.h
+    fep3/components/scheduler/clock_based/timer_scheduler_impl.cpp
+    fep3/components/scheduler/clock_based/timer_scheduler_impl.h
+)
+
+set(SCHEDULER_SOURCES_JOBS
+    ${PROJECT_SOURCE_DIR}/include/fep3/components/scheduler/jobs/job.h
+    ${PROJECT_SOURCE_DIR}/include/fep3/components/scheduler/jobs/datajob.h
+    ${PROJECT_SOURCE_DIR}/include/fep3/components/scheduler/jobs/jobsequence.h
+    fep3/components/scheduler/jobs/job.cpp
+    fep3/components/scheduler/jobs/datajob.cpp
+    fep3/components/scheduler/jobs/jobsequence.cpp
+)
+
+set(SCHEDULER_SOURCES_PRIVATE ${SCHEDULER_SOURCES_PRIVATE_COMMON}
+                              ${SCHEDULER_SOURCES_PRIVATE_CLOCKBASED}
+                              ${SCHEDULER_SOURCES_PRIVATE_LOGSTEP}
+                              ${SCHEDULER_SOURCES_JOBS}
+                              ${SCHEDULER_SOURCES_PUBLIC})
+
+install(
+    FILES ${SCHEDULER_SOURCES_PUBLIC}
+    DESTINATION include/fep3/components/scheduler
+)
+
+install(
+    FILES ${SCHEDULER_RPC_SOURCES_PUBLIC}
+    DESTINATION include/fep3/rpc_components/scheduler
+)
+
+set(SCHEDULER_SOURCES ${SCHEDULER_SOURCES_PUBLIC} ${SCHEDULER_RPC_SOURCES_PUBLIC} ${SCHEDULER_SOURCES_PRIVATE})
+
+source_group(components\\scheduler FILES ${SCHEDULER_SOURCES_PRIVATE_COMMON})
+source_group(components\\scheduler\\public FILES ${SCHEDULER_SOURCES_PUBLIC})
+source_group(components\\scheduler\\clockbased FILES ${SCHEDULER_SOURCES_PRIVATE_CLOCKBASED})
+source_group(components\\scheduler\\jobs FILES ${SCHEDULER_SOURCES_JOBS})

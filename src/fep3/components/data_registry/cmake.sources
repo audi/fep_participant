@@ -1,0 +1,56 @@
+#
+# Copyright @ 2019 Audi AG. All rights reserved.
+# 
+#     This Source Code Form is subject to the terms of the Mozilla
+#     Public License, v. 2.0. If a copy of the MPL was not distributed
+#     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+# 
+# If it is not possible or desirable to put the notice in a particular file, then
+# You may include the notice in a location (such as a LICENSE file in a
+# relevant directory) where a recipient would be likely to look for such a notice.
+# 
+# You may add additional accurate notices of copyright ownership.
+#
+set(COMPONENTS_BASE_DATA_REGISTRY_INCLUDE_DIR ../include/fep3/base)
+set(COMPONENTS_DATA_REGISTRY_INCLUDE_DIR ../include/fep3/components/data_registry)
+
+set(COMPONENTS_BASE_DATA_REGISTRY_SOURCES_PUBLIC ${COMPONENTS_BASE_DATA_REGISTRY_INCLUDE_DIR}/streamtype/streamtype.h
+                                                 ${COMPONENTS_BASE_DATA_REGISTRY_INCLUDE_DIR}/streamtype/streamtype_intf.h
+                                                 ${COMPONENTS_BASE_DATA_REGISTRY_INCLUDE_DIR}/streamtype/default_streamtype.h)
+
+set(COMPONENTS_DATA_REGISTRY_SOURCES_PUBLIC ${COMPONENTS_DATA_REGISTRY_INCLUDE_DIR}/data_registry_config.h
+                                            ${COMPONENTS_DATA_REGISTRY_INCLUDE_DIR}/data_sample.h
+                                            ${COMPONENTS_DATA_REGISTRY_INCLUDE_DIR}/data_reader_queue.h
+                                            ${COMPONENTS_DATA_REGISTRY_INCLUDE_DIR}/data_reader.h
+                                            ${COMPONENTS_DATA_REGISTRY_INCLUDE_DIR}/raw_memory_intf.h
+                                            ${COMPONENTS_DATA_REGISTRY_INCLUDE_DIR}/raw_memory.h
+                                            ${COMPONENTS_DATA_REGISTRY_INCLUDE_DIR}/data_registry_intf.h
+                                            ${COMPONENTS_DATA_REGISTRY_INCLUDE_DIR}/data_item_queue.h
+                                            ${COMPONENTS_DATA_REGISTRY_INCLUDE_DIR}/data_item_queue_base.h
+                                            ${COMPONENTS_DATA_REGISTRY_INCLUDE_DIR}/dynamic_data_item_queue.h)
+
+set(COMPONENTS_DATA_REGISTRY_SOURCE_PRIVATE fep3/components/data_registry/data_sample.cpp
+                                            fep3/components/data_registry/data_reader_queue.cpp
+                                            fep3/components/data_registry/data_reader.cpp
+                                            fep3/components/data_registry/data_writer.cpp
+                                            )
+
+set(COMPONENTS_DATA_REGISTRY_SOURCES_FEP2 fep3/components/data_registry/data_registry_fep2/data_sample_fep2.cpp
+                                          fep3/components/data_registry/data_registry_fep2/data_registry_fep2.cpp
+                                          fep3/components/data_registry/data_registry_fep2/data_reader_fep2.cpp
+                                          fep3/components/data_registry/data_registry_fep2/data_reader_fep2.h
+                                          fep3/components/data_registry/data_registry_fep2/data_writer_fep2.h
+                                          fep3/components/data_registry/data_registry_fep2/data_sample_pool_fep2.cpp
+                                          fep3/components/data_registry/data_registry_fep2/data_sample_pool_fep2.h
+
+                                          ${COMPONENTS_DATA_REGISTRY_INCLUDE_DIR}/data_registry_fep2/data_sample_fep2.h
+                                          ${COMPONENTS_DATA_REGISTRY_INCLUDE_DIR}/data_registry_fep2/data_registry_fep2.h)
+
+set(COMPONENTS_DATA_REGISTRY_SOURCES ${COMPONENTS_DATA_REGISTRY_SOURCES_FEP2} 
+                                     ${COMPONENTS_DATA_REGISTRY_SOURCES_PUBLIC}
+                                     ${COMPONENTS_DATA_REGISTRY_SOURCE_PRIVATE}
+                                     ${COMPONENTS_BASE_DATA_REGISTRY_SOURCES_PUBLIC})
+
+source_group(components\\data_registry_base FILES ${COMPONENTS_DATA_REGISTRY_SOURCES})
+source_group(components\\data_registry FILES ${COMPONENTS_DATA_REGISTRY_SOURCES})
+source_group(components\\data_registry_fep2 FILES ${COMPONENTS_DATA_REGISTRY_SOURCES_FEP2})

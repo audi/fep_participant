@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch_configuration xmlns="fep/xsd/launch_configuration">
+    <schema_version>1.0.0</schema_version>
+    <description>FEP SDK timing example system</description>
+    <contact>aev.support@audi.de</contact>
+    <participants>
+        <participant>
+            <name>TimingMaster</name>
+            <host>localhost</host>
+            <working_dir>.</working_dir>
+            <!-- <arguments>--name $(name) --mode 0</arguments> -->             <!-- AFAP -->
+            <arguments>--name $(name) --mode 1 --scale 1.0</arguments>          <!-- System Time Mode -->
+            <!-- <arguments>--name $(name) --mode 2</arguments> -->             <!-- External Clock Mode -->
+            <!-- <arguments>--name $(name) --mode 3</arguments> -->             <!-- Manual Trigger Mode (single step using console input) -->
+            <executable>../demo_timing_timingmaster</executable>
+        </participant>
+        <participant>
+            <name>Observer</name>
+            <host>localhost</host>
+            <working_dir>.</working_dir>
+            <arguments>--name $(name)</arguments>
+            <executable>../demo_timing_observer</executable>
+        </participant>
+        <participant>
+            <name>Environment</name>
+            <host>localhost</host>
+            <working_dir>.</working_dir>
+            <arguments>--name $(name)</arguments>
+            <executable>../demo_timing_environment</executable>
+        </participant>
+        <participant>
+            <name>Driver</name>
+            <host>localhost</host>
+            <working_dir>.</working_dir>
+            <arguments>--name $(name)</arguments>
+            <executable>../demo_timing_driver</executable>
+        </participant>
+        <participant>
+            <name>SensorBack</name>
+            <host>localhost</host>
+            <working_dir>.</working_dir>
+            <arguments>--name $(name)</arguments>
+            <executable>../demo_timing_sensor_back</executable>
+        </participant>
+        <participant>
+            <name>SensorFront</name>
+            <host>localhost</host>
+            <working_dir>.</working_dir>
+            <arguments>--name $(name)</arguments>
+            <executable>../demo_timing_sensor_front</executable>
+        </participant>
+    </participants>
+</launch_configuration>

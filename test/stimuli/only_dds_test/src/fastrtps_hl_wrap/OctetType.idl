@@ -1,0 +1,4 @@
+struct OctetType
+{
+    sequence<octet, 63000> data;
+};

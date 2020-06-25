@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<element xmlns="fep/xsd/element">
+    <schema_version>1.0.0</schema_version>
+    <type_name>TimingMaster</type_name>
+    <description>TimingMaster element used in the FEP SDK timing example</description>
+    <version>2.1.0</version>
+    <contact>aev.support@audi.de</contact>
+    <interfaces>
+        <interface>
+            <name>FEP_TimingMaster</name>
+            <version>2.1.0</version>
+            <properties />
+        </interface>
+    </interfaces>
+    <requirements>
+        <requirement>
+            <name>FEP_TimingMaster</name>
+            <version>2.1.0</version>
+        </requirement>
+    </requirements>
+</element>

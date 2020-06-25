@@ -1,0 +1,38 @@
+[
+    // returns a comma sperated list of RPC objects
+    {
+        "name": "getRPCComponents",
+        "returns": "Object1,Object2"
+    },
+
+    // returns the interface id of an RPC object
+    {
+        "name": "getRPCComponentIIDs",
+        "params": {
+            "rpc_component_name": "Object1"
+        },
+        "returns": "iid1,iid2"
+    },
+
+    // retrieves the
+    {
+        "name": "getRPCComponenttInterfaceDefinition",
+        "params": {
+            "rpc_component_name": "clock",
+            "component_iid": "clock.iid"
+        },
+        "returns": "json"
+    },
+
+    // returns the name
+    {
+        "name": "getName",
+        "returns": "name"
+    },
+
+    // returns the current system name the participant is relying to
+    {
+        "name": "getSystemName",
+        "returns": "name"
+    }
+]

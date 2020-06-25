@@ -1,0 +1,18 @@
+[
+    // returns a string
+    {
+        "name": "GetHost",        
+        "returns": "Hostname of the server participant"
+    },
+
+    // returns a number
+    {
+        "name": "GetSum",
+        "params":
+        {  
+            "a": 1,
+            "b": 1
+        },
+        "returns": 1
+    }
+]

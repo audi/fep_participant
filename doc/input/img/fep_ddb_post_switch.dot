@@ -1,0 +1,47 @@
+/**
+ *
+ * Image of the DDB after switching
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+
+digraph fep_data_ddb_rx4 {
+    edge [style="invis"];
+    node [shape=box];
+    subgraph cluster0 {
+        style=filled;
+        color=lightgrey;
+        label="Read Buffer";
+        i1 [label="Instance 4"];
+        i2 [label="Instance 5"];
+        i3 [label="Instance 6"];
+        i0 [label="Instance 7\nsync"];
+        i3 -> i0;
+        i1 -> i2;
+        i2 -> i3;
+    }
+    subgraph cluster1 {
+        style=filled;
+        color=lightgrey;
+        label="Rx Buffer";
+        i4 [label="Instance 1", style="invis"];
+        i5 [label="Instance 2", style="invis"];
+        i6 [label="Instance 3\nsync", style="invis"];
+        i7 [label="Instance 0", style="invis"];
+        i4 -> i5;
+        i5 -> i6;
+        i6 -> i7;
+    }
+}

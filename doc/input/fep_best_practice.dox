@@ -1,0 +1,142 @@
+//
+// Copyright @ 2019 Audi AG. All rights reserved.
+// 
+//     This Source Code Form is subject to the terms of the Mozilla
+//     Public License, v. 2.0. If a copy of the MPL was not distributed
+//     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+// 
+// If it is not possible or desirable to put the notice in a particular file, then
+// You may include the notice in a location (such as a LICENSE file in a
+// relevant directory) where a recipient would be likely to look for such a notice.
+// 
+// You may add additional accurate notices of copyright ownership.
+//
+namespace fep
+{
+/**
+\page fep_best_practice FEP SDK 2 Guidelines and Best Practices
+
+
+This page is intended to give the FEP SDK user some guidelines and best practices, all collected in
+one place.  For details on each subject refer to the respective pages in the documentation.
+
+A FEP Participant is almost never to be considered isolated but rather in the context of
+(potentially different) FEP Systems.  Hence, it is crucial to design a FEP Participant to behave in
+a compliant way.
+
+\anchor fep_best_practice_tldr 
+\section fep_summary_nest_practices Best practices summary
+
++ Hardcode configurations only if necessary and only in a way that allows the configuration to
+  override those hardcoded defaults
++ Expose your function-specific configuration using best practice approaches (preferably the
+  Property Tree)
++ Implement time-dependent functionality using \ref fep_timing "FEP Timing"
++ If possible, expose the command-line interface
+  (\ref fep_participant_configuration "FEP Module options" (Environment Variables/ Command Line
+  Arguments))
++ Typically use only one module per executable
++ Never control your own state machine
+  (only exceptions: FS_STARTUP -> FS_IDLE, X -> FS_ERROR, FS_INITIALIZING -> FS_READY)
++ Do not control or configure other participants, leave this to @ref fep_description_tooling
++ Do not write to your properties other than setting a default value in FS_STARTUP
++ Use \ref fep_incident_handling "Incident Handling" for logging and event handling
++ Use the state machine accordings to the following scheme
+    + ProcessStartupEntry (FS_STARTUP):
+        + Register hardcoded signal descriptions using the Property Tree 
+          (in FEP_DESCRIPTION_REMOTE_DESCRIPTION_PATH, comma separated)
+        + Create properties with initial values
+        + Fill module header properties with meta information
+        + Register state machine and command listeners
+        + Publish RPC interfaces
+    + ProcessIdleEntry (FS_IDLE):
+        + If (eOldState != FS_STARTUP):
+            + Unregister Signals
+            + Unregister Step Listeners
+            + Reset participant state
+    + ProcessInitializingEntry (FS_INITIALIZING):
+        + Read out all properties and initialize participant state
+        + Register signals
+        + Register step listeners
+        + Initialize any external components (maybe a tool or a piece of hardware)
+    + ProcessReadyEntry (FS_READY):
+        + Nothing to do here
+    + ProcessRunningEntry (FS_RUNNING):
+        + Start any external components (maybe a tool or a piece of hardware)
+    + ProcessErrorEntry (FS_ERROR):
+        + Application specific
+    + CleanUp (ProcessShutdownEntry would be too late) (FS_SHUTDOWN):
+        + Clean up everything remaining
+
+
+
+\section fep_implementing_fep_participant More Detailed Guidelines
+
+\subsection fep_implementing_fep_participant_stm  The FEP State Machine
+The key aspect of being FEP compliant involves the correct use of the \ref fep_state_machine "FEP
+State Machine". To help the SDK user with this task, here is a short recap of what to to do in which
+state and why. In a FEP Participant's life cycle the states FS_STARTUP and FS_SHUTDOWN are supposed
+to be unique events. The FS_STARTUP state is passed once when the module is brought to life and
+equivalently the state FS_SHUTDOWN is passed once the live cycle of the module ends. Normal
+operation cycles through the following states: ... ->FS_IDLE -> FS_INITIALIZING -> FS_READY ->
+FS_RUNNING -> FS_IDLE -> ... .
+
+\dotfile fep_simplified_state_machine.dot "The simplified FEP State Machine"
+
+This cycle is displayed in the graphic above and indicated by the bold black arrows. It is crucial
+for the operability of the FEP %System that a participant can cycle through these states. Multiple
+reinitialization cycles must be possible. For further reference please have a look at the \ref
+fep_state_machine "Complete FEP State Machine"
+
+\subsubsection fep_fs_idle FS_IDLE:
+The state FS_IDLE is used to setup/reset the participant into a save/well defined state for the next
+cycle. The ProcessIdleEntry callback that provides the previous state as an argument can be used for
+most of the setup and reset tasks. If the argument is anything other than FS_STARTUP, then usually
+cleanups are necessary (e.g. unregistering signals, emptying buffers, etc.).
+
+\subsubsection fep_fs_init FS_INITIALIZING:
+This is the state that is used to initialize the system and bring it to a state that is ready for
+operation/running. This means this is the right state to register signals and do things like
+preallocation and default initialization of variables. In general, this is when you prepare your
+data transmission (The details of data transmission can be found \ref fep_data "here".) For some
+special use cases there are things like the \ref fep_ddb_component "DDB" that is initialized here.
+This is also the right time to read properties (in general they should not be read past this state).
+
+\subsubsection fep_fs_ready FS_READY:
+The only purpose of the FS_READY state is to indicate that the participant is ready to run.
+
+\subsubsection fep_fs_running FS_RUNNING:
+In the FS_RUNNING state the simulation is actually running. This is when the functional code /
+simulation code (e.g. user code) takes the stage. Data transmission is active and FEP Timing is
+running.
+
+\subsubsection fep_fs_error FS_ERROR:
+The state FS_ERROR can be reached from all states except from FS_SHUTDOWN. This state indicates that
+an error occurred from which it is not possible to recover into an operational state without user
+interaction (usually this results in a restart of the participant). In case the error can be
+resolved it is possible to transit into state FS_IDLE.
+
+\subsubsection fep_fs_startup FS_STARTUP:
+FS_STARTUP is reached automatically by creating the module. It is mandatory to set the \ref
+fep_CCA_header "FEP Participant header" in this state (otherwise an Incident is thrown).  In general
+FS_STARTUP is the state used to setup everything that is persistent over the entire participant life
+cycle. This can involve registering state machine listeners or setting up particpant-specific
+properties.  Additionally, this is the state used to register Signal Descriptions (DDLs) in the
+property tree.
+
+\subsubsection fep_fs_shutdown FS_SHUTDOWN:
+The end of every participants life cycle is the FS_SHUTDOWN state. Any application specific cleanup,
+that must be done before the module shuts down, has to be done withing the \c Cleanup callback
+(which is also part of the state entry listener interface)
+
+\subsection Additional helpful information
+
+\li @subpage fep_realtime
+\li @subpage fep_messages
+\li @subpage fep_integrate_other_participants
+\li @subpage fep_participant_configuration
+\li @subpage page_d_pointer
+\li @subpage fep_migration
+
+**/
+}

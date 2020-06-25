@@ -1,0 +1,235 @@
+/**
+ * Implementation of the Class cPropertyNotification.
+ *
+ * @file
+
+   @copyright
+   @verbatim
+   Copyright @ 2019 Audi AG. All rights reserved.
+   
+       This Source Code Form is subject to the terms of the Mozilla
+       Public License, v. 2.0. If a copy of the MPL was not distributed
+       with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+   
+   If it is not possible or desirable to put the notice in a particular file, then
+   You may include the notice in a location (such as a LICENSE file in a
+   relevant directory) where a recipient would be likely to look for such a notice.
+   
+   You may add additional accurate notices of copyright ownership.
+   @endverbatim
+ *
+ */
+
+#include <cstddef>
+#include <string>
+#include <a_util/result/result_type.h>
+
+#include "fep3/components/legacy/property_tree/property.h"
+#include "fep_errors.h"
+#include "messages/fep_notification_property.h"
+
+#if __GNUC__
+// Avoid lots of warnings in libjson
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreorder"
+#endif
+#include <libjson.h>
+#if __GNUC__
+// Restore previous behaviour
+#pragma GCC diagnostic pop
+#endif
+
+namespace fep {
+class IProperty;
+}  // namespace fep
+
+using namespace fep;
+
+FEP_UTILS_P_DECLARE(cPropertyNotification)
+{
+    friend class cPropertyNotification;
+
+private:
+    std::string m_strPropPath;
+    cProperty * m_poProperty;
+    std::string m_strRepresentation;
+
+private:
+    cPropertyNotificationPrivate() : m_poProperty(NULL) { }
+};
+
+cPropertyNotification::cPropertyNotification(char const * strPropPath,
+    const cProperty * poProperty, const char* strSender,
+    const char* strReceiver, timestamp_t tmTimeStamp, timestamp_t tmSimTime) :
+    cMessage(strSender, strReceiver, tmTimeStamp, tmSimTime)
+{
+    FEP_UTILS_D_CREATE(cPropertyNotification);
+
+    _d->m_strPropPath = strPropPath;
+    CreateStringRepresentation(poProperty);
+    ParseFromStringRepresentation(_d->m_strRepresentation.c_str());
+}
+
+cPropertyNotification::cPropertyNotification(char const * strPropertyNotification) :
+    cMessage(strPropertyNotification)
+{
+    FEP_UTILS_D_CREATE(cPropertyNotification);
+
+    ParseFromStringRepresentation(strPropertyNotification);
+    CreateStringRepresentation(_d->m_poProperty);
+}
+
+cPropertyNotification::cPropertyNotification(const cPropertyNotification &oOther) :
+    cMessage(oOther)
+{
+    FEP_UTILS_D_CREATE(cPropertyNotification);
+    _d->m_strPropPath = oOther._d->m_strPropPath;
+    _d->m_strRepresentation = oOther._d->m_strRepresentation;
+    _d->m_poProperty = NULL;
+    ParseFromStringRepresentation(_d->m_strRepresentation.c_str());
+}
+
+cPropertyNotification &cPropertyNotification::operator=(const cPropertyNotification &oOther)
+{
+    if (this != &oOther)
+    {
+        _d->m_strPropPath = oOther._d->m_strPropPath;
+        _d->m_strRepresentation = oOther._d->m_strRepresentation;
+        delete _d->m_poProperty;
+        _d->m_poProperty = NULL;
+        ParseFromStringRepresentation(oOther._d->m_strRepresentation.c_str());
+    }
+    return *this;
+}
+
+cPropertyNotification::~cPropertyNotification()
+{
+    delete _d->m_poProperty;
+}
+
+char const * cPropertyNotification::GetPropertyPath() const
+{
+    return _d->m_strPropPath.c_str();
+}
+
+IProperty * cPropertyNotification::TakeProperty()
+{
+    IProperty * poProp = _d->m_poProperty;
+    _d->m_poProperty = NULL;
+    return poProp;
+}
+
+const IProperty * cPropertyNotification::GetProperty() const
+{
+    return _d->m_poProperty;
+}
+
+uint8_t cPropertyNotification::GetMajorVersion() const
+{
+    return cMessage::GetMajorVersion();
+}
+
+uint8_t cPropertyNotification::GetMinorVersion() const
+{
+    return cMessage::GetMinorVersion();
+}
+
+char const * cPropertyNotification::GetReceiver() const 
+{
+    return  cMessage::GetReceiver();
+}
+
+char const * cPropertyNotification::GetSender() const 
+{
+    return  cMessage::GetSender();
+}
+
+timestamp_t cPropertyNotification::GetTimeStamp() const 
+{
+    return  cMessage::GetTimeStamp();
+}
+
+timestamp_t cPropertyNotification::GetSimulationTime() const 
+{
+    return cMessage::GetSimulationTime();
+}
+
+char const * cPropertyNotification::ToString() const 
+{
+    return _d->m_strRepresentation.c_str();
+}
+
+fep::Result cPropertyNotification::CreateStringRepresentation(const cProperty * poProperty)
+{
+    JSONNode oCompleteNode = libjson::parse(cMessage::ToString());
+    JSONNode oNotificationNode;
+    oNotificationNode.set_name("Notification");
+    oNotificationNode.push_back(JSONNode("Type", "property"));
+    JSONNode oBranch;
+    oBranch.set_name("Property_Branch");
+    JSONNode oProperty;
+
+    if (poProperty)
+    {
+        oNotificationNode.push_back(JSONNode("Path", GetPropertyPath()));
+
+        poProperty->PropertyToJSON(oProperty);
+    }
+    else
+    {
+        oNotificationNode.push_back(JSONNode("Path", ""));
+
+        cProperty oTmp("", "");
+        oTmp.PropertyToJSON(oProperty);
+    }
+
+    oBranch.push_back(oProperty);
+    oNotificationNode.push_back(oBranch);
+    oCompleteNode.push_back(oNotificationNode);
+    std::string strTmp = libjson::to_std_string((oCompleteNode.write_formatted()));
+    _d->m_strRepresentation = strTmp.c_str();
+    return ERR_NOERROR;
+}
+
+fep::Result cPropertyNotification::ParseFromStringRepresentation(const char * strRepr)
+{
+    if (!strRepr) { return ERR_POINTER; }
+
+    delete _d->m_poProperty;
+    _d->m_poProperty = new cProperty("", "");
+
+    JSONNode oMessageNode = libjson::parse(std::string(strRepr));
+    JSONNode::iterator pNotificationNode = oMessageNode.find("Notification");
+    if (oMessageNode.end() != pNotificationNode)
+    {
+        JSONNode::iterator pNodeIter = pNotificationNode->find("Path");
+        if (pNotificationNode->end() != pNodeIter)
+        {
+            std::string strTmp = pNodeIter->as_string();
+            _d->m_strPropPath = strTmp.c_str();
+        }
+        else
+        {
+            return ERR_INVALID_ARG;
+        }
+
+        pNodeIter = pNotificationNode->find("Property_Branch");
+        if (pNotificationNode->end() != pNodeIter)
+        {
+            const JSONNode & oPropBranch = *pNodeIter;
+            if (oPropBranch.size() != 1)
+            {
+                // only one property may be below the prop branch
+                return ERR_INVALID_ARG;
+            }
+
+            _d->m_poProperty->JSONToProperty(oPropBranch.at(0));
+        }
+        else
+        {
+            return ERR_INVALID_ARG;
+        }
+    }
+
+    return ERR_NOERROR;
+}

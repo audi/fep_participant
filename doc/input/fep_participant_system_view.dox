@@ -1,0 +1,81 @@
+/**
+ *
+ * This file holds the main page of the FEP SDK user documentation.
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+
+/**
+\page page_fep_participant_system_view FEP Participant View and FEP System View
+
+FEP SDK will provide a solution for an abstraction of a middleware to build a distributed software system.
+It will not only provide standardized interfaces but also provide clear defined functionality and process models 
+a FEP software solution must fulfill to provide a distributed system. 
+
+
+\section section_fep_service_bus FEP Service Bus
+
+A FEP Participant is a network node within a FEP System. 
+The FEP Participant (fep::Participant) is the "gate" to connect to the defined network. 
+So, one main part of a participant is called "FEP Service Bus". The defined network is called "Service Network". 
+
+From a participant's point of view the "FEP Service Bus"will have following important features: 
+\li provide one service access point for any control remote procedure call to the participant from the network world
+\li provide the possibility to response to a request from system perspective
+\li provide a service interface which may be used from the service network world
+
+ The FEP System is formed by a set of FEP Participants.
+ The smallest FEP System contains one FEP Participant.
+
+From a system's point of view the "FEP Service Bus" will have following important features: 
+\li network discovery to discover current participants which are connected to the service network 
+\li provide access to the participants service to control it by remote procedure calls
+\li provide the possibility to request any functionality within the participant
+\li connect to a defined set of participants which may be part of the FEP System
+
+\image html section_fep_service_bus_1.png "FEP Service Bus - Service Network" 
+
+\section section_fep_participant_components FEP Participant components and the FEP Service Bus
+
+The participant's functionality is separated into clear defined services. These services are called \b FEP \b Components. 
+Each component is able to use the service bus to provide some service interfaces for its specific task.
+
+\par Example Participant Info Component, Properties Component
+\li The task for the participant information component is to provide a name and a type for this started 
+participant within the service network. To do so, the participant information component will provide two RPC call methods: \p getName() and \p getType().
+\li The task for the properties component is to provide a possibility to set and retrieve the value of a specific property. 
+This property will be registered with a name and might be a parameter for any other functionality.
+
+@remark We always have an participant internal interface to program the participants functionality and a participant service interface 
+to provide a remote procedure access via service bus.
+
+\image html section_fep_participant_components_design.png
+
+\section section_fep_participant_sim_bus Special FEP Participant components and the FEP Simulation Bus
+
+As you see above it is not necessary to exchange data to form a FEP System. 
+But the task for the FEP Middleware abstraction is to define a common way to decribe and exchange data.
+The data exchange is separated into 2 important components: 
+\li DataRegistry - to provide the internal interface for registering named and typed data the user wants to exchange and also to provide a 
+                 participant service interface to retrieve information regarding this registered data.
+\li SimulationBus - to access a simulation network where to exchange this data in the simulation network specific way.
+
+\image html section_fep_participant_sim_bus.png
+
+
+*/
+
+
+

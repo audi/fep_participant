@@ -1,0 +1,643 @@
+/**
+ *
+ * This file documents the FEP Incident Handler
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+namespace fep
+{
+
+/**
+\page fep_incident_handling FEP Incident Handling
+
+\section sec_preamble Introduction
+
+The FEP Incident Handler provides a convenient way to manage incidents within a FEP environment.
+Herein, the term "Incident" refers to a specific set of information that describes any kind of
+low-level exception, information or warning.  Incidents arise only during the lifetime of a FEP
+Participant and may or may not influence the behavior of one or more FEP Participants. The term
+"incident" must not be confused with events of \ref fep_state_machine or \ref fep_messages which may
+be received from remote FEP Participants.
+
+<br><br>
+By design, a FEP Incident Handler is part of a FEP Participant object, similar to the FEP
+Property Tree or the FEP State Machine. It cannot exist outside the context of a FEP Participant.
+The main purpose of the FEP Incident Handler is to provide local means of implementing FEP
+Participants with fail-safe or fail-silent mechanisms. These mechanisms, in turn, are intended to
+handle incidents of any kind and recover during runtime - if possible - or to suppress them as
+desired. No matter the configuration of the affected FEP Participant, incidents are always
+broadcasted. However, it is up to the receiving FEP Participant to evaluate and handle these
+incidents. As a rule in FEP, this type of incident is considered "global incident" from the
+perspective of the issuing FEP Participant whereas from the perspective of a remote FEP Participant,
+these are called "remote incidents".
+
+<br>
+An incident consists of the following data components: <br>
+<table>
+<caption>Extent of a FEP Incident</caption>
+<tr><th width="80"><b>Entry</b></th><th><b>Type</b></th><th><b>Description</b></th></tr>
+<tr>
+<td><i>Incident Code</i></td><td>tInt16</td>
+<td>A general code allowing to distinguish between various incidents. An incident code has to be
+seen in the context of its individual scope (e.g. the issuing instance). By definition the incident
+code is a signed integer. <b>While the <i>positive range</i> is standardized and exclusively
+reserved for FEP internal incidents, the <i>negative range</i> is dedicated to user defined
+incidents</b>. \warning It is extremely important to bear in mind that within FEP networks multiple
+FEP Participants may use the exact, user-defined incident code for different issues. This also
+applies to implementations which share the same code-base (e.g. a FEP Participant inherits from a
+previously extended \ref cModule). </td>
+
+</tr>
+<tr>
+<td><i>Severity Level</i></td><td>\ref tSeverityLevel</td>
+<td>FEP provides three basic severity levels: <i>Information</i>, <i>Warning</i> and <i>
+Critical</i>. It is at the developer's discretion to evaluate the severity in the context of an
+incident code and to drive a FEP Participant accordingly. Incidents with the severity "Critical"
+will always be broadcasted through a FEP Notification on the FEP bus as they are considered vital
+for the entire FEP environment. For more details and configuration options see the section \ref
+sec_notif_log_strategy below.
+
+</td>
+</tr>
+<tr>
+<td><i>Timestamp</i></td><td>tUInt64</td>
+<td>The time stamp of an incident is optional and implicitly assigned when an incident occurs. The
+only exception are remote incidents which always supply a time stamp from the respective host system
+on which the incident arose.</td>
+</tr>
+<tr>
+<td><i>Context</i></td><td>tChar* / \ref IModule* </td>
+<td>An incident is always bound to a specific context. Local incidents will be supplied with a
+reference to the current FEP Participant in which they have been triggered. Exceptions are remote
+incidents which are encountered through FEP Incident Notifications and only bear the name of the
+affected FEP Participant.</td>
+</tr>
+<tr>
+<td><i>Description</i></td><td>tChar*</td>
+<td>An optional description accompanying an incident code. Due to a potential ambiguity of incident
+codes from the user-defined range (negative values!) it is highly advisable to supply additional
+information when invoking an incident.</td>
+</tr>
+<tr>
+<td><i>Origin</i></td><td>tChar*</td>
+<td>A string identifying the component which caused the incident e.g SignalRegistry or StateMachine
+... .</td>
+</tr>
+<tr>
+<td><i>File</i></td><td>tChar*</td>
+<td>Name of the file in which the incident was invoked. (only used in debug build)</td>
+
+</tr>
+<tr>
+<td><i>Line</i></td><td>tInt</td>
+<td>Number of the line in which the incident was invoked. (only used in debug build)</td>
+
+</tr>
+<tr>
+<td><i>Simulation Time</i></td><td>tInt</td>
+<td>The current simulation time at the moment of invokation.</td>
+
+</tr>
+</table>
+A structural representation of a FEP Incident is provided by \ref tIncidentEntry.
+
+The following guidelines should be used when invoking incidents: \subpage fep_participant_incident_guidelines
+
+<hr>
+
+\section sec_incident_handler_arc The Architecture of the FEP Incident Handler
+
+The FEP Incident Handler may be regarded as proxy when incidents are invoked by a FEP Participant or
+any of its related implementations (e.g. sub-components, sub-classes, etc.). To actually handle and
+process invoked incidents, the FEP Incident Handler forwards these to so-called "FEP Incident
+Strategies". These strategies are either built-in standard implementations provided by the FEP
+framework as well as user-implemented strategies which have previously been registered and
+associated to the FEP Incident Handler. From the developers perspective, the actual internal
+implementation of the FEP Incident Handler is a variation of the common "Strategy Pattern" design
+which is explained in detail in "Design Patterns - Participants of Reusable Object-Orientated
+Software" by E. Gamma, R. Helm, R.Johnson and J.Vlissides. It is recommended to become familiar with
+this pattern when implementing own incident handling routines based on the FEP Incident Handler.
+
+<br>
+
+\dotfile incident_handler_architecture.dot "The Incident Handler Architecture"
+<br>
+<hr>
+
+\section sec_incident_handler Implementing Incident Handling Mechanisms
+
+The first part of the following sections will walk through the process of configuring the FEP
+Incident Handler as well as the configuration of the built-in incident handling provided by the FEP
+SDK. The subsequent part will cover the more advanced approach of implementing fully customized FEP
+Incident Strategies to achieve more precise and use-case driven incident handling.
+<br>
+
+\subsection subsec_configuration Incident Handling - Configuring the FEP Incident Handler
+
+For configuration, the FEP Incident Handler relies on a FEP Participant's Property Tree. Its 
+root path is <i>ComponentConfig.sIncidentHandler</i> and provides the following properties: <br>
+<table>
+<caption>Configuration Options of the FEP Incident Handler</caption>
+<tr><th width="200"><b>Property</b></th><th><b>Type</b></th><th><b>Description</b></th></tr>
+<tr>
+<td><i>ComponentConfig.sIncidentHandler.bEnable</i></td><td>tBool</td>
+<td>Switch to enable or disable a FEP Participant's incident handler completely. Invocation of
+incidents will result in an error and none of the associated strategies will be called. Remote
+incidents will be ignored likewise.</td>
+</tr>
+<tr>
+<td><i>ComponentConfig.sIncidentHandler.bEnableGlobalScope</i></td><td>tBool</td>
+<td>Switch to allow the incident handler to receive remote incidents issued by other FEP
+Participants on the same bus if these chose to publish incidents. Incoming remote incidents are
+being supplied to all registered strategies if these are associated with the respective incident
+code.  If this option is disabled, all FEP Incident Notifications on the bus are ignored. Please
+note, that this option does NOT have any influence on the broadcasting of "global scope" incidents
+issued by the FEP Participant.</td>
+</tr>
+<tr>
+<td><i>ComponentConfig.sIncidentHandler.strSourceFilter</i></td><td>string</td>
+<td>If the Global Scope above has been enabled, this option provides means to regex-filter remote
+incidents by their originating source, e.g. the FEP Participant Name, to only accept and handle
+incidents from specific FEP Participants. The default is "*", which is considered an alias for ".*"
+.</td>
+</tr>
+</table>
+<hr>
+
+\subsection subsec_severity_levels Incident Handling - FEP Severity Levels
+
+Upon enabling the FEP Incident Handler, incidents are being invoked using the following FEP Severity
+Levels:
+<br>
+
+- SL_Info: Standard log/dump severity level.
+    - Use-Case: Console- / File- / History- / Notification-Log. No relevance for runtime changes
+- SL_Warning: Standard warning severity level.
+    - Use-Case: Console- / File- / History- / Notification Log. No relevance for runtime changes
+- SL_Critical: Globally relevant, critical error level.
+    - Use-Case: Console- / File- / History- / Notification Log. Definite state change to
+      FS_ERROR. <br><b> A FEP Participant is vital to the FEP network / FEP system and is unable to
+      recover, hence the incident is relevant to other FEP Participants including a Master FEP
+      Participant, a Test-Evaluation FEP Participant or other dependent FEP Participants.</b>
+
+<hr>
+
+\subsection subsec_incident_code_range Incident Handling - Range of Incident Codes
+
+As mentioned earlier, the range in which an incident code is being defined is extremely important.
+The listing below is intended to serve as a guideline on how to select custom incident codes: <br>
+<table>
+<caption>Common / Reserved Incident Code Ranges</caption>
+<tr><th width="120"><b>Range</b></th><th width="120"><b>Purpose</b></th><th><b>Notes</b></th></tr>
+<tr>
+<td><i>0</i></td><td>Spare</td>
+<td>Reserved. Unused incident code to avoid misconceptions in general.</td>
+</tr>
+<tr>
+<td><i>1 to 32767</i></td><td>FEP Core Reserved</td>
+<td>This range is exclusively reserved for internal assignment by the FEP Core mechanisms.
+Published incident codes for public use are documented in fep_incident_codes.h. Please note that
+some additional internal incident codes might not have been documented and are thus not intended to
+be used publicly. The only exception are the range of general incident codes which may be used
+universally: <br>
+| Incident                                  | Value  | Meaning                                      |
+|-------------------------------------------|--------|----------------------------------------------|
+|\ref FSI_GENERAL_WARNING                   | 3      | General warning                              |
+|\ref FSI_GENERAL_INFORMATION               | 4      | General information                          |
+|\ref FSI_GENERAL_CRITICAL_FAILURE          | 5      | Deprecated (kept for version compatibilty)   |
+|\ref FSI_GENERAL_CRITICAL_GLOBAL_FAILURE   | 5      | Deprecated (kept for version compatibilty)   |
+|\ref FSI_GENERAL_CRITICAL                  | 5      | General critical failure (global relevance)  |
+</td>
+</tr>
+<tr>
+<td><i>-1 to ~ -50</i></td><td>Build In Error Codes</td>
+<td>FEP comes with its own set of unspecific error codes (e.g. fep::ERR_NOERROR).  It *may* happen
+that these are being used or confused with FEP Incident Codes. At any time, these may be invoked
+explicitly by any user-implementation on the current FEP system or simply invoked undeliberately for
+any reason, however, it is beyond question that these error codes are likely to be used among most
+of the FEP developer and are therefore very likely to result in collision when used as incident
+code.</td>
+</tr>
+<tr>
+<td><i>-100 to -32768</i></td><td>User-defined incident codes</td>
+<td>This range can be used for any purposes. While custom incident codes are unique and well defined
+on a local scope of a FEP Participant, they have to be handled with caution on a global scope since
+they might have been intended for different purposes by one or more remote FEP Participants. When
+using these on a global scope, be sure to consider the context of the respective incident (e.g. the
+FEP Participant name, incident description) as well.</td>
+</tr>
+</table>
+
+<hr>
+
+\subsection subsec_default_handling Incident Handling - Strategy Configuration and Association
+
+While FEP promotes user-defined implementations of the \ref IIncidentStrategy interface, the
+framework provides several built-in incident handling strategies for the most common tasks. All
+included strategies are being configured through a FEP Participant's Property Tree and do not
+require any further implementation steps. <br>
+<br>
+FEP includes the following built-in FEP Incident Strategies: <br>
+
+- <b>Console Logging</b> : Regardless of the severity level, the FEP Console Log Strategy will dump
+  a string representation of the incident to <i>stdout</i>. This strategy is enabled by
+  default.<br>For details, see section \ref sec_console_log_strategy.
+- <b>File Logging</b> : File-dumping of invoked incidents, no matter the severity level. The FEP
+  File Log Strategy is disabled by default.<br>For details, see section \ref sec_file_log_strategy.
+- <b>History Logging</b> : Tracking and recording of all invoked incidents regardless of the
+  severity level. This strategy is intended for later processing and analyzing with reduced timing
+  impact on the critical path. The FEP Incident History is disabled by default.<br>For, details see
+  \ref sec_history_log_strategy.
+- <b>Notification Log</b> : Encapsulation of invoked incidents as FEP Notifications and propagation
+  thereof on the FEP bus for (optional) processing by remote FEP Participants. The FEP Notification
+  Log is disabled by default.<br>For, details see \ref sec_notif_log_strategy.
+
+Customized FEP Incident Strategies, by contrast, have to be implemented explicitly and are designed
+to provide additional flexibility by interacting directly with a specific FEP Participant (e.g.
+interaction with the FEP Participant's FEP State Machine). Customized strategies implement the \ref
+IIncidentStrategy interface.<br>
+Both, built-in strategies as well as customized strategies are being applied by associating them
+either to one or more specific incident codes or by associating them as so-called "Catch-All"
+strategies. As catch-all strategies they are being called upon all invoked incidents, regardless of
+the incident code. While user-defined strategies are associated with their interface reference, the
+built-in strategies as mentioned above are being associated by their respective type enumeration in
+\ref tIncidentStrategy. Association and configuration should be done during the FS_STARTUP phase:
+<br>
+
+\snippet snippet_incidents/snippet_incident_element.cpp ExtStrategyAssoc
+
+\warning
+Associations of individual FEP Incident Strategies and catch-all associations are not
+interchangeable! Individual association of a strategy in addition to registering this strategy as
+catch-all strategy will result in this strategy being called twice for the respective incident
+codes! Moreover, associations are always performed in a "white-listing" fashion. This means
+"blacklisting" an incident code by registering a strategy as catch-all and a subsequent
+disassociation thereof from a specific incident code will NOT work.
+<br>
+<hr>
+
+\subsection subsec_implementation Incident Handling - User-defined Implementations
+
+Implementing user-defined strategies e.g. for fails-safe / fail-silent use-cases should be done
+along with the component (e.g. FEP Participant, encapsulated classes, etc.) directly (same or
+accompanying *.cpp files). This way, readability and maintainability is assured since each component
+has its own strategies solely focused on its particular context, respective scope or functionality.
+It is therefore not recommended to implement incident resolving mechanisms for completely different
+components or purposes as part of any arbitrary FEP Participant. To illustrate this approach,
+consider the following example: <br>
+
+\image html incidenthandler_strategy_impl_doc.png
+
+<br>
+
+The setup above consists of several components, all hosted by a single FEP Participant. The FEP
+Participant's objective in this regard is to expose the fictional MMI application to other
+components within the FEP network. It is responsible for the data signals and control commands
+exchange as well as for hosting the FEP Property Tree and the FEP Incident Handler. Incidents local
+to the FEP Participant are processed by the FEP Participant itself by overloading the \ref
+cModule::HandleLocalIncident() callback. Components and implementations concerning the MMI
+application itself and the BAP/CAN communication features implement two dedicated FEP Incident
+Strategies. Assuming these implementations outside the FEP Participant are separate code files and
+are compiled into their own object library, the scope of target implementation and incident handling
+is well distinguished. The remaining relation to the FEP Participant is only necessary to have
+access to the FEP Transmission Layer to signal incidents (if necessary) as well as to use the FEP
+Property Tree.
+
+<br>
+<br>
+Definition of custom Incident codes (negative range):
+\snippet snippet_incidents/snippet_custom_incidents.h CustomIncidCodeDef
+Implementation in \ref cModule::HandleLocalIncident():
+\snippet snippet_incidents/snippet_incident_element.cpp HandleLocalIncident
+
+\par Implementing the IIncidentStrategy Interface
+FEP Incident Strategies that are implementing the \ref IIncidentStrategy interfaces are
+significantly more feature-rich. They can be configured through the FEP Participant's Property Tree.
+Implementation and configuration of custom FEP Incident Strategies is demonstrated by the example
+\ref page_fep_demo_incident_global.
+
+<br><br>
+Handling of FEP Incidents with the context of a \ref IModule, e.g. Incidents issued by 
+object local FEP Participants:
+\snippet snippet_incidents/snippet_incident_element.cpp HandleLocalIncidentExtStrategy
+<br>
+Handling of FEP Incidents with a global scope, issued by remote FEP Participants:
+\snippet snippet_incidents/snippet_incident_element.cpp HandleGlobalIncidentExtStrategy
+
+
+<hr>
+\subsection subsec_invoking_incident Incident Handling - Invoking an Incident
+
+Invoking incidents is straight forward and is generic no matter how the handling mechanism has been
+implemented. It has to be taken into account that each invoked incident is being supplied to
+<i>all</i> FEP Incident Strategies associated with the incident code being called. This includes
+user-implementations, third-party implementation from any derived base class (if applicable) and all
+built-in FEP Incident Strategies provided by the FEP framework. For details on how to configure,
+enable or disable the built-in strategies, refer to the sections below.
+
+In general, incident invocation is being illustrated by the following example:
+- \ref page_fep_demo_incident_global
+
+The snippet below uses generalized FEP Incident Codes in combination with their intended severity
+level. Invocation of FEP Incidents using the FEP Incident Handler is always synchronous. This means
+that \ref IIncidentHandler::InvokeIncident() does not return until all associated FEP Incident
+Strategies have processed the call. A notable exception is the FEP Notification Strategy. If enabled
+and associated with the invoked incident code, the call to \ref IIncidentHandler::InvokeIncident()
+is only synchronous as long as the FEP Message is being composed and transmitted. Remote handling of
+incidents outside the context of the current FEP Participant is always concurrent and will have no
+static impact on the local FEP Incident Handler.
+
+\snippet snippet_incidents/snippet_incident_element.cpp InvokingIncidents
+
+\warning
+Never invoke incidents in a FEP Incident Strategy which is registered as catch-all strategy! This
+will most probably lead to infinite recursive calls and a stack overflow. Likewise, it is not
+recommended to invoke incidents in individually associated strategies either.
+
+<hr>
+
+\subsection subsec_shipped_incidentcodes Incident Handling - Native Incident Codes
+
+All pre-defined incident codes used by the FEP framework are published through
+<i>fep_incident_codes.h</i>: <br>
+- \subpage page_aux_builtin_incidents
+
+<hr>
+
+\subsection subsec_extstrat_config Incident Handling - Configuration of IIncidentStrategy
+
+In general, FEP Incident Strategies are hosted by a FEP Participant but are intentionally designed
+to work as well independently form specific components. Similarly, \ref
+IIncidentStrategy::HandleLocalIncident() accepts an \ref IModule * reference as the current incident
+context \ref IIncidentStrategy::RefreshConfiguration() can be used to configure a custom strategy
+implementation regardless of the hosting FEP Participant or a prospective incident context.
+Interactive configuration is provided through \ref IIncidentStrategy::RefreshConfiguration().
+<br><br>
+
+\ref IIncidentStrategy::RefreshConfiguration() is optional and only required if a custom strategy is
+to be configured either by the developer himself (during compile-time) or later by the end-user
+during runtime: e.g. enabling or disabling a strategy. If a strategy should be configurable during
+runtime, the FEP Incident Handler requires to be aware of the "root" path a strategy is supposed to
+be using in the FEP Property Tree of the hosting FEP Participant:
+
+\snippet snippet_incidents/snippet_incident_element.cpp ExtStratAssocWithRoot
+
+With a given FEP Property Tree root path, the FEP Incident Handler is able to monitor changes on 
+this path and its subsequent branches and will notify associated FEP Incident Strategies 
+respectively. Analogously to the concept of \ref fep::IPropertyListener, the first 
+\ref fep::IProperty references the root path itself while the second one references the 
+actually affected property node:
+
+\snippet snippet_incidents/snippet_incident_element.cpp ConfigureIncidentExtStrategy
+
+<hr>
+<hr>
+
+\section sec_builtin_strategies Built-in FEP Incident Strategies
+
+FEP is shipped with a collection of built-in strategies for the most common tasks. These are not
+accessible directly through any interface class but are being used implicitly when incidents are
+invoked. The following sections deliver an overview of available configuration options provided on a
+per FEP Participant basis.
+
+\note
+For general documentation of configuration options for internal FEP components, including the FEP
+Incident Handler as well as the built-in strategies, please refer to the page \ref fep_configs.
+
+\warning
+Enabling any of these incident handling strategies may increase the processing time for each
+received sample. Thus it is advised to disable incident handling in cases of high sample rates.
+
+<hr>
+\subsection sec_console_log_strategy Console Log Strategy
+
+This basic strategy covers standard IO logging to stdout and stderr, depending on the severity
+level. SL_Critical_Local and SL_Critical_Global are redirected to stderr while the remaining
+severity levels are logged to stdout.<br>
+
+The log output is formatted as follows:
+\code
+[<date> - <time>]: <elementname>@<hostname> ST: <simulationtime>[us] <OriginComponent> <Info|Warning|Critical> <incident code>: <Message>
+\endcode
+E.g.:
+\code
+[21.04.2015 - 14:24:12]: MyElement@THEHOSTNAME0815  ST: 60[us]  [StateMachine] Info 15: My custom info is here!
+\endcode
+In case of a debug build the OriginComponent is followed by line and file of the incident invokation: [\<OriginComponent\> (\<file\>:\<line\>)].
+
+<br>
+
+<table>
+<caption>Strategy Configuration Options</caption>
+<tr><th width="200"><b>Property</b></th><th><b>Type</b></th><th><b>Description</b></th><th><b>
+Default</b></th></tr>
+<tr>
+<td><i>ComponentConfig.sIncidentHandler.sConsoleLog.bEnable</i></td><td>tBool</td>
+<td>Switch to completely enable or disable the FEP Console Log Strategy completely.</td>
+<td>tTrue</td>
+</tr>
+<tr>
+<td><i>ComponentConfig.sIncidentHandler.sConsoleLog.bEnableCatchAll</i></td><td>tBool</td>
+<td>Enables the "catch-all" mode of the FEP Console Log Strategy allowing it to capture <b>all</b> 
+encountered incidents and severity levels.</td>
+
+<td>tTrue</td>
+</tr>
+</table>
+Code Example:
+\snippet snippet_incidents/snippet_incident_element.cpp ConsoleLogConfig
+
+<hr>
+
+\subsection sec_notif_log_strategy Notification Log Strategy
+
+The FEP Notification Log Strategy enables a FEP Participant either to propagate encountered
+incidents globally within the FEP %System or to transmit these directly to a remote FEP Participant
+specifically (e.g. a master FEP Participant or a test automation FEP Participant).
+
+\note
+This strategy has to be enabled if remote FEP Participants are configured (and expected) to handle
+incidents issued by the current FEP Participant. 
+
+\note
+If disabled, this strategy will <b>nevertheless</b> transmit encountered incidents if these are
+indicated to be of a 'SL_Critical' severity level! To suppress this behavior, the FEP Incident
+Handler has to be entirely disabled.
+
+\note
+Since this strategy is directly dependant on the FEP transmission layer it will ignore invoked
+incidents with code \ref FSI_TRANSM_MSG_TX_FAILED.
+
+<table>
+<caption>Strategy Configuration Options</caption>
+<tr><th width="200"><b>Property</b></th><th><b>Type</b></th><th><b>Description</b></th><th><b>
+Default</b></th></tr>
+<tr>
+<td><i>ComponentConfig.sIncidentHandler.sIncidentNotification.bEnable</i></td><td>tBool</td>
+<td>Switch to enable or disable the FEP Notification Log Strategy completely.</td>
+<td>tFalse</td>
+</tr>
+<tr>
+<td><i>ComponentConfig.sIncidentHandler.sIncidentNotification.bEnableCatchAll</i></td><td>tBool</td>
+<td>Enables the "catch-all" mode of the FEP Notification Log Strategy allowing it to capture <b>all
+</b> encountered incidents and severity levels.</td>
+<td>tFalse</td>
+</tr>
+<tr>
+<td><i>ComponentConfig.sIncidentHandler.sIncidentNotification.strTarget</i></td><td>tChar*</td>
+<td>Setting this to a specific FEP Participant's name enables directed notification logging and
+limits reporting to the named FEP Participant only. Please note that the FEP Participants does not
+perform steps to verify whether the configured FEP Participant is actually reachable.</td>
+<td>"*"</td>
+</tr>
+</table>
+Code Example:
+\snippet snippet_incidents/snippet_incident_element.cpp NotifLogConfig
+
+<hr>
+\subsection sec_history_log_strategy History Log Strategy
+
+The FEP Incident History Strategy is primarily intended to be used as an alternative to the FEP
+Console Log Strategy in order to circumvent real-time compliance issues. Encountered incident
+description are being trimmed in their absolute length (max. 512 characters, see \ref
+ENTRY_MESSAGE_LENGTH) and cached in pre-allocated memory. Only a fixed number of entries is
+available during runtime. If the maximum capacity is exceeded the oldest entries are being dropped
+(FIFO).<br>
+
+To retrieve recorded history, the FEP Incident Handler provides two options: <br>
+
+\snippet snippet_incidents/snippet_incident_element.cpp HistoryStratGetLastError
+
+This allows to <i>"peek"</i> into the last recorded incident. Using this method does not interfere
+with ongoing recording of incidents and does not dequeue the accessed history entry.
+
+\warning This method is <b>NOT</b> multi-thread safe!
+
+\snippet snippet_incidents/snippet_incident_element.cpp HistoryStratRetrieveHistory
+
+The second approach above performs a full lock on the entire set of recorded incidents up until this
+point. Access is provided through <i>Begin</i> and <i>End</i> STL iterators. While keeping a lock on
+the history, ongoing recording of incidents is not affected. However, meanwhile recorded entries are
+not accessible through the retrieved iterators. Each call to \ref
+IIncidentHandler::RetrieveIncidentHistory() has to be terminated by \ref
+IIncidentHandler::FreeIncidentHistory(), effectively dequeuing the just processed list of incidents
+and freeing the used-up slots of the incident history strategy.
+
+\note This method is multi-thread safe.
+
+<table>
+<caption>Strategy Configuration Options</caption>
+<tr><th width="200"><b>Property</b></th><th><b>Type</b></th><th><b>Description</b></th><th><b>
+Default</b></th></tr>
+<tr>
+<td><i>ComponentConfig.sIncidentHandler.sIncidentHistory.bEnable</i></td><td>tBool</td>
+<td>Switch to enable or disable the FEP History Log Strategy completely.</td>
+<td>tFalse</td>
+</tr>
+<tr>
+<td><i>ComponentConfig.sIncidentHandler.sIncidentHistory.bEnableCatchAll</i></td><td>tBool</td>
+<td>Enables the "catch-all" mode of the FEP History Log Strategy allowing it to capture <b>all</b> 
+encountered incidents and severity levels.</td>
+<td>tFalse</td>
+</tr>
+<tr>
+<td><i>ComponentConfig.sIncidentHandler.sIncidentHistory.nBufferSize</i></td><td>tFloat</td>
+<td>The number of slots available for recording FEP Incidents. Changing this will have immediate 
+effect and is therefore to be avoided during state FS_RUNNING!</td>
+<td>500.0</td>
+</tr>
+</table>
+Code Example:
+\snippet snippet_incidents/snippet_incident_element.cpp HistoryLogConfig
+
+<hr>
+\subsection sec_file_log_strategy File Log Strategy
+
+The FEP File Log Strategy redirects and dumps all encountered incidents into a log file.
+
+By default, the output is formatted as follows
+\code
+[<date> - <time>]: <elementname>@<hostname> ST: <simulationtime>[us] <OriginComponent> <Info|Warning|Critical> <incident code>: <Message>
+\endcode
+E.g.:
+\code
+[21.04.2015 - 14:24:12]: MyElement@THEHOSTNAME0815  ST: 60[us]  [StateMachine] Info 15: My custom info is here!
+\endcode
+In case of a debug build the OriginComponent is followed by line and file of the incident invokation: [\<OriginComponent\> (\<file\>:\<line\>)].
+
+If CSV format is selected, the output files yield
+\code
+<date>,<time>,<hostname>,<simulationtime>,<OriginComponent>,<elementname>,<Info|Warning|Critical>,<incident code>,<Message>
+\endcode
+E.g.:
+\code
+21.04.2015,14:24:12,60,StateMachine,THEHOSTNAME0815,MyElement,Critical,50,My custom error is here!
+\endcode
+In case of a debug build the OriginComponent is followed by line and file of the incident invokation: \<OriginComponent\>,\<file\>,\<line\>.
+
+<br>
+
+<table>
+<caption>Strategy Configuration Options</caption>
+<tr><th width="200"><b>Property</b></th><th><b>Type</b></th><th><b>Description</b></th><th><b>
+Default</b></th></tr>
+<tr>
+<td><i>ComponentConfig.sIncidentHandler.sFileLog.bEnable</i></td><td>tBool</td>
+<td>Switch to enable or disable the FEP File Log Strategy completely.</td>
+<td>tFalse</td>
+</tr>
+<tr>
+<td><i>ComponentConfig.sIncidentHandler.sFileLog.bEnableCSV</i></td><td>tBool</td>
+<td>Switch to switch the output to the CSV format. By default, the format is as used by the Console Log. </td>
+<td>tFalse</td>
+</tr>
+<tr>
+<td><i>ComponentConfig.sIncidentHandler.sFileLog.bEnableCatchAll</i></td><td>tBool</td>
+<td>Enables the "catch-all" mode of the FEP File Log Strategy allowing it to capture <b>all</b> 
+encountered incidents and severity levels.</td>
+<td>tFalse</td>
+</tr>
+<tr>
+<td><i>ComponentConfig.sIncidentHandler.sFileLog.strPath</i></td><td>tChar*</td>
+<td>Absolute or relative path to a log file. The file is being created if it does not exist. 
+Please note that a valid path <b>must</b> have been specified <b>before</b> this strategy is set 
+active! </td>
+<td>""</td>
+</tr>
+<tr>
+<td><i>ComponentConfig.sIncidentHandler.sFileLog.bOverwriteExisting</i></td><td>tBool</td>
+<td>Switch whether existing log files should be overwritten. If this option is set to false, all 
+encountered incidents are being appended when enabling this strategy.</td>
+<td>tFalse</td>
+</tr>
+</table>
+Code Example:
+\snippet snippet_incidents/snippet_incident_element.cpp FileLogConfig
+
+*/
+
+
+/**
+\page page_aux_builtin_incidents FEP Native Incident Codes
+
+The FEP Framework incorporates a variety of pre-defined incident codes to provide means of
+interfacing with internal functionality (e.g. the transmission layer; the distributed data buffer,
+etc.). This allows for more comprehensive error handling in user implementations. Currently, the
+following incident codes are supported:
+
+\include incident_handler/fep_incident_codes.h
+
+*/
+}

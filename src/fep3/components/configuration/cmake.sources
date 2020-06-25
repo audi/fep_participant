@@ -1,0 +1,46 @@
+#
+# Copyright @ 2019 Audi AG. All rights reserved.
+# 
+#     This Source Code Form is subject to the terms of the Mozilla
+#     Public License, v. 2.0. If a copy of the MPL was not distributed
+#     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+# 
+# If it is not possible or desirable to put the notice in a particular file, then
+# You may include the notice in a location (such as a LICENSE file in a
+# relevant directory) where a recipient would be likely to look for such a notice.
+# 
+# You may add additional accurate notices of copyright ownership.
+#
+# subtle difference: on unix the command silently fails if the output directory does not exist...
+file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/configuration)
+
+jsonrpc_generate_server_stub(${PROJECT_SOURCE_DIR}/include/fep3/rpc_components/configuration/configuration.json
+                             fep::rpc_stubs::RPCConfigurationServer
+                             ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/configuration/configuration_service.h)
+jsonrpc_generate_client_stub(${PROJECT_SOURCE_DIR}/include/fep3/rpc_components/configuration/configuration.json
+                             fep::rpc_stubs::RPCConfigurationClient
+                             ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/configuration/configuration_service_client.h)
+
+set(CONFIGURATION_RPC_SOURCES_PUBLIC ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/configuration/configuration_service.h
+                         ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/configuration/configuration_service_client.h
+                         ${PROJECT_SOURCE_DIR}/include/fep3/rpc_components/configuration/configuration.json
+
+                         ${PROJECT_SOURCE_DIR}/include/fep3/rpc_components/configuration/configuration_rpc_intf_def.h)
+
+set(CONFIGURATION_SOURCES_PRIVATE
+    ${PROJECT_SOURCE_DIR}/include/fep3/base/properties/property_type.h
+    ${PROJECT_SOURCE_DIR}/include/fep3/base/properties/property_type_conversion.h
+    ${PROJECT_SOURCE_DIR}/include/fep3/base/properties/properties.h
+    ${PROJECT_SOURCE_DIR}/include/fep3/base/properties/properties_intf.h
+)
+
+install(FILES
+        ${CONFIGURATION_RPC_SOURCES_PUBLIC}
+        DESTINATION include/fep3/rpc_components/configuration
+)
+
+set(CONFIGURATION_SOURCES ${CONFIGURATION_SOURCES_PUBLIC} ${CONFIGURATION_RPC_SOURCES_PUBLIC} ${CONFIGURATION_SOURCES_PRIVATE})
+
+source_group(components\\configuration\\public FILES     ${CONFIGURATION_SOURCES_PUBLIC})
+source_group(components\\configuration\\public_rpc FILES ${CONFIGURATION_RPC_SOURCES_PUBLIC})
+source_group(components\\configuration FILES ${CONFIGURATION_SOURCES_PRIVATE})

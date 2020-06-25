@@ -1,0 +1,120 @@
+/**
+ *
+ * This file describes the usage of the signal registry functionality.
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+
+namespace fep
+{
+
+/**
+\page fep_signal_registry FEP Signal Registry
+
+The signal registry component handles the registration of FEP Signals as well as the management of
+any datatypes involved. Its main interface is \ref ISignalRegistry and can be accessed using \ref
+IModule::GetSignalRegistry.
+
+\section sec_signal_description Signal descriptions and datatypes (DDL)
+
+Before any signals can be registered using \ref ISignalRegistry::RegisterSignal, all datatypes
+involved need to be known to the signal registry. Datatype registration is done using \ref
+ISignalRegistry::RegisterSignalDescription, where whole or partial DDL descriptions can be
+registered. Upon successful registration, all contained datatypes become available for signals to
+use.
+
+See \ref page_ddl_specification for further details on DDL.
+
+There are two common ways if you want to register a data description file.
+\li Using the \ref AutomationInterface "Automation Interface", in particular 
+\ref AutomationInterface::RegisterSignalDescription, 
+datatypes can be registered remotely in other FEP Participants.
+\li Using the \ref fep::IPropertyTree "Property Tree", in particular by using the path 
+"ComponentConfig.Description.strRemoteDescriptionPath" it is possible to register a 
+description file. You can also set multiple configuration files, 
+separated by the delimiters ";" and ",". Already registered configurations can be cleared 
+when the property is set to an empty string ("").
+
+\warning Usage of \ref AutomationInterface::RegisterSignalDescription and description configurations
+through \ref fep::IPropertyTree together is _NOT_ supported and results in undefined behavior.
+
+\note Upon any unsuccessful signal description registration attempt, an incident (\ref
+fep::FSI_SIGNAL_DESCRIPTION_INVALID) will be raised with a detailed error description.
+
+\section sec_signal_registration Registering FEP Signals
+
+Actual signal registration is done by \ref ISignalRegistry::RegisterSignal during state
+FS_INITIALIZING. The signal datatype specified during the call must be known to the signal registry
+(see \ref sec_signal_description). Information about registered signals can be found in the
+property sub tree with root nodes "ComponentConfig.SignalRegistry.RegisteredInputSignals" and
+"ComponentConfig.SignalRegistry.RegisteredOutputSignals" for input and output signals, respectively.
+
+\section fep_UserSignalOptions The cUserSignalOptions Class
+
+With the help of the cUserSignalOptions class, a signal is specified before it's registration. The
+class has two constructors one for RAW-Signals cUserSignalOptions("SignalName", SD_Input|SD_Output)
+and another one for creating DDL serialized options
+cUserSignalOptions("SignalName",SD_Input|SD_Output, "SignalType").  Both constrctors share the
+first two arguments, the name and respectively the signal direction. The constructor for the DDL
+serialized signal has the signal type as it's third argument. Options created for a RAW signal can
+be made DDL signal options with \ref cUserSignalOptions::SetSignalType. On the otherhand options
+created for a DDL serialized signal can be made a RAW signal by \ref
+cUserSignalOptions::SetSignalRaw. For an overview over all methods of this class refere to its class
+documentation which is found \ref fep::cUserSignalOptions "here".
+
+The cUserSignalOptions-Class also provides access to Quality of Service settings for the
+transmission. Currently the only QoS setting supported by all drivers concerns the reliability of
+the signal transmission. By default, signals are sent in best-effort mode. If a reliable (but
+usually less performant) transmission is required, the signal option should be configured for
+reliability by calling \ref cUserSignalOptions::SetReliability "SetReliability(true)". Not all QoS
+settings are necessarily supported by all drivers. The API for setting these QoS settings is
+documented \ref cUserSignalOptions "here". To see what each driver supports, have a look at the
+driver documentation \ref fep_transmission_driver "here". If QoS settings are activated that are not
+supported by the selected driver, the call to RegisterSignal will fail with the error code
+ERR_NOT_SUPPORTED. The changes made to the cUserSignalOptions object are taken into account until
+the signal is registered by calling GetSignalRegistry()->RegisterSignal(cUserSignalOptions
+&oUserSignalOptions, handle_t hHandle).
+
+
+\note
+Only structured datatypes (DDL Structs) are usable as signal datatype in FEP (This only affects DDL
+serialized samples).
+
+\warning While signal registration is possible during state FS_STARTUP and FS_IDLE, it is advised to
+register signals during state FS_INITIALIZING for uniform behavior of FEP Participants in a system.
+Signal registration during state FS_READY and FS_RUNNING is not possible and will fail.
+
+\subsection sub_sec_user_signal_options Signalregistration via UserSignalOptions
+
+The \ref ISignalRegistry::RegisterSignal method has one input and one output argument. The signal
+handle will be set during signal registration. The input parameter is an instance of a \ref
+cUserSignalOptions object. This class has two constructors one for DDL described singals and one for
+raw signals. Further more the class has methods to set Quality of Service (QoS) settings.
+Currently only a reliability option is provided. Be aware that not all transmission drivers support
+every QoS-setting. Reliability is supported by both drivers: \ref TX_RTI_DDS "RTI_DDS" and \ref
+TX_ZMQ_ZYRE "ZMQ".
+
+\section sec_signal_backlog Signal Backlog
+
+\ref IUserDataAccess manages a sample backlog for every signal, to make it possible to access signal
+samples based on time using \ref IUserDataAccess::LockDataAt. The default length of this sample
+buffer is 1, meaning only the latest sample can be accessed.
+
+Since the backlog is a configuration property of every registered input signal, it can be configured
+using ISignalRegistry::SetSignalSampleBacklog and accessed using \ref
+ISignalRegistry::GetSignalSampleBacklog at any time.
+
+*/
+}

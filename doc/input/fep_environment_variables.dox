@@ -1,0 +1,47 @@
+//
+// Copyright @ 2019 Audi AG. All rights reserved.
+// 
+//     This Source Code Form is subject to the terms of the Mozilla
+//     Public License, v. 2.0. If a copy of the MPL was not distributed
+//     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+// 
+// If it is not possible or desirable to put the notice in a particular file, then
+// You may include the notice in a location (such as a LICENSE file in a
+// relevant directory) where a recipient would be likely to look for such a notice.
+// 
+// You may add additional accurate notices of copyright ownership.
+//
+namespace fep
+{ /**
+
+\page fep_env_variable_configuration Environment Variables
+----------------------------------------------------------------------------------------------------
+
+Environment variables are automatically used. There is no need for code changes.
+As of now, the following environment variables are available:
+    - `FEP_MODULE_DOMAIN` to set the domain id
+    - `FEP_TRANSMISSION_DRIVER` to select the transmission driver to be used
+    - `FEP_NETWORK_INTERFACE` to select the network interfaces to be used
+
+On MS Windows, these could be defined on the command line as:
+\code{.sh}
+set FEP_MODULE_DOMAIN=42
+set FEP_TRANSMISSION_DRIVER=RTI_DDS
+set FEP_NETWORK_INTERFACE=127.0.0.1,eth0
+\endcode
+On Linux using bash-Shell, the definition would look like:
+\code{.sh}
+export FEP_MODULE_DOMAIN=42
+export FEP_TRANSMISSION_DRIVER=RTI_DDS
+export FEP_NETWORK_INTERFACE=127.0.0.1
+\endcode
+
+Valid settings for the environment variables are:
+    - `FEP_TRANSMISSION_DRIVER`: "RTI_DDS" (\ref TX_RTI_DDS "RTI DDS") or "ZMQ" (\ref TX_ZMQ_ZYRE "Zyre/ZMQ")
+    - `FEP_MODULE_DOMAIN`: The valid range for the domain id is dependant on the transmission
+       adapter. The minimum value is zero. The maximum value is adapter specific. For the "RTI_DDS"
+       transmission driver, valid values are integer in the range 0 to 232 (see also \ref fep_capabilities).
+    - `FEP_NETWORK_INTERFACE`: there are many options to set the network interfaces, like using
+       the IP-address of the network interface, IP-address ranges, an IP-address string with wildcards,
+       a hostname or a network interface name. Multiple interfaces can be seperated by commas.
+*/}

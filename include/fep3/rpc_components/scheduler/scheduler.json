@@ -1,0 +1,55 @@
+[
+  // returns a comma seperated list of all registered clocks
+  {
+    "name": "getSchedulers",
+    "returns": "name1,name2"
+  },
+
+  // returns the name of the current configured clock
+  {
+    "name": "getCurrentScheduler",
+    "returns": "name1"
+  },
+
+  // return the time in micro sec for the given clock
+  // if clock_name is empty it will return the time of the current getCurrentClock
+  {
+    "name": "getJobs",
+    "returns": "name1,name2"
+  },
+
+  // return the time in micro sec for the given clock
+  // if clock_name is empty it will return the time of the current getCurrentClock
+  {
+    "name": "getJobInfo",
+    "params": {
+      "job_name": "name1"
+    },
+    "returns": {
+        "job_kind" : "job_info_value"
+      }
+    },
+
+  // return the time in micro sec for the given clock
+  // if clock_name is empty it will return the time of the current getCurrentClock
+  {
+    "name": "getTasks",
+    "params": {
+      "scheduler_name": "name1"
+    },
+    "returns": "name1,name2"
+  },
+
+  // return the time in micro sec for the given clock
+  // if clock_name is empty it will return the time of the current getCurrentClock
+  {
+    "name": "getTaskInfo",
+    "params": {
+      "scheduler_name": "schedulername",
+      "task_name": "taskname"
+    },
+    "returns": {
+        "task_kind" : "job_info_values"
+      }
+  }
+]

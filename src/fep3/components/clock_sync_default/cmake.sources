@@ -1,0 +1,28 @@
+#
+# Copyright @ 2019 Audi AG. All rights reserved.
+# 
+#     This Source Code Form is subject to the terms of the Mozilla
+#     Public License, v. 2.0. If a copy of the MPL was not distributed
+#     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+# 
+# If it is not possible or desirable to put the notice in a particular file, then
+# You may include the notice in a location (such as a LICENSE file in a
+# relevant directory) where a recipient would be likely to look for such a notice.
+# 
+# You may add additional accurate notices of copyright ownership.
+#
+set(CLOCK_SYNC_SOURCES_PUBLIC )
+
+set(CLOCK_SYNC_SOURCES_PRIVATE
+    fep3/components/clock_sync_default/clock_sync_service.cpp
+    fep3/components/clock_sync_default/clock_sync_service.h
+    fep3/components/clock_sync_default/interpolation_time.cpp
+    fep3/components/clock_sync_default/interpolation_time.h
+
+    fep3/components/clock_sync_default/master_on_demand_clock_client.cpp
+    fep3/components/clock_sync_default/master_on_demand_clock_client.h
+)
+
+set(COMPONENTS_CLOCK_SYNC_SOURCES ${CLOCK_SYNC_SOURCES_PUBLIC} ${CLOCK_SYNC_SOURCES_PRIVATE})
+
+source_group(components\\clock_sync_default FILES ${COMPONENTS_CLOCK_SYNC_SOURCES})

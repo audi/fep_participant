@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<property_file xmlns="fep/xsd/properties">
+    <schema_version>1.0.0</schema_version>
+    <properties>
+        <property>
+            <name>TimingConfig</name>
+            <value>timing_configurations/strict_timing_config.xml</value>
+            <type>string</type>
+        </property>
+    </properties>
+</property_file>

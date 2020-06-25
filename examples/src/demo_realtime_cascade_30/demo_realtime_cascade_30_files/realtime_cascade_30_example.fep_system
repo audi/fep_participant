@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<system xmlns="fep/xsd/system">
+    <schema_version>1.0.0</schema_version>
+    <description>FEP SDK realtime cascade 30 example system</description>
+    <version>2.1.0</version>
+    <contact>aev.support@audi.de</contact>
+    <properties>
+    </properties>
+    <elements>
+        <element>
+            <name>TimingMaster30</name>
+            <type>TimingMaster</type>
+            <type_version>2.1.0</type_version>
+            <interface_properties />
+            <requirement_resolutions>
+                <requirement_resolution>
+                    <requirement>FEP_TimingMaster</requirement>
+                    <resolution>TimingMaster30</resolution>
+                </requirement_resolution>
+            </requirement_resolutions>
+        </element>
+        <element>
+            <name>Starter30</name>
+            <type>Starter</type>
+            <type_version>2.1.0</type_version>
+            <interface_properties>
+            </interface_properties>
+            <requirement_resolutions>
+                <requirement_resolution>
+                    <requirement>FEP_TimingMaster</requirement>
+                    <resolution>TimingMaster30</resolution>
+                </requirement_resolution>
+            </requirement_resolutions>
+        </element>
+        
+        <!-- the following part should be done be done by a Code Generator -->
+        <element>
+            <name>Transmitter30_1</name>
+            <type>Transmitter_1</type>
+            <type_version>2.1.0</type_version>
+            <interface_properties>
+            </interface_properties>
+            <requirement_resolutions>
+                <requirement_resolution>
+                    <requirement>FEP_TimingMaster</requirement>
+                    <resolution>TimingMaster30</resolution>
+                </requirement_resolution>
+            </requirement_resolutions>
+        </element>
+
+        <element>
+            <name>Transmitter30_2</name>
+            <type>Transmitter_2</type>
+            <type_version>2.1.0</type_version>
+            <interface_properties>
+            </interface_properties>
+            <requirement_resolutions>
+                <requirement_resolution>
+                    <requirement>FEP_TimingMaster</requirement>
+                    <resolution>TimingMaster30</resolution>
+                </requirement_resolution>
+            </requirement_resolutions>
+        </element>
+        
+        <element>
+            <name>Transmitter30_3</name>
+            <type>Transmitter_3</type>
+            <type_version>2.1.0</type_version>
+            <interface_properties>
+            </interface_properties>
+            <requirement_resolutions>
+                <requirement_resolution>
+                    <requirement>FEP_TimingMaster</requirement>
+                    <resolution>TimingMaster30</resolution>
+                </requirement_resolution>
+            </requirement_resolutions>
+        </element>        
+    </elements>
+</system>

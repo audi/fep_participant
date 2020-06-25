@@ -1,0 +1,8 @@
+module fep {
+    module transmission {
+        const long MESSAGE_STRING_LENGTH = 1048576;
+        struct tMessage{
+            string<MESSAGE_STRING_LENGTH> strMessageContent;
+        };
+    };
+};

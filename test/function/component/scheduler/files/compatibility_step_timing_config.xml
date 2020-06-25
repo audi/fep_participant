@@ -1,0 +1,36 @@
+<!--
+  Copyright @ 2019 Audi AG. All rights reserved.
+  
+      This Source Code Form is subject to the terms of the Mozilla
+      Public License, v. 2.0. If a copy of the MPL was not distributed
+      with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+  
+  If it is not possible or desirable to put the notice in a particular file, then
+  You may include the notice in a location (such as a LICENSE file in a
+  relevant directory) where a recipient would be likely to look for such a notice.
+  
+  You may add additional accurate notices of copyright ownership.
+  -->
+<?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
+<timing xmlns:timing="timing">
+ <header>
+  <author>AUDI AG</author>
+  <date_creation>16.01.2020</date_creation>
+  <date_change>16.01.2020</date_change>
+  <description>Timing Configuratuion for Compatibility Step Test</description>
+ </header>
+ <participants>
+    <participant name="ReceiverModule">
+        <steps>
+            <step name="ReceiveDataStep" cycleTime_sim_us="100" maxRuntime_us="99999" maxInputWaittime_us="10000" runtimeViolationStrategy="TS_IGNORE_RUNTIME_VIOLATION">
+                <inputs>
+                    <input name="SampleSignal" validAge_sim_us="100000" delay_sim_us="0" inputViolationStrategy="IS_IGNORE_INPUT_VALIDITY_VIOLATION" />
+                </inputs> 
+            </step>
+        </steps>
+        <inputs>
+            <input name="SampleSignal" backLogSize="10" />
+        </inputs>
+    </participant>
+ </participants>
+</timing>

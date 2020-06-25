@@ -1,0 +1,318 @@
+/**
+ *
+ * This file describes the compatibility of various FEP SDK 2.X.X minor versions.
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+
+
+namespace fep
+{ /**
+\page fep_compatibility FEP Compatibility
+
+This page describes:
+- An overview of the compatibility of different FEP SDK Versions (@ref fep_compatibility_table)
+- More detailed information about some compatibility constellations (@ref version_compatibilities)
+- The @ref compatibility_mode (introduced in FEP SDK 2.6.0)
+
+
+\section fep_compatibility_table Compatibility Overview
+
+FEP SDK 2.x.y minor versions are designed to be compatible with each other.
+
+We divide between various different kinds of compatibility:
+
+- \b Code \b compatibility
+    The code written for a FEP SDK 2.x.y version will immediately compile against FEP SDK version 2.(x+1).y and any further releases of this minor version. Any code incompatibility will be published by setting the specified API as deprecated.
+- \b Bus \b compatibility
+    Service bus commands sent with FEP SDK version 2.x.y will be understood by all participants compiled against FEP SDK version 2.(x+1).y and any further releases of this major version. Any data sent on the simulation bus with FEP SDK version 2.x.y will be understood by all participants compiled against FEP SDK version 2.(x+1).y and any further releases of this major version.
+- \b Behaviour \b compatibility
+    A functionality and therefore some behaviour may not be compatible. Features introduced with FEP SDK version 2.x.y might not be available for systems where a FEP SDK version 2.(x-1).y participant is used, or this participant may not use the feature.
+
+The following table shows an overview of the compatibility of various FEP SDK 2.x.y minor versions regarding the \b Timing \b API - \b behaviour \b compatibility.
+
+\remark
+This table does \b not provide any information regarding \b code \b compatibility or \b bus \b compatibility.
+
+<table>
+    <tr>
+        <th>FEP SDK Version</th>
+        <th>2.0.0</th>
+        <th>2.0.1</th>
+        <th>2.1.0</th>
+        <th>2.2.0</th>
+        <th>2.3.0</th>
+        <th>2.4.0</th>
+        <th>2.4.1</th>
+        <th>2.5.1</th>
+        <th>2.6.0</th>
+    </tr>
+    <tr>
+        <th>2.0.0</th>
+        <td>+</td>
+        <td>+</td>
+        <td>+</td>
+        <td>+</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>+ (cm)</td>
+    </tr>
+    <tr>
+        <th>2.0.1</th>
+        <td>+</td>
+        <td>+</td>
+        <td>+</td>
+        <td>+</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>+ (cm)</td>
+    </tr>
+    <tr>
+        <th>2.1.0</th>
+        <td>+</td>
+        <td>+</td>
+        <td>+</td>
+        <td>+</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>+ (cm)</td>
+    </tr>
+    <tr>
+        <th>2.2.0</th>
+        <td>+</td>
+        <td>+</td>
+        <td>+</td>
+        <td>+</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>+ (cm)</td>
+    </tr>
+    <tr>
+        <th>2.3.0</th>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>+</td>
+        <td>+</td>
+        <td>+</td>
+        <td>+</td>
+        <td>+</td>
+    </tr>
+    <tr>
+        <th>2.4.0</th>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>+</td>
+        <td>+</td>
+        <td>+</td>
+        <td>+</td>
+        <td>+</td>
+    </tr>
+    <tr>
+        <th>2.4.1</th>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>+</td>
+        <td>+</td>
+        <td>+</td>
+        <td>+</td>
+        <td>+</td>
+    </tr>
+    <tr>
+        <th>2.5.1</th>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>+</td>
+        <td>+</td>
+        <td>+</td>
+        <td>+</td>
+        <td>+</td>
+    </tr>
+    <tr>
+        <th>2.6.0</th>
+        <td>+ (cm)</td>
+        <td>+ (cm)</td>
+        <td>+ (cm)</td>
+        <td>+ (cm)</td>
+        <td>+</td>
+        <td>+</td>
+        <td>+</td>
+        <td>+</td>
+        <td>+</td>
+    </tr>
+</table>
+
+\remark
+Combinations of FEP SDK versions labelled with '+ (cm)' may not be compatible by default but support the
+@ref compatibility_mode. 
+
+\warning
+Combinations of FEP SDK versions labelled with '-' are not compatible regarding data exchange using the Timing API (see @ref fep_sdk_220_fep_sdk_230_251).
+
+\section version_compatibilities Compatibility Details
+
+The following section lists some relevant combinations.
+
+\subsection not_compatible Not compatible
+
+\subsubsection fep_sdk_220_fep_sdk_230_251 FEP SDK version 2.2.0 (and earlier) and FEP SDK version from version 2.3.0 to FEP SDK 2.5.1
+
+FEP SDK version 2.3.0 introduced a new Timing (see @ref page_fep_timing_3) and changed some details regarding data exchange when using a Timing API.
+
+Starting with FEP SDK version 2.3.0 participants may be used with either the Legacy Timing (see @ref fep_timing_20_default_configuration)
+used by FEP SDK 2.2.0 and earlier versions or the @ref page_fep_timing_3.
+
+\subsection bit_compatible Compatible with correct configuration
+
+\subsubsection fep_sdk_220_fep_sdk_230 FEP SDK version 2.2.0 (and earlier) and FEP SDK version 2.6.0
+
+This combination behaves the same as the combination @ref fep_sdk_220_fep_sdk_230_251
+but additionally offers the @ref compatibility_mode functionality to switch between
+@ref fep_sdk_220_behaviour and @ref fep_sdk_230_behaviour.
+
+\subsection fully_compatible Fully compatible
+
+\subsubsection fep_sdk_230_fep_sdk_241 FEP SDK version 2.3.0 and later
+
+From FEP SDK version 2.3.0 on, participants are completely compatible when using the same Timing.
+
+@remark To utilize participants using FEP Legacy Timing and participants using @ref page_fep_timing_3
+in the same FEP system, matching signals must have the same backlog size.
+Please have a look at @ref fep_timing_2 for further information on how to use a timing configuration
+file to configure the appropriate property.
+
+\subsubsection fep_sdk_220_and_earlier FEP SDK version 2.2.0 and earlier
+
+Participants using FEP SDK version 2.2.0 (and earlier) are fully compatible.
+
+
+
+\section compatibility_mode Compatibility Mode
+
+FEP SDK version 2.2.0 (and earlier) behaves different compared to FEP SDK version 2.3.0 (and later) regarding data exchange when using a Timing API.
+This issue is addressed by this @ref compatibility_mode. The differences are regarding transmission and availability of samples at a receiver when using one of the Timing APIs (see @ref fep_step_listener or @ref scheduler_service_registration).
+
+The compatibility mode allows to switch between both behaviours for FEP SDK version 2.6.0 by setting the FEP property \ref FEP_SCHEDULERSERVICE_FEP22_COMPATIBILITY_MODE_ENABLED
+for a participant.
+
+@remark The compatibility mode can only be used in combination with the @ref fep::Job class
+or a class which is derived from @ref fep::Job. An incident is thrown if
+an incompatible class is used in combination with the compatibility mode.
+
+@remark The compatibility mode is only available for FEP SDK version 2.
+The compatibility mode won't be part of FEP SDK 3.
+
+\subsection fep_sdk_230_behaviour Behaviour FEP SDK 2.3.0 (and later)
+
+FEP SDK version 2.3.0 (and later) uses the current simulation time as timestamp for samples to be published.
+This represents the behaviour of FEP SDK version 2.6.0 if compatibility mode is disabled (default mode).
+
+With this behaviour a receiving @ref fep::Job or StepListener (see @ref fep::ITiming::RegisterStepListener) expects samples with a timestamp which is older than the current
+simulation time. Received samples with a timestamp which is newer than or equal to the current simulation
+time, are not considered relevant for the current simulation step and are therefore not available for
+processing. Samples with a timestamp older than the current simulation time are considered
+relevant and are available for processing.
+
+\image html fep_compatibility_mode_disabled.png "Data exchange, compatibilty mode disabled"
+
+\subsection fep_sdk_220_behaviour Behaviour FEP SDK 2.2.0 (and earlier)
+
+FEP SDK version 2.2.0 (and earlier) uses a future simulation time as timestamp for samples to be published. 
+This future timestamp means the configured cycle time is added to the current timestamp.
+This represents the behaviour of FEP SDK version 2.6.0 if compatibility mode is enabled.
+
+With this behaviour a receiving @ref fep::Job or StepListener (see @ref fep::ITiming::RegisterStepListener) expects samples with a timestamp which is equal to the current
+simulation time or older. Received samples with a timestamp which is newer than the current simulation
+time, are not considered relevant for the current simulation step and therefore not available for
+processing. Samples with a timestamp equal to or older than the current simulation time are considered
+relevant and are available for processing.
+
+\image html fep_compatibility_mode_enabled.png "Data exchange, compatibilty mode enabled"
+
+\subsection compatibility_mode_usage Compatibility Mode Usage
+
+To enable the compatibility mode set the FEP property \ref FEP_SCHEDULERSERVICE_FEP22_COMPATIBILITY_MODE_ENABLED
+for a specific FEP participant. While setting the property, the property tree has to be available and
+the participant may not have been initialized yet.
+
+\subsection fep_compatibility_example A concrete compatibility example
+
+The following textual example demonstrates the issues when FEP SDK 2.2.0 and FEP SDK 2.3.0 participants exchange data using a Timing API.
+
+On the one hand samples might be missed (depending on the \c backlog_size) and on the other hand samples are processed at the wrong simulation time. Because of these issues the \ref compatibility_mode was introduced.
+
+<b>Participants</b>
+
+| Description                     | Name |
+| :----                           | :---- |
+| FEP SDK 2.2 sender participant: |     \c Sender_2.2 |
+| FEP SDK 2.3 sender participant: |     \c Sender_2.3 |
+| FEP SDK 2.3 receiver participant: |   \c Receiver_2.3 |
+
+<b>Configuration</b>
+
+| Description                     | Name and Value|
+| :----                           | :---- |
+| General cycle time: |                 \c cycle_time = 1 |
+| General Backlog size: |               \c backlog_size = 1 |
+
+<b>Simulation time == 0</b>
+
+\c Sender_2.2 sends a sample with \c timestamp 0 + \c cycle_time.<br>
+\c Sender_2.3 sends a sample with \c timestamp 0.
+
+<b>Simulation time == 1</b>
+
+\c Sender_2.2 sends a sample with \c timestamp 1 + \c cycle_time.<br>
+\c Sender_2.3 sends a sample with \c timestamp 1..<br>
+.<br>
+\c Receiver_2.3 receives a sample (\c timestamp 0 + \c cycle_time) from \c Sender_2.2.<br>
+\c Receiver_2.3 receives a sample (\c timestamp 0) from \c Sender_2.3..<br>
+.<br>
+\c Receiver_2.3 expects valid samples to have a \c timestamp < the current simulation time.<br>
+\c Receiver_2.3 uses the sample received from \c Sender_2.3 but keeps the sample received from \c Sender_2.2 (\c timestamp 0 + \c cycle_time) for usage in an upcoming simulation cycle in the backlog..<br>
+
+*<b>Simulation time == 2</b>
+
+\c Sender_2.2 sends a sample with \c timestamp 2 + \c cycle_time.<br>
+\c Sender_2.3 sends a sample with \c timestamp 2.<br>
+.<br>
+\c Receiver_2.3 receives a sample (\c timestamp 1 + \c cycle_time) from \c Sender_2.2 and drops the previously received sample (\c timestamp 0 + \c cycle_time) because of \c backlog_size == 1. (This sample has never been processed).<br> 
+\c Receiver_2.3 receives a sample (\c timestamp 1) from \c Sender_2.3..<br>
+.<br>
+\c Receiver_2.3 expects valid samples to have a \c timestamp < the current simulation time.<br>
+\c Receiver_2.3 uses the sample received from \c Sender_2.3 but keeps the sample received from \c Sender_2.2 (\c timestamp 1 + \c cycle_time) in the backlog.
+
+and so on..
+
+When increasing \c backlog_size to at least 2, \c Receiver_2.3 does not drop old (unused) samples received from \c Sender_2.2 anymore
+but they are not used in the same simulation cycle as the samples received from \c Sender_2.3.
+
+*/ }

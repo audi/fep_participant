@@ -1,0 +1,221 @@
+/**
+ *
+ * This file describes the usage of the FEP Examples.
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+namespace fep
+{
+/**
+\page fep_examples_build How to build the FEP Examples
+
+FEP SDK includes examples to demonstrate the main features of FEP. Note that the examples are not
+part of the FEP SDK package and have to be install separately through the FEP SDK examples package -
+see \ref fep_installation for more information.
+
+After downloading the examples you can either use pre-compiled executables (see sub-directory
+\c bin) or build them from the sources. For this purpose we ship
+- a \c conanfile.txt to easily retrieve all dependencies (including CMake) using Conan
+- a \c CMakeLists.txt to generate an IDE project / make file for any IDE / compiler of your choice
+ using CMake
+
+As a simplification you can use the \c build_examples.sh (Linux) / \c build_examples.cmd (Windows)
+to build everything automatically. If you want to adapt the build process defined in the script to
+your needs, you might want to call the script with the -h option to obtain additional help
+information.
+
+Some settings, e.g. the build type (Release / Debug), can not be set when using the script. In
+such cases you have to build the examples manually by going through the following steps.
+- call <c>conan install \<path-to-the-conanfile\> \<any-settings-or-options-supported-by-conan\></c>
+- use CMake / CMake GUI with the given \c CMakeLists.txt
+- open the resulting IDE project file / make file with the IDE / compiler of your choice.
+
+The following text explains how to create a project file for the IDE of your choice using CMake
+<b>after you successfully used <c>conan install</c></b>. For more details on the FEP examples
+see chapter \ref fep_first_participant. For information on how to use Conan see https://conan.io/
+
+CMake
+----------------------------------------------------------------------------------------------------
+CMake is an open source tool to automatically create platform-dependent make files / IDE project
+files from a platform independent configuration. These platform independent configurations are
+stored in files named \c CMakeLists.txt. Such a configuration file for the FEP examples is shipped
+with FEP SDK. We highly recommend to use CMake and to build the examples. Other build approaches are
+currently not supported by the AEV support.
+
+\image html fep_cmake_gui.png "CMake: platform independent tool for any build process"
+
+All CMake configurations of FEP are written for and tested with the version of CMake declared in the
+\ref fep_sys_req. Using an older version might result in CMake errors. Using a newer version might
+result in errors in the resulting make file. Again: we highly recommend to use the declared version;
+using any other version is currently unsupported by the AEV support.
+
+To obtain CMake you can use Conan. Alternatively go to the CMake project website
+(http://www.cmake.org/) and download the required version for your platform (see section <c>Download
+-> Older Releases</c>). After downloading, install it and run the executable <c>cmake-gui</c>.
+
+Usage of CMake
+----------------------------------------------------------------------------------------------------
+\note The following step by step tutorial assumes you are running CMake the first time for a
+      specific project. CMake stores information about previous runs, thus some steps
+      are different when running CMake again for the same project. If you want to delete the
+      previous set of information to ensure to start "from the scratch" again, select
+      <c>File -> Delete Cache</c> and manually delete the "build directory"
+
+i) Set Folders
+
+After starting CMake-GUI you first have to set two folders: the folder "Where is the source code"
+and "Where to build the binaries". The first path is the "source directory", containing the source
+code and the \c CMakeLists.txt you want to use for your project. The second path is the "build
+directory" were the make file and/or IDE project file will be generated and the binaries will be
+compiled. Even if CMake supports to use the same folder for source code and build files, we highly
+recommend not to do so!
+
+For FEP the "source directory" always has to be set to the directory that holds the most top level
+\c CMakeLists.txt, i.e. you have to select the installation directory of your FEP installation. If
+you select the \c CMakeLists.txt in a subfolder of a single example you will most likely (later on)
+get CMake errors such as
+
+<pre>
+CMake Error at CMakeLists.txt:8 (fep_add_executable):
+  Unknown CMake command "fep_add_executable".
+</pre>
+
+or other similar error
+
+You can set the "build directory" to any directory you want. If it does not exist, CMake will (later
+on) ask you whether CMake should create it. Common best practice is to use a folder on the same
+level as the "source directory" with the name "build".
+
+\image html fep_cmake_paths.png "CMake: possible folder settings for FEP Examples"
+
+ii) Make Settings & Configure
+
+After you set the two folders, press the button \c Configure. If the "build directory" does not
+yet exist, CMake will offer you to create it at that point.
+
+\image html fep_cmake_create_directory.png "CMake: missing \"build directory\" can be created automatically"
+
+After the build directory has been selected, CMake needs to know the target compiler or IDE, for
+which  it should generate the make file or project file. For most use cases you have to select your
+compiler/IDE from the drop down menu and set the radio button to <c>Use default native compilers</c>
+and click the button \c Finish. Please note, that only the IDEs/compilers named in chapter \ref
+fep_sys_req are supported currently supported by the AEV support.
+
+\image html fep_cmake_generator.png "CMake: Selecting the target compiler or IDE"
+
+CMake will now start to gather possible configuration settings and to run some macros. After this is
+finished, it should show a message <c>Configuration done</c> in the lower part of the GUI. Do not
+worry about any red color in the middle part of the GUI: CMake uses red color to mark settings as
+new settings that were not known to it before.
+
+\image html fep_cmake_gui_filled.png "CMake: red color is used to highlight \"new\" settings"
+
+If you did not check the check-box \c Grouped, you will not see groups of settings as shown in the
+picture but a long list of settings. Note the small arrow left to the red highlighting, indicating
+that you can expand the settings. This is a useful visualization setting but has no functional
+impact.
+
+A CMake variable you should always set is \c CMAKE_INSTALL_PREFIX: this declares the directory where
+the build binaries will be "installed to" when running the cmake install command after building the
+project. Initially it is set to the install directory of FEP, but you should consider changing it to
+something like <c>[..]/fep_toolbox_install</c>. To find this setting more easily, you can use the
+edit field <c>Search:</c>.
+
+Most of the time it will not be necessary to change or explicitly set any other setting.
+Nonetheless, for any other setting you get some additional information through tool-tips when
+hovering the mouse pointer above the setting for a second.
+
+After changing some settings click \c Configure again to check if additional settings become
+accessible: you can easily identify them as "old" settings lose their highlighting while "new"
+settings are highlighted with red color again. In addition CMake might write some information such
+as warnings, errors or status information to the output area in the lower part of the GUI.
+
+iii) Generate
+
+After all settings are done click the button \c Generate. If everything is correct, CMake
+will now generate the make file and/or IDE project file and saves it to the "build directory".
+After finishing it will print <c>Generating done</c> in the lower area of the GUI.
+
+If any error occurs, the output should give you information about what caused the problem. Possibly
+you have to apply some other configuration settings (see above) or install a missing dependency
+(should not apply for FEP).
+
+iv) Build
+
+Now you can open the generated IDE project file with the IDE of your choice. Please note, that
+only the IDEs/compilers named in chapter \ref fep_sys_req are currently supported by the AEV support.
+
+Use the function of your IDE to build the example you want to build, use the target \c ALL_BUILD to
+build all examples at once or use target \c INSTALL to "install" the compiled examples to the
+directory set for \c CMAKE_INSTALL_PREFIX (see above).
+
+Troubleshooting
+----------------------------------------------------------------------------------------------------
+
+This section lists possible errors and solutions to fix them. Try finding your specific error
+message with \<Ctrl\>+\<F\>.
+
+<b>Dialog: "Error in configuration process, project file may be invalid"</b>
+
+This indicates some errors in the CMake settings or some missing files. Anyway, the \c
+CMakeLists.txt is _not_ invalid. See the textual output in the lower area of the CMake GUI to
+identify the problem.
+
+<b>Wrong "source directory": any directory without CMakeLists.txt selected</b>
+
+After clicking \c Configure an error similar to the following text is shown in the lower area of
+the CMake GUI:
+
+<pre>
+CMake Error: The source directory "C:/fep-toolbox/src" does not appear to contain CMakeLists.txt.
+Specify --help for usage, or press the help button on the CMake GUI.
+</pre>
+
+This simply indicates that the current "source directory" does not contain a \c CMakeLists.txt.
+Either you did not select the main directory of the FEP installation or your installation is
+corrupted. To fix this problem set the "source directory" to the FEP installation directory or -
+if the problem still exists - re-install FEP.
+
+<b>Wrong "source directory": an example sub-directory</b>
+
+After clicking \c Configuration an error similar to one of the following texts is shown in the
+lower area of the CMake GUI:
+
+<pre>
+CMake Error at CMakeLists.txt:3 (fep_add_executable):
+  Unknown CMake command "fep_add_executable".
+</pre>
+
+or
+
+<pre>
+CMake Warning (dev) in CMakeLists.txt:
+  No cmake_minimum_required command is present.  A line of code such as
+
+    cmake_minimum_required(VERSION 2.8)
+
+  should be added at the top of the file.  The version specified may be lower
+  if you wish to support older CMake versions for this project.  For more
+  information run "cmake --help-policy CMP0000".
+This warning is for project developers.  Use -Wno-dev to suppress it.
+</pre>
+
+This indicates that the current "source directory" is not equal to the installation directory
+of FEP. Most likely you selected one of the sub-directories for a specific example. To fix this
+problem set the "source directory" to the FEP installation directory. The resulting make file/IDE
+project file will contain all examples.
+
+*/
+}

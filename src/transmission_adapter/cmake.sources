@@ -1,0 +1,100 @@
+#
+# Copyright @ 2019 Audi AG. All rights reserved.
+# 
+#     This Source Code Form is subject to the terms of the Mozilla
+#     Public License, v. 2.0. If a copy of the MPL was not distributed
+#     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+# 
+# If it is not possible or desirable to put the notice in a particular file, then
+# You may include the notice in a location (such as a LICENSE file in a
+# relevant directory) where a recipient would be likely to look for such a notice.
+# 
+# You may add additional accurate notices of copyright ownership.
+#
+set(TRANSMISSION_SOURCES
+    transmission_adapter/fep_transmission_type.cpp
+    transmission_adapter/fep_data_sample.cpp
+    transmission_adapter/fep_data_sample_factory.cpp
+    transmission_adapter/fep_signal_direction.cpp
+    transmission_adapter/fep_signal_serialization.cpp
+    transmission_adapter/fep_data_listener_adapter.cpp
+    transmission_adapter/fep_transmission_adapter_common.h
+    transmission_adapter/fep_transmission.cpp
+    transmission_adapter/fep_options.cpp
+    transmission_adapter/fep_options_factory.cpp
+    transmission_adapter/fep_queue_manager.h
+    transmission_adapter/fep_queue_manager.cpp
+    transmission_adapter/fep_receiver.cpp
+    transmission_adapter/fep_transmitter.cpp
+    transmission_adapter/fep_serialization_helpers.cpp
+    
+    transmission_adapter/fep_data_sample.h
+    transmission_adapter/fep_transmitter.h
+    transmission_adapter/fep_receiver.h
+    transmission_adapter/fep_data_sample_factory.h
+    transmission_adapter/fep_data_muting_access.h
+    transmission_adapter/fep_data_listener_adapter.h
+    transmission_adapter/fep_options_factory.h
+    transmission_adapter/fep_transmission.h
+    transmission_adapter/fep_serialization_helpers.h
+    transmission_adapter/fep_fragmentation.h
+    
+    ../include/transmission_adapter/fep_preparation_data_access_intf.h
+    ../include/transmission_adapter/fep_preparation_data_listener_intf.h
+    ../include/transmission_adapter/fep_preparation_data_sample_intf.h
+    ../include/transmission_adapter/fep_signal_serialization.h
+    ../include/transmission_adapter/fep_signal_direction.h
+    ../include/transmission_adapter/fep_transmission_adapter_intf.h
+    ../include/transmission_adapter/fep_transmission_sample_intf.h
+    ../include/transmission_adapter/fep_transmission_type.h
+    ../include/transmission_adapter/fep_user_data_listener_intf.h
+    ../include/transmission_adapter/fep_user_data_sample_intf.h
+    ../include/transmission_adapter/fep_transmission_driver_intf.h
+    ../include/transmission_adapter/fep_receive_intf.h
+    ../include/transmission_adapter/fep_transmit_intf.h
+    ../include/transmission_adapter/fep_options_verifier_intf.h
+    ../include/transmission_adapter/fep_options.h
+    ../include/transmission_adapter/fep_driver_options.h
+    ../include/transmission_adapter/fep_signal_options.h
+)
+source_group(transmission FILES ${TRANSMISSION_SOURCES})
+    
+set(INTERNAL_RTI_DDS_SOURCES
+    transmission_adapter/RTI_DDS/fep_dds_driver.cpp
+    transmission_adapter/RTI_DDS/fep_dds_signal_options_verifier.h
+    transmission_adapter/RTI_DDS/fep_dds_driver_options_verifier.h
+    transmission_adapter/RTI_DDS/fep_dds_receiver.h
+    transmission_adapter/RTI_DDS/fep_dds_receiver.cpp
+    transmission_adapter/RTI_DDS/fep_dds_transmitter.h
+    transmission_adapter/RTI_DDS/fep_dds_transmitter.cpp
+    transmission_adapter/RTI_DDS/fep_dds_err_redirect_device.h
+    transmission_adapter/RTI_DDS/fep_dds_header.h
+    
+    transmission_adapter/RTI_DDS/fep_dds_driver.h
+)
+
+set(INTERNAL_ZMQ_SOURCES
+    transmission_adapter/zmq/fep_zmq_driver.cpp
+    transmission_adapter/zmq/fep_zmq_signal_options_verifier.h
+    transmission_adapter/zmq/fep_zmq_driver_options_verifier.h
+    transmission_adapter/zmq/fep_zmq_receiver.h
+    transmission_adapter/zmq/fep_zmq_receiver.cpp
+    transmission_adapter/zmq/fep_zmq_transmitter.h
+    transmission_adapter/zmq/fep_zmq_transmitter.cpp
+    transmission_adapter/zmq/fep_zmq_abstract_transceiver.h
+    transmission_adapter/zmq/fep_zmq_abstract_transceiver.cpp
+    
+    transmission_adapter/zmq/fep_zmq_driver.h
+)
+
+source_group(transmission\\RTI_DDS FILES ${INTERNAL_RTI_DDS_SOURCES})
+source_group(transmission\\zmq FILES ${INTERNAL_ZMQ_SOURCES})
+if (zyre_FOUND)
+set(TRANSMISSION_SOURCES
+    ${TRANSMISSION_SOURCES} ${INTERNAL_RTI_DDS_SOURCES} ${INTERNAL_ZMQ_SOURCES}
+)
+else()
+set(TRANSMISSION_SOURCES
+    ${TRANSMISSION_SOURCES} ${INTERNAL_RTI_DDS_SOURCES}
+)
+endif()

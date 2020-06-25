@@ -1,0 +1,39 @@
+<!--
+  Copyright @ 2019 Audi AG. All rights reserved.
+  
+      This Source Code Form is subject to the terms of the Mozilla
+      Public License, v. 2.0. If a copy of the MPL was not distributed
+      with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+  
+  If it is not possible or desirable to put the notice in a particular file, then
+  You may include the notice in a location (such as a LICENSE file in a
+  relevant directory) where a recipient would be likely to look for such a notice.
+  
+  You may add additional accurate notices of copyright ownership.
+  -->
+<?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
+<timing xmlns:timing="timing">
+ <header>
+  <author>AUDI AG</author>
+  <date_creation>DD.MM.YYYY</date_creation>
+  <date_change>DD.MM.YYYY</date_change>
+  <description>manual</description>
+ </header>
+ <participants>
+    <participant name="participantName">
+        <steps>
+            <step name="namesteplistener" cycleTime_sim_us="10" maxRuntime_us="10" maxInputWaittime_us="12" runtimeViolationStrategy="TS_IGNORE_RUNTIME_VIOLATION">
+                <inputs>
+                    <input name="inputName" validAge_sim_us="maxValidAge" delay_sim_us="delay" inputViolationStrategy="IS_IGNORE_INPUT_VALIDITY_VIOLATION" />
+                </inputs>
+              <outputs>
+                <output name="outputName"/>
+              </outputs>
+            </step>
+        </steps>
+        <inputs>
+            <input name="inputName" backLogSize="1" />
+        </inputs>
+    </participant>
+ </participants>
+</timing>

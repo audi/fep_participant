@@ -1,0 +1,135 @@
+<!--
+  Copyright @ 2019 Audi AG. All rights reserved.
+  
+      This Source Code Form is subject to the terms of the Mozilla
+      Public License, v. 2.0. If a copy of the MPL was not distributed
+      with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+  
+  If it is not possible or desirable to put the notice in a particular file, then
+  You may include the notice in a location (such as a LICENSE file in a
+  relevant directory) where a recipient would be likely to look for such a notice.
+  
+  You may add additional accurate notices of copyright ownership.
+  -->
+<?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
+<timing xmlns:timing="timing">
+ <header>
+  <author>AUDI AG</author>
+  <date_creation>10.10.2017</date_creation>
+  <date_change>12.10.2017</date_change>
+  <description>Timing Configuratuion for Demo Timing</description>
+ </header>
+ <participants>
+    <participant name="Consumer_win64_vc140">
+        <steps>
+            <step name="StepListenerConsumer" cycleTime_sim_us="100000" maxRuntime_us="99999" maxInputWaittime_us="500000000" runtimeViolationStrategy="TS_IGNORE_RUNTIME_VIOLATION">
+                <inputs>
+                    <input name="LightSource" validAge_sim_us="400000" delay_sim_us="0" inputViolationStrategy="IS_IGNORE_INPUT_VALIDITY_VIOLATION" />
+                </inputs>
+            </step>
+        </steps>
+    </participant>
+    <participant name="Consumer_win64_vc100">
+        <steps>
+            <step name="StepListenerConsumer" cycleTime_sim_us="100000" maxRuntime_us="99999" maxInputWaittime_us="500000000" runtimeViolationStrategy="TS_IGNORE_RUNTIME_VIOLATION">
+                <inputs>
+                    <input name="LightSource" validAge_sim_us="400000" delay_sim_us="0" inputViolationStrategy="IS_IGNORE_INPUT_VALIDITY_VIOLATION" />
+                </inputs>
+            </step>
+        </steps>
+    </participant>
+    <participant name="Consumer__win64_vc141">
+        <steps>
+            <step name="StepListenerConsumer" cycleTime_sim_us="100000" maxRuntime_us="99999" maxInputWaittime_us="500000000" runtimeViolationStrategy="TS_IGNORE_RUNTIME_VIOLATION">
+                <inputs>
+                    <input name="LightSource" validAge_sim_us="400000" delay_sim_us="0" inputViolationStrategy="IS_IGNORE_INPUT_VALIDITY_VIOLATION" />
+                </inputs>
+            </step>
+        </steps>
+    </participant>
+    <participant name="Consumer_linux">
+        <steps>
+            <step name="StepListenerConsumer" cycleTime_sim_us="100000" maxRuntime_us="99999" maxInputWaittime_us="500000000" runtimeViolationStrategy="TS_IGNORE_RUNTIME_VIOLATION">
+                <inputs>
+                    <input name="LightSource" validAge_sim_us="400000" delay_sim_us="0" inputViolationStrategy="IS_IGNORE_INPUT_VALIDITY_VIOLATION" />
+                </inputs>
+            </step>
+        </steps>
+    </participant>
+    <!--
+    <participant name="FrontSensor">
+        <steps>
+            <step name="CalculateFrontDistance" cycleTime_sim_us="100000" maxRuntime_us="99999" maxInputWaittime_us="500000000" runtimeViolationStrategy="TS_IGNORE_RUNTIME_VIOLATION">
+                <inputs>
+                    <input name="PositionCarA" validAge_sim_us="400000" delay_sim_us="0" inputViolationStrategy="IS_IGNORE_INPUT_VALIDITY_VIOLATION" />
+                    <input name="PositionCarB" validAge_sim_us="400000" delay_sim_us="0" inputViolationStrategy="IS_IGNORE_INPUT_VALIDITY_VIOLATION" />
+                    <input name="PositionOwn"  validAge_sim_us="400000" delay_sim_us="0" inputViolationStrategy="IS_IGNORE_INPUT_VALIDITY_VIOLATION" />
+                </inputs> 
+                <outputs>
+                    <output name="FrontDistance"  />
+                </outputs>
+            </step>
+        </steps>
+        <inputs>
+            <input name="PositionCarA" backLogSize="10" />
+            <input name="PositionCarB" backLogSize="10" />
+            <input name="PositionOwn"  backLogSize="10" />
+        </inputs>
+    </participant>
+    <participant name="BackSensor">
+        <steps>
+            <step name="CalculateBackDistance" cycleTime_sim_us="100000" maxRuntime_us="99999" maxInputWaittime_us="500000000" runtimeViolationStrategy="TS_IGNORE_RUNTIME_VIOLATION">
+                <inputs>
+                    <input name="PositionCarA" validAge_sim_us="400000" delay_sim_us="0" inputViolationStrategy="IS_IGNORE_INPUT_VALIDITY_VIOLATION" />
+                    <input name="PositionCarB" validAge_sim_us="400000" delay_sim_us="0" inputViolationStrategy="IS_IGNORE_INPUT_VALIDITY_VIOLATION" />
+                    <input name="PositionOwn"  validAge_sim_us="400000" delay_sim_us="0" inputViolationStrategy="IS_IGNORE_INPUT_VALIDITY_VIOLATION" />
+                </inputs>
+                 <outputs>
+                    <output name="BackDistance"  />
+                </outputs>
+           </step>
+        </steps>
+        <inputs>
+            <input name="PositionCarA" backLogSize="10" />
+            <input name="PositionCarB" backLogSize="10" />
+            <input name="PositionOwn"  backLogSize="10" />
+        </inputs>
+    </participant>
+    <participant name="Driver">
+        <steps>
+            <step name="CheckDistanceAndDecide" cycleTime_sim_us="100000" maxRuntime_us="99999" maxInputWaittime_us="500000000" runtimeViolationStrategy="TS_IGNORE_RUNTIME_VIOLATION">
+                <inputs>
+                    <input name="FrontDistance" validAge_sim_us="400000" delay_sim_us="0" inputViolationStrategy="IS_IGNORE_INPUT_VALIDITY_VIOLATION" />
+                    <input name="BackDistance"  validAge_sim_us="400000" delay_sim_us="0" inputViolationStrategy="IS_IGNORE_INPUT_VALIDITY_VIOLATION" />
+                    <input name="PositionOwn"  validAge_sim_us="400000" delay_sim_us="0" inputViolationStrategy="IS_IGNORE_INPUT_VALIDITY_VIOLATION" />
+                </inputs>
+                 <outputs>
+                    <output name="DriverCommand"  />
+                </outputs>
+            </step>
+        </steps>
+        <inputs>
+            <input name="FrontDistance" backLogSize="10" />
+            <input name="BackDistance"  backLogSize="10" />
+            <input name="PositionOwn"  backLogSize="10" />
+        </inputs>
+    </participant>
+    <participant name="Observer">
+        <steps>
+            <step name="ObserveScene" cycleTime_sim_us="100000" maxRuntime_us="99999" maxInputWaittime_us="500000000" runtimeViolationStrategy="TS_IGNORE_RUNTIME_VIOLATION">
+                <inputs>
+                    <input name="PositionCarA" validAge_sim_us="400000" delay_sim_us="0" inputViolationStrategy="IS_IGNORE_INPUT_VALIDITY_VIOLATION" />
+                    <input name="PositionCarB" validAge_sim_us="400000" delay_sim_us="0" inputViolationStrategy="IS_IGNORE_INPUT_VALIDITY_VIOLATION" />
+                    <input name="PositionOwn"  validAge_sim_us="400000" delay_sim_us="0" inputViolationStrategy="IS_IGNORE_INPUT_VALIDITY_VIOLATION" />
+                </inputs> 
+            </step>
+        </steps>
+        <inputs>
+            <input name="PositionCarA" backLogSize="10" />
+            <input name="PositionCarB" backLogSize="10" />
+            <input name="PositionOwn"  backLogSize="10" />
+        </inputs>
+    </participant>
+    -->
+ </participants>
+</timing>

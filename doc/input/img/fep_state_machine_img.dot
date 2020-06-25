@@ -1,0 +1,64 @@
+/**
+ *
+ * Image of the state machine graph
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+
+digraph fep_state_machine {
+    graph [];
+    
+    node [shape = "box"];
+    
+    ENTRY                   [label = "" shape = "circle" style="filled" fillcolor="black"];
+    ENTRY -> STARTUP        [style="bold"];
+    
+    TERM                    [label = "" shape = "doublecircle" style="filled" fillcolor="black" size=0.5];
+    TERM -> SHUTDOWN        [style="bold" dir="back"];
+    
+    
+    STARTUP                 [label = "E: ProcessStartupEntry\n\nSTARTUP\n\nE: ProcessStartupExit"];
+    STARTUP -> IDLE         [label = "StartupDoneEvent" style="bold"];
+    STARTUP -> SHUTDOWN     [label = "ShutdownEvent" style="dashed"];
+    
+    SHUTDOWN                [label = "E: ProcessShutdownEntry\n\nSHUTDOWN\n\n\n" peripheries=2];
+    SHUTDOWN -> IDLE        [label = "ShutdownEvent (*)" style="bold" dir="back"];
+    SHUTDOWN -> ERROR       [label = "ShutdownEvent (*)" style="dashed" dir="back"];
+    
+    IDLE                    [label = "E: ProcessIdleEntry\n\nIDLE\n\nE: ProcessIdleExit" style="filled"];
+    IDLE -> ERROR           [label = "ErrorFixedEvent" style="dashed" dir="back"];
+    IDLE -> ERROR           [label = "ErrorEvent" style="dashed"];
+    IDLE -> INITIALIZING    [label = "InitializeEvent" style="bold"];
+    IDLE -> STARTUP         [label = "RestartEvent (*)" style="dashed"];
+    
+    INITIALIZING            [label = "E: ProcessInitializingEntry\n\nINITIALIZING\n\nE: ProcessInitializingExit" style="filled"];
+    INITIALIZING -> ERROR   [label = "ErrorEvent" style="dashed"];
+    INITIALIZING -> IDLE    [label = "StopEvent" style="dashed"];
+    INITIALIZING -> READY   [label = "InitDoneEvent" style="bold"];
+    
+    READY                   [label = "E: ProcessReadyEntry\n\nREADY\n\nE: ProcessReadyExit" style="filled"];
+    READY -> ERROR          [label = "ErrorEvent" style="dashed"];
+    READY -> IDLE           [label = "StopEvent" style="dashed"];
+    READY -> RUNNING        [label = "StartEvent" style="bold"];
+    
+    RUNNING                 [label = "E: ProcessRunningEntry\n\nRUNNING\n\nE: ProcessRunningExit" style="filled"];
+    RUNNING -> ERROR        [label = "ErrorEvent" style="dashed"];
+    RUNNING -> IDLE         [label = "StopEvent" style="bold"];
+    
+    ERROR                   [label = "E: ProcessErrorEntry\n\nERROR\n\nE: ProcessErrorExit" style="dashed"];
+    
+    LEGENDE                 [label = "(*) = CleanUp-Callback is called (right after all\l         Process<State>Exit returned)\l" shape="note"]
+    LEGENDE -> ERROR        [style = "invis"]
+}

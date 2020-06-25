@@ -1,0 +1,47 @@
+/**
+ *
+ * Image of the sending without sync flag
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+
+digraph fep_data_no_ddb {
+    edge [style="invis"];
+    node [shape=box];
+    subgraph cluster0 {
+        style=filled;
+        color=lightgrey;
+        label="Cycle 1";
+        i1 [label="Instance 1\nsync"];
+    }
+    subgraph cluster1 {
+        style=filled;
+        color=lightgrey;
+        label="Cycle 2";
+        i4 [label="Instance 2\nsync"];
+    }
+    subgraph cluster2 {
+        style=filled;
+        color=lightgrey;
+        label="Cycle 3";
+        i8 [label="Instance 3\nsync"];
+    }
+    subgraph cluster3 {
+        style=filled;
+        color=lightgrey;
+        label="Cycle 4";
+        i9 [label="Instance 4\nsync"];
+    }
+}

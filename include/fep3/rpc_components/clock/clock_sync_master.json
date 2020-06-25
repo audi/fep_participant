@@ -1,0 +1,39 @@
+[
+  // registers a Slave
+  // for before/update/after events 
+  {
+    "name": "registerSyncSlave",
+    "params": {
+      "slave_name": "name1",
+      "event_id_flag": 1
+    },
+    "returns": 1
+  },
+  // unregisters a Slave
+  {
+    "name": "unregisterSyncSlave",
+    "params": {
+      "slave_name": "name1"
+    },
+    "returns": 1
+  },
+  //
+  {
+    "name": "slaveSyncedEvent",
+    "params": {
+      "slave_name": "name1",
+      "new_time": "int64_time"
+    },
+    "returns": 1 //microsec
+  },
+  //
+  {
+    "name": "getMasterTime",
+    "returns": "int64_time" //microsec
+  },
+  //
+  {
+    "name": "getMasterType",
+    "returns": 1 //continuos = 0, discrete = 1 ... means wether update event is sent or not
+  }
+]

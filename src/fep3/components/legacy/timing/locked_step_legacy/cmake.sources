@@ -1,0 +1,37 @@
+#
+# Copyright @ 2019 Audi AG. All rights reserved.
+# 
+#     This Source Code Form is subject to the terms of the Mozilla
+#     Public License, v. 2.0. If a copy of the MPL was not distributed
+#     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+# 
+# If it is not possible or desirable to put the notice in a particular file, then
+# You may include the notice in a location (such as a LICENSE file in a
+# relevant directory) where a recipient would be likely to look for such a notice.
+# 
+# You may add additional accurate notices of copyright ownership.
+#
+set(TIMING_LEGACY_SCHEDULER_DIR fep3/components/legacy/timing/locked_step_legacy)
+
+set(TIMING_LEGACY_SCHEDULER_SOURCES
+    ${TIMING_LEGACY_SCHEDULER_DIR}/timing_master.cpp
+    ${TIMING_LEGACY_SCHEDULER_DIR}/timing_client.cpp
+    ${TIMING_LEGACY_SCHEDULER_DIR}/task.cpp
+    ${TIMING_LEGACY_SCHEDULER_DIR}/schedule_map.cpp
+    ${TIMING_LEGACY_SCHEDULER_DIR}/step_trigger_strategy.cpp
+    
+    ${TIMING_LEGACY_SCHEDULER_DIR}/timing_master.h
+    ${TIMING_LEGACY_SCHEDULER_DIR}/timing_client.h
+    ${TIMING_LEGACY_SCHEDULER_DIR}/task.h
+    ${TIMING_LEGACY_SCHEDULER_DIR}/schedule_map.h
+    ${TIMING_LEGACY_SCHEDULER_DIR}/step_trigger_strategy_intf.h
+    ${TIMING_LEGACY_SCHEDULER_DIR}/step_trigger_strategy.h 
+ 
+    ${TIMING_LEGACY_SCHEDULER_DIR}/locked_step_scheduler.h
+    ${TIMING_LEGACY_SCHEDULER_DIR}/locked_step_scheduler.cpp
+
+    ${TIMING_LEGACY_SCHEDULER_DIR}/timing_client_master_leg_comp.h
+    ${TIMING_LEGACY_SCHEDULER_DIR}/timing_client_master_leg_comp.cpp
+)
+
+source_group(components\\legacy\\timing\\locked_step_legacy FILES ${TIMING_LEGACY_SCHEDULER_SOURCES})

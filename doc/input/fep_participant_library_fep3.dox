@@ -1,0 +1,133 @@
+//
+// Copyright @ 2019 Audi AG. All rights reserved.
+// 
+//     This Source Code Form is subject to the terms of the Mozilla
+//     Public License, v. 2.0. If a copy of the MPL was not distributed
+//     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+// 
+// If it is not possible or desirable to put the notice in a particular file, then
+// You may include the notice in a location (such as a LICENSE file in a
+// relevant directory) where a recipient would be likely to look for such a notice.
+// 
+// You may add additional accurate notices of copyright ownership.
+//
+/**
+\page fep_participant_library_fep3 FEP 3
+
+A FEP Participant is divided into components.
+Each component has a clear defined and specific functionality and may use other components by its internal or service interface.
+
+@section fep_participant FEP Participant
+
+<table>
+
+<tr>
+<td rowspan="8" bgcolor="#AFAFAF">
+@ref fep::ParticipantFEP2 
+</td>
+<td bgcolor="#AFAFAF">
+@ref section_fep_participant_internal_interfaces
+</td>
+<td bgcolor="#AFAFAF">
+<b>Component Name</b>
+</td>
+<td bgcolor="#AFAFAF">
+@ref section_fep_participant_service_interfaces
+</td>
+</tr>
+
+<tr>
+<td>
+@ref fep::IRPC
+</td>
+<td bgcolor="#CFCFCF">
+@ref service_bus_emulation "ServiceBus"
+</td>
+<td>
+@ref fep::rpc::IRPCParticipantInfo (@ref participant_info.json)
+</td>
+</tr>
+
+<tr>
+<td>
+@ref fep::IClockService
+</td>
+<td bgcolor="#CFCFCF">
+@ref page_fep_clock_service "ClockService"
+</td>
+<td>
+@ref fep::rpc::IRPCClockServiceDef (@ref clock.json)\n
+@ref fep::rpc::IRPCClockSyncMasterDef (@ref clock_sync_master.json)
+</td>
+</tr>
+
+<tr>
+<td>
+@ref fep::IClockSyncService
+</td>
+<td bgcolor="#CFCFCF">
+@ref page_fep_clock_sync_service "ClockSyncService"
+</td>
+<td>
+@ref fep::rpc::IRPCClockSyncSlaveDef (@ref clock_sync_slave.json)
+</td>
+</tr>
+
+<tr>
+<td>
+@ref fep::ISchedulerService
+</td>
+<td bgcolor="#CFCFCF">
+@ref page_fep_scheduler_service "SchedulerService"
+</td>
+<td>
+</td>
+</tr>
+
+<tr>
+<td>
+@ref fep::IPropertyTree
+</td>
+<td bgcolor="#CFCFCF">
+@ref fep_properties "PropertyTree"
+</td>
+<td>
+@ref fep::rpc::IRPCConfigurationDef (@ref configuration.json)
+</td>
+</tr>
+
+<tr>
+<td>
+@ref fep::IDataRegistry
+</td>
+<td bgcolor="#CFCFCF">
+@ref page_fep_data_registry "DataRegistry" (@ref data_registry.json)
+</td>
+<td>
+@ref fep::rpc::IRPCDataRegistryDef
+</td>
+</tr>
+
+<tr>
+<td>
+</td>
+<td bgcolor="#CFCFCF">
+@ref simulation_bus_emulation "SimulationBus"
+</td>
+<td>
+</td>
+</tr>
+
+</table>
+
+\par Programming model
+\li @ref fep::ParticipantFEP2 
+\li @ref fep::DataJob 
+
+Have a look at the example: @ref demo_timing_30
+
+\par References
+\li \ref fep_best_practice_fep3 
+\li \subpage fep_participant_library_participant
+
+*/ 

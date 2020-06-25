@@ -1,0 +1,219 @@
+/**
+ *
+ * This file describes the wording used in FEP.
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+namespace fep
+{
+/**
+\page fep_wording Wording and Definitions
+
+This page provides an overview of all terms and definitions used in the context of FEP. We highly
+recommend reading this before reading any other pages since a knowledge of the terminology
+tremendeously helps in understanding the remaining parts of the documentation.
+
+
+\anchor fep_wording_fep
+FEP - Functional Engineering Platform
+----------------------------------------------------------------------------------------------------
+
+FEP is the abbreviation for <em>Functional Engineering Platform</em> and names a product family
+based on automatic network discovery and routing concept for distributed executables and functions.
+FEP releases the developer from many of the challenges and hassles of implementing a distributed
+system by providing a readily connected base implementation, prepared for data exchange without any
+further effort from the developer. This out-of-the-box distributed system can easily be extended
+with custom participants.
+
+
+\anchor fep_wording_sdk
+FEP SDK - FEP Software Development Kit
+----------------------------------------------------------------------------------------------------
+
+The FEP SDK is the base for the development of any \ref fep_wording_participant "FEP Participants"
+as well as for controlling them in the resulting \ref fep_wording_system "FEP System". The FEP SDK
+consists of the following artifacts:
+- \ref fep_wording_library "FEP Library"
+- \ref fep_wording_std_data_mdl "FEP Standard Data Models"
+- \ref index "FEP SDK Documentation"
+- \ref fep_first_participant "Examples"
+
+
+\anchor fep_wording_component
+FEP Component
+----------------------------------------------------------------------------------------------------
+
+FEP Components are functional units implemented by the \ref fep_wording_library "FEP Library".
+These FEP Components implement and provide all basic features provided by \ref fep_wording_fep
+"FEP". All FEP Components are encapsulated by the \ref fep_wording_module "FEP Module" and can be
+accessed by appropriate interfaces. For an overview of the FEP Components and information on how to
+use them see \ref fep_components.
+
+
+\anchor fep_wording_module
+FEP Module
+----------------------------------------------------------------------------------------------------
+
+The FEP Module is the base for every user implemented \ref fep_wording_participant "FEP
+Participant". It encapsulates all \ref fep_wording_component "FEP Components" and provides the basic
+behavior of FEP, such as:
+
+- registration to the \ref fep_wording_system "FEP System"
+- automatic network discovery and connection to the \ref fep_wording_bus "FEP Bus"
+- registration of \ref fep_wording_signal "FEP Signals" and interchange of data
+
+The FEP Module ensures, that all FEP Participants behave FEP compliant, can use all services
+provided by the FEP Components and are able to interact with all other FEP Participants within the
+same \ref fep_wording_system "FEP System". For information on the standardized participant header of
+every FEP Module see \ref sec_participant_header "Standardized participant header".
+
+
+\anchor fep_wording_participant
+FEP (Standard) Participant
+----------------------------------------------------------------------------------------------------
+
+A FEP Participant is the specific implementation of one use case, i.e., one simulation participant.
+Thus, FEP Participants can be seen as one network node within the \ref fep_wording_system "FEP
+System", connected via the \ref fep_wording_bus "FEP Bus". To ensure a FEP Participant can use all
+services provided by FEP and communicate with all other participants within the same FEP Network,
+all FEP Participants have to inherit from \ref fep_wording_module "FEP Module" (see \ref
+fep::IModule).
+
+\anchor fep_wording_std_participant
+
+FEP Standard Participants are FEP Participants that implement re-usable functionality that could
+possibly be required in various FEP Systems. They are provided and maintained by one specific
+department (single source). These FEP Participants are intended for well-defined use cases and are
+tested and validated to fulfill the given requirements for this use case. They can - and should! -
+be used for the documented use case(s). They can be integrated to any FEP %System by "plug and play".
+For some of the FEP Participants there are \ref fep_wording_std_data_mdl "FEP Standard Data Models"
+as part of the \ref fep_wording_sdk "FEP SDK" to ensure uniform communication.
+
+If you have a FEP Participant that can be possibly used as a generic approach within other projects
+and you are willing to provide this participant to other users, we would appreciate if you contact
+us for more information on how to convert a FEP Participant to a FEP Standard Participant.
+
+
+\anchor fep_wording_system
+FEP %System
+----------------------------------------------------------------------------------------------------
+
+A FEP %System is a self-organizing network of multiple \ref fep_wording_participant "FEP
+Participants". The automatic connection of all FEP Participants to a FEP %System is ensured by the
+basic communication behavior of the \ref fep_wording_module "FEP Modules". All FEP Participants
+inform the FEP %System about provided and required \ref fep_wording_signal "FEP Signals". As a result
+the FEP %System can be seen as an information base for all participating FEP Participants, such that
+developers of a FEP Participant get access to all provided FEP Signals in an easy and uniform way.
+
+To make a FEP Participant participant of a specific FEP %System it simply has to be started. Because
+of the inherited FEP Module it will automatically try to connect to any FEP %System by using any
+available network device. The developer does not have to care about network communication or signal
+administration; development of a new FEP Participant always starts in a prepared network of
+simultaneous FEP Participants that automatically connect to each other in a flexible way.
+
+
+\anchor fep_wording_message
+FEP Message
+----------------------------------------------------------------------------------------------------
+
+FEP Messages are used to exchange administrative information within a \ref fep_wording_system "FEP
+System", using the \ref fep_wording_bus_service "FEP Service Bus". We distinguish between FEP
+Commands and FEP Notifications.
+
+<b>FEP Commands</b>
+<br>
+FEP Commands are intended to trigger specific reactions for one or more remote \ref
+fep_wording_participant "FEP Participants". There are build-in commands (e.g. FEP Control Commands
+are used to trigger remote events), but also the possibility for \ref fep::cCustomCommand "user
+specific custom commands" (see \ref fep::cCustomCommand ).
+
+<b>FEP Notifications</b>
+<br>
+FEP Notifications, in contrary, are used to just inform other FEP Participants, e.g. FEP Status
+Notifications are used to inform remote FEP Participants about a local state change. Thus, FEP
+Notifications can also be a response to a FEP Command. Unlike FEP Commands there is no user specific
+"custom notification" - use \ref fep_wording_signal "FEP Signals" instead.
+
+For an overview of all available FEP Commands and FEP Notifications see the inheritance diagram of
+\ref fep::IMessage.
+
+
+\anchor fep_wording_signal
+FEP Signal
+----------------------------------------------------------------------------------------------------
+
+FEP Signals are used to transport/exchange (simulation) data. The data can be a single field of a
+basic data type as well as a complex structure containing multiple fields or arrays. Furthermore,
+the structure of a FEP Signal is described using the Data Definition Language (DDL) and is part of
+the \ref fep_wording_data_mdl "FEP Data Model" of the current \ref fep_wording_system "FEP System".
+
+All FEP Signals are send by (at least) one \ref fep_wording_participant "FEP Participant" and can be
+read by none, one or multiple other FEP Participants. The exchange of all FEP Signals is carried out
+by the \ref fep_wording_bus_simulation "FEP Simulation Bus".
+
+
+\anchor fep_wording_bus
+FEP Bus
+----------------------------------------------------------------------------------------------------
+
+The FEP Bus is the virtual channel used by FEP for any communication. The FEP Bus is accessed by a
+\ref fep_wording_component "FEP Component" of type FEP Bus Adapter. Thus, all \ref
+fep_wording_participant "FEP Participants" that are using the same type of FEP Driver (e.g. FEP RTI
+DDS Driver:TT_RTI_DDS) build up a \ref fep_wording_system "FEP System". The FEP Bus is separated
+into two sub buses.
+
+\anchor fep_wording_bus_service
+<b>FEP Service Bus</b>
+<br>
+The FEP Service Bus is used to exchange all \ref fep_wording_message "FEP Messages", i.e. all
+administrative data. This bus focuses on a reliable transmission, whereas jitter and latency are
+subsidiary priorities.
+
+\anchor fep_wording_bus_simulation
+<b>FEP Simulation Bus</b>
+<br>
+The FEP Simulation Bus is used to transmit the \ref fep_wording_signal "FEP Signals", i.e. all
+(simulation) data from the custom parts of a FEP Participant. This bus focuses on short latency and
+low jitter.
+
+
+\anchor fep_wording_library
+FEP Library
+----------------------------------------------------------------------------------------------------
+
+The FEP Library is an artifact of the \ref fep_wording_sdk "FEP SDK". It is a shared library (DLL /
+SO) that implements the \ref fep_wording_module "FEP Module" and its \ref fep_wording_component "FEP
+Components". The FEP Library provides a C++ API to make all FEP services available to the user
+implementation, i.e. to the \ref fep_wording_participant "FEP Participant".
+
+
+\anchor fep_wording_data_mdl
+FEP (Standard) Data Models
+----------------------------------------------------------------------------------------------------
+
+The content of a \ref fep_wording_signal "FEP Signal" is described using the Data Definition
+Language (DDL). A collection of several of such descriptions is called data model. Whenever such a
+data model pictures a whole \ref fep_wording_participant "FEP Participant" or even a whole \ref
+fep_wording_system "FEP System" it is called FEP Data Model.
+
+\anchor fep_wording_std_data_mdl
+Some FEP Data Models, especially FEP Data Models for \ref fep_wording_std_participant "FEP Standard
+Participants", might become re-used in several projects or by various FEP Participants. Such data
+models are called FEP Standard Data Models and are delivered as XML description file (DDL) as part
+of the \ref fep_wording_sdk "FEP SDK". See \ref fep_std_data_models for details about the current
+FEP Standard Data Models.
+
+ */
+}

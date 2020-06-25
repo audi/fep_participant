@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch_configuration xmlns="fep/xsd/launch_configuration">
+    <schema_version>1.0.0</schema_version>
+    <description>FEP SDK demo empty element example system</description>
+    <contact>aev.support@audi.de</contact>
+    <participants>
+        <participant>
+            <name>Demo_Empty_Element</name>
+            <host>localhost</host>
+            <working_dir>.</working_dir>
+            <arguments>--name $(name)</arguments>
+            <executable>../demo_empty_element</executable>
+        </participant>
+    </participants>
+</launch_configuration>

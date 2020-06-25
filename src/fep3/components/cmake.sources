@@ -1,0 +1,40 @@
+#
+# Copyright @ 2019 Audi AG. All rights reserved.
+# 
+#     This Source Code Form is subject to the terms of the Mozilla
+#     Public License, v. 2.0. If a copy of the MPL was not distributed
+#     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+# 
+# If it is not possible or desirable to put the notice in a particular file, then
+# You may include the notice in a location (such as a LICENSE file in a
+# relevant directory) where a recipient would be likely to look for such a notice.
+# 
+# You may add additional accurate notices of copyright ownership.
+#
+include(fep3/components/base/cmake.sources)
+set(COMPONENTS_SOURCES ${COMPONENTS_SOURCES} ${COMPONENTS_BASE_SOURCES})
+
+include(fep3/components/clock/cmake.sources)
+set(COMPONENTS_SOURCES ${COMPONENTS_SOURCES} ${CLOCK_SOURCES})
+
+include(fep3/components/scheduler/cmake.sources)
+set(COMPONENTS_SOURCES ${COMPONENTS_SOURCES} ${SCHEDULER_SOURCES})
+
+include(fep3/components/clock_sync_default/cmake.sources)
+set(COMPONENTS_SOURCES ${COMPONENTS_SOURCES} ${COMPONENTS_CLOCK_SYNC_SOURCES})
+
+include(fep3/components/data_registry/cmake.sources)
+set(COMPONENTS_SOURCES ${COMPONENTS_SOURCES} ${COMPONENTS_DATA_REGISTRY_SOURCES})
+
+find_package(pkg_rpc REQUIRED)
+include(fep3/components/rpc/cmake.sources)
+set(COMPONENTS_SOURCES ${COMPONENTS_SOURCES} ${RPC_SOURCES})
+
+include(fep3/components/legacy/cmake.sources)
+set(COMPONENTS_SOURCES ${COMPONENTS_SOURCES} ${COMPONENTS_LEGACY_SOURCES})
+
+include(fep3/components/configuration/cmake.sources)
+set(COMPONENTS_SOURCES ${COMPONENTS_SOURCES} ${CONFIGURATION_SOURCES})
+
+
+

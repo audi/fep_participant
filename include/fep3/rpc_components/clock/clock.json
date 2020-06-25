@@ -1,0 +1,33 @@
+[
+  // returns a comma seperated list of all registered clocks
+  {
+    "name": "getClocks",
+    "returns": "name1,name2"
+  },
+
+  // returns the name of the current configured clock
+  {
+    "name": "getCurrentClock",
+    "returns": "name1"
+  },
+
+  // return the time in micro sec for the given clock
+  // if clock_name is empty it will return the time of the current getCurrentClock
+  {
+    "name": "getTime",
+    "params": {
+      "clock_name": "name1"
+    },
+    "returns": "int64_time" //microsec
+  },
+  // return the type of the current clock
+  // contiuous clock = 0
+  // dicrete clock = 1
+  {
+    "name": "getType",
+    "params": {
+      "clock_name": "name1"
+    },
+    "returns": 1 //microsec
+  }
+]

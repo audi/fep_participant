@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<property_file xmlns="fep/xsd/properties">
+    <schema_version>1.0.0</schema_version>
+    <properties>
+        <property>
+            <name>TimingMaster/FEP_TimingMaster/TimeFactor</name>
+            <value>2.0</value>
+            <type>float</type>
+        </property>
+    </properties>
+</property_file>

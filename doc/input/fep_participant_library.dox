@@ -1,0 +1,46 @@
+//
+// Copyright @ 2019 Audi AG. All rights reserved.
+// 
+//     This Source Code Form is subject to the terms of the Mozilla
+//     Public License, v. 2.0. If a copy of the MPL was not distributed
+//     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+// 
+// If it is not possible or desirable to put the notice in a particular file, then
+// You may include the notice in a location (such as a LICENSE file in a
+// relevant directory) where a recipient would be likely to look for such a notice.
+// 
+// You may add additional accurate notices of copyright ownership.
+//
+/**
+\page fep_participant_library FEP Participant Library
+
+Since FEP SDK 2.3 the participant library is divided into two API parts. This provides you the opportunity to
+change your code to the new programming model of FEP 3 while staying compatible with the communication protocols defined in FEP SDK 2.
+
+
+The FEP 2 will provide a programming model where you usually implement a specialized fep::cModule 
+to build a FEP Participant.
+
+The new FEP 3 API will provide new defined interfaces and programming models. You will use a @ref fep::ParticipantFEP2 to build 
+and program a fep::Element.
+
+\dot
+digraph fep_participant_apis {
+    node [shape=box, fontname="Arial" style=filled, color="#AFAFAF"];
+    
+    fep2_api [label="FEP 2 API", URL="\ref fep_participant_library_fep2"];
+    fep3_api [label="FEP 3 API", URL="\ref fep_participant_library_fep3"]
+}
+\enddot
+
+\par References
+\li \subpage fep_participant_library_fep2
+\li \subpage fep_participant_library_fep3
+\li \subpage fep_first_participant
+
+\par Dependencies
+
+- DDL Library
+- \ref page_pkgrpc
+
+*/ 

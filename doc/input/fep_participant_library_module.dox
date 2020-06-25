@@ -1,0 +1,37 @@
+//
+// Copyright @ 2019 Audi AG. All rights reserved.
+// 
+//     This Source Code Form is subject to the terms of the Mozilla
+//     Public License, v. 2.0. If a copy of the MPL was not distributed
+//     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+// 
+// If it is not possible or desirable to put the notice in a particular file, then
+// You may include the notice in a location (such as a LICENSE file in a
+// relevant directory) where a recipient would be likely to look for such a notice.
+// 
+// You may add additional accurate notices of copyright ownership.
+//
+/**
+\page fep_participant_library_module FEP 2 Components
+
+
+The FEP Module, which is the base of every FEP Participant, contains some default components
+provided by the FEP Library. These components are named FEP Components and make the basic features
+of FEP available to every FEP Participant. The following pages give you some information about the
+most important FEP Components.
+
+- \subpage fep_state_machine "FEP State Machine"
+- \subpage fep_properties "FEP Property Tree"
+- \subpage fep_configs "FEP Configuration Areas"
+- \subpage fep_incident_handling "FEP Incident Handler"
+- \subpage fep_signal_registry "FEP Signal Registry"
+- \subpage fep_data_receive_ddb "FEP Distributed Data Buffer"
+- \subpage page_fep_timing "FEP Timing"
+- \subpage fep_signal_mapping "FEP Signal Mapping"
+- \subpage fep::AutomationInterface "FEP Automation Interface"
+- \subpage fep_transmission "FEP Transmission Adapter"
+- \subpage fep_rpc "FEP RPC Service"
+- \subpage fep_data
+
+
+*/ 

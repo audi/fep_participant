@@ -1,0 +1,366 @@
+//
+// Copyright @ 2019 Audi AG. All rights reserved.
+// 
+//     This Source Code Form is subject to the terms of the Mozilla
+//     Public License, v. 2.0. If a copy of the MPL was not distributed
+//     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+// 
+// If it is not possible or desirable to put the notice in a particular file, then
+// You may include the notice in a location (such as a LICENSE file in a
+// relevant directory) where a recipient would be likely to look for such a notice.
+// 
+// You may add additional accurate notices of copyright ownership.
+//
+ 
+namespace fep
+{ /**
+@page fep_description_tooling FEP Tooling and Description Files
+
+\anchor fep_tools
+
+The FEP SDK implements the standard solution defined in the @subpage MetaModel to describe, deploy
+and run FEP Systems.
+
+
+Element descriptions
+---------------------------------------------------------------------------------------------------
+
+Element descriptions, as defined in the Meta Model, are meant to describe a concrete FEP Element
+(which at runtime becomes a FEP Participant) as is. That means, it describes any interfaces and
+requirements exactly as they are implemented and default-parameterized.
+
+In a future release, FEP Participants will be able to generate a basic element description.
+
+
+Supported element interfaces
+---------------------------------------------------------------------------------------------------
+
+The following interfaces are supported by the FEP 2 implementation of the Meta Model tooling.
+
+<table>
+    <tr>
+        <th>Interface</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td><pre>FEP_PropertyTree</pre></td>
+        <td>
+            Direct way to set FEP Properties in the Property Tree
+            <table>
+                <tr>
+                    <th>Property</th>
+                    <th>Type</th>
+                    <th>Comment</th>
+                </tr>
+                <tr>
+                    <td><pre>Any</pre></td>
+                    <td><pre>string, float, int32, bool</pre></td>
+                    <td>Paths are relative to FEP Property Tree root</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td><pre>FEP_StateMachine</pre></td>
+        <td>
+            Configuration for the FEP State Machine
+            <table>
+                <tr>
+                    <th>Property</th>
+                    <th>Type</th>
+                    <th>Comment</th>
+                </tr>
+                <tr>
+                    <td><pre>StandaloneMode</pre></td>
+                    <td><pre>bool</pre></td>
+                    <td>Controls standalone mode. If enabled, state is not considered by launcher/controller</td>
+                </tr>
+                <tr>
+                    <td><pre>InitPriority</pre></td>
+                    <td><pre>int32</pre></td>
+                    <td>[-2147483648, 2147483647]<br>Controls the order of initialization in the controller. The higher it is, the earlier it is initialized relative to other elements.</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td><pre>FEP_SignalRegistry</pre></td>
+        <td>
+            Configuration of FEP Signals
+            <table>
+                <tr>
+                    <th>Property</th>
+                    <th>Type</th>
+                    <th>Comment</th>
+                </tr>
+                <tr>
+                    <td><pre>SignalDescriptionFiles</pre></td>
+                    <td><pre>string</pre></td>
+                    <td>Comma separated list of signal description files to load</td>
+                </tr>
+                <tr>
+                    <td><pre>SignalMappingFiles</pre></td>
+                    <td><pre>string</pre></td>
+                    <td>Comma separated list of signal mapping files to load</td>
+                </tr>
+                <tr>
+                    <td><pre>Output/\<SignalName\>/Type</pre></td>
+                    <td><pre>string</pre></td>
+                    <td>Describes the type of an output signal with name 'SignalName'. Empty string means raw signal</td>
+                </tr>
+                <tr>
+                    <td><pre>Input/\<SignalName\>/Type</pre></td>
+                    <td><pre>string</pre></td>
+                    <td>Describes the type of an input signal with name 'SignalName'. Empty string means raw signal</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td><pre>FEP_VUProvider</pre></td>
+        <td>
+            Configuration of a FEP VU Provider. Can only be published in an participant named "VUProvider", due to FEP 2 VU limitations
+            <table>
+                <tr>
+                    <th>Property</th>
+                    <th>Type</th>
+                    <th>Comment</th>
+                </tr>
+                <tr>
+                    <td><pre>ScenarioPath</pre></td>
+                    <td><pre>string</pre></td>
+                    <td>Controls the scenario path to be used in the VU Provider</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td><pre>FEP_TimingClient 
+2.1.0</pre></td>
+        <td>
+            Configuration of a FEP Timing Client using the legacy timing layer
+            <table>
+                <tr>
+                    <th>Property</th>
+                    <th>Type</th>
+                    <th>Comment</th>
+                </tr>
+                <tr>
+                    <td><pre>TimingConfiguration</pre></td>
+                    <td><pre>string</pre></td>
+                    <td>Path to a FEP Timing Configuration File</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td><pre>FEP_TimingMaster 
+2.1.0</pre></td>
+        <td>
+            Configuration of a FEP Timing Master using the legacy timing layer
+            <table>
+                <tr>
+                    <th>Property</th>
+                    <th>Type</th>
+                    <th>Comment</th>
+                </tr>
+                <tr>
+                    <td><pre>TriggerMode</pre></td>
+                    <td><pre>string</pre></td>
+                    <td>Controls the trigger mode. ("AFAP", "SYSTEM_TIME", "EXTERNAL_CLOCK", "USER_IMPLEMENTATION")</td>
+                </tr>
+                <tr>
+                    <td><pre>TimeFactor</pre></td>
+                    <td><pre>float</pre></td>
+                    <td>Controls the time factor in system time trigger mode</td>
+                </tr>
+                <tr>
+                    <td><pre>ClientTimeout</pre></td>
+                    <td><pre>int32</pre></td>
+                    <td>Client timeout in seconds</td>
+                </tr>
+                <tr>
+                    <td><pre>SystemTimeout</pre></td>
+                    <td><pre>int32</pre></td>
+                    <td>System timeout in seconds (set in all Timing Clients)</td>
+                </tr>
+                <tr>
+                    <td><pre>MinTriggerTime</pre></td>
+                    <td><pre>int32</pre></td>
+                    <td>Minimal trigger time (ms)</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+        <tr>
+        <td><pre>FEP_TimingClient
+3.0.0</pre></td>
+        <td>
+            Configuration of FEP Timing Client using the new timing layer
+            <table>
+                <tr>
+                    <th>Property</th>
+                    <th>Type</th>
+                    <th>Comment</th>
+                </tr>
+                <tr>
+                    <td><pre>TriggerMode</pre></td>
+                    <td><pre>string</pre></td>
+                    <td>Controls the trigger mode. ("NO_SYNC", "LOCAL_SYS_REALTIME", "EXTERNAL_REALTIME", "FIXED_TIME_STEPS", "EXTERNAL_CLOCK")</td>
+                </tr>
+                <tr>
+                    <td><pre>SyncCycleTime</pre></td>
+                    <td><pre>int32</pre></td>
+                    <td>Controls the synchronous cycle time</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td><pre>FEP_TimingMaster
+3.0.0</pre></td>
+        <td>
+            Configuration of a FEP Timing Master using the new timing layer
+            <table>
+                <tr>
+                    <th>Property</th>
+                    <th>Type</th>
+                    <th>Comment</th>
+                </tr>
+                <tr>
+                    <td><pre>TriggerMode</pre></td>
+                    <td><pre>string</pre></td>
+                    <td>Controls the trigger mode. ("NO_SYNC", "LOCAL_SYS_REALTIME", "EXTERNAL_REALTIME", "FIXED_TIME_STEPS", "EXTERNAL_CLOCK")</td>
+                </tr>
+                <tr>
+                    <td><pre>TimeFactor (FIXED_TIME_STEPS mode only)</pre></td>
+                    <td><pre>float</pre></td>
+                    <td>The factor to stretch or shrink the discrete time steps in relation to the system time.</td>
+                </tr>
+                <tr>
+                    <td><pre>CycleTime (FIXED_TIME_STEPS mode only)</pre></td>
+                    <td><pre>int32</pre></td>
+                    <td>Cycle time of the built-in discrete simulation time clock which defines the length of a discrete time step in ms. </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+<br>
+
+There are two different timing layers supported. To select a specific one, you need to 
+change the version tag of the FEP_TimingMaster/FEP_TimingClient <c>interface</c> to the required
+version. Supported interface versions are:
+
+- 2.1.0 - Timing Legacy layer also known as @ref fep_timing_2 "FEP 2 Timing"
+- 3.0.0 - New Timing layer also known as @ref fep_timing_3 "FEP 3 Timing"
+
+
+Supported element requirements
+---------------------------------------------------------------------------------------------------
+
+The following requirement interfaces are supported by the FEP 2 implementation of the Meta Model
+tooling.
+
+<table>
+    <tr>
+        <th>Interface</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td><pre>FEP_TimingMaster</pre></td>
+        <td>Configuration of FEP Timing is realized using a requirement to FEP_TimingMaster.<br>
+            Resolving the requirement for a FEP Timing Client/FEP Timing Master configures it to use/be the timing master.</td>
+    </tr>
+    <tr>
+        <td><pre>FEP_VUProvider</pre></td>
+        <td>Requiring the FEP_VUProvider interface means, that an participant requires the VU Data Model at initialization time.<br>
+            Resolving it ensures that the VU Provider is initialized before any participant requiring it.</td>
+    </tr>
+</table>
+
+
+<br>
+
+
+Tooling
+---------------------------------------------------------------------------------------------------
+
+The FEP SDK provides implementations for both the system launcher and the controller, as defined by
+the @ref MetaModel.
+
+### Launcher
+
+The launcher brings up all participants to state FS_IDLE. In the current implementation the system
+name is not used to separate two FEP systems (use the FEP Domain system for this).
+
+\note
+The FEP 2 launcher uses the FEP Remote Starter from FEP Utility to start participant on other hosts
+than the localhost. The FEP Remote Starter has to be running on the target host and has to be named
+<c>Remote_Starter_\<hostname\>_\<domain-ID\></c> (default since FEP 2.1.0). Furthermore there has to
+be an alias configured for the corresponding executable (see FEP Utility manual for details). For
+the launch configuration you have to use the \c remote_starter_alias tag for remote hosts and the \c
+executable for localhost.
+
+All other aspects of the launcher are defined in the @ref MetaModel.
+
+### Controller
+
+The controller connects to a system that has already been launched.
+
+#### Supported commands
+<table>
+    <tr>
+        <th>Command</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td><pre>start [timeout (s)]</pre></td>
+        <td>Standard command from the @ref MetaModel</td>
+    </tr>
+    <tr>
+        <td><pre>stop [timeout (s)]</pre></td>
+        <td>Standard command from the @ref MetaModel</td>
+    </tr>
+    <tr>
+        <td><pre>shutdown [timeout (s)]</pre></td>
+        <td>Standard command from the @ref MetaModel</td>
+    </tr>
+    <tr>
+        <td><pre>await_idle [timeout (s)]</pre></td>
+        <td>Standard command from the @ref MetaModel</td>
+    </tr>
+    <tr>
+        <td><pre>dump_properties [participant]</pre></td>
+        <td>Dumps all properties of the participant to stdout.</td>
+    </tr>
+    <tr>
+        <td><pre>get_property [participant] [path] [type]</pre></td>
+        <td>Gets and prints the value of a property to stdout. The path uses FEP 2 path notation ('.' instead of '/')! Supported types are <pre>string, float, int32, bool</pre></td>
+    </tr>
+    <tr>
+        <td><pre>set_property [participant] [path] [type] [value]</pre></td>
+        <td>Sets the value of a property. The path uses FEP 2 path notation ('.' instead of '/')! Supported types are <pre>string, float, int32, bool</pre></td>
+    </tr>
+    <tr>
+        <td><pre>get_state [participant]</pre></td>
+        <td>Gets and prints the state of the participant to stdout.</td>
+    </tr>
+    <tr>
+        <td><pre>trigger_event [participant] [event]</pre></td>
+        <td>Triggers an event at the participant (wildcards allowed). Supported events are <pre>initialize, start, stop, shutdown, errorfixed, restart</pre></td>
+    </tr>
+</table>
+
+
+Examples
+---------------------------------------------------------------------------------------------------
+
+Some of the FEP SDK examples are described with appropriate descriptions files and launch- and
+controllable using the tooling documented here.
+
+The most accurately described example is @ref demo_timing_30.
+
+<br>
+
+*/ }

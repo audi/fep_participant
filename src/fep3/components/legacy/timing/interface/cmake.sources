@@ -1,0 +1,28 @@
+#
+# Copyright @ 2019 Audi AG. All rights reserved.
+# 
+#     This Source Code Form is subject to the terms of the Mozilla
+#     Public License, v. 2.0. If a copy of the MPL was not distributed
+#     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+# 
+# If it is not possible or desirable to put the notice in a particular file, then
+# You may include the notice in a location (such as a LICENSE file in a
+# relevant directory) where a recipient would be likely to look for such a notice.
+# 
+# You may add additional accurate notices of copyright ownership.
+#
+set(COMPONENTS_TIMING_OLD_DIR fep3/components/legacy/timing/interface)
+set(COMPONENTS_TIMING_OLD_INCLUDE_DIR ../include/fep3/components/legacy/timing)
+
+set(TIMING_OLD_SOURCES
+    ${COMPONENTS_TIMING_OLD_INCLUDE_DIR}/step_trigger_intf.h
+    ${COMPONENTS_TIMING_OLD_INCLUDE_DIR}/timing_client_intf.h
+    ${COMPONENTS_TIMING_OLD_INCLUDE_DIR}/timing_master_intf.h
+)
+set(TIMING_LEGACY_SOURCES 
+    ${COMPONENTS_TIMING_OLD_DIR}/timing_intf_leg_component.h
+    ${COMPONENTS_TIMING_OLD_DIR}/timing_intf_leg_component.cpp)
+
+set(TIMING_LEGACY_INTERFACE_SOURCES ${TIMING_OLD_SOURCES} ${TIMING_LEGACY_SOURCES})
+
+source_group(components\\legacy\\timing\\interface_legacy FILES ${TIMING_LEGACY_INTERFACE_SOURCES})

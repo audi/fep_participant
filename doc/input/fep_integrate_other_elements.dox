@@ -1,0 +1,48 @@
+//
+// Copyright @ 2019 Audi AG. All rights reserved.
+// 
+//     This Source Code Form is subject to the terms of the Mozilla
+//     Public License, v. 2.0. If a copy of the MPL was not distributed
+//     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+// 
+// If it is not possible or desirable to put the notice in a particular file, then
+// You may include the notice in a location (such as a LICENSE file in a
+// relevant directory) where a recipient would be likely to look for such a notice.
+// 
+// You may add additional accurate notices of copyright ownership.
+//
+
+/**
+*
+@page fep_integrate_other_participants Integrating with other FEP Participants
+
+<p>
+Discovery of FEP Participants within a FEP System is done automatically. This means that
+developers using the FEP SDK and its FEP SDK System library do not have to worry about the actual configuration or name/address
+resolution of other FEP Participants.
+
+However, to interact and integrate with remote FEP Participants, some kind of synchronization point
+is still needed where the state of another FEP Participant is known and determined.
+</p>
+
+To discover available FEP Participants in the FEP System, FEP offers two mechanisms - an active
+mechanism that works via a polling approach and a passive mechanism that listens and reacts to
+broadcast messages.
+
+
+Using Domain Ids
+----------------------------------------------------------------------------------------------------
+
+With the introduction of domain ids multiple FEP Networks can be run independently from each other
+on the same physical network.
+
+Only FEP Participants within the same domain are able to communicate/interact with each other. FEP
+Participants from other domains will not be discovered.
+
+The domain id can be set using methods described in \ref fep_participant_configuration "FEP
+Participant Configuration".
+
+
+*/
+
+

@@ -1,0 +1,85 @@
+#
+# Copyright @ 2019 Audi AG. All rights reserved.
+# 
+#     This Source Code Form is subject to the terms of the Mozilla
+#     Public License, v. 2.0. If a copy of the MPL was not distributed
+#     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+# 
+# If it is not possible or desirable to put the notice in a particular file, then
+# You may include the notice in a location (such as a LICENSE file in a
+# relevant directory) where a recipient would be likely to look for such a notice.
+# 
+# You may add additional accurate notices of copyright ownership.
+#
+# subtle difference: on unix the command silently fails if the output directory does not exist...
+file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/clock)
+
+jsonrpc_generate_server_stub(${PROJECT_SOURCE_DIR}/include/fep3/rpc_components/clock/clock.json
+                             fep::rpc_stubs::RPCClockService
+                             ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/clock/clock_service.h)
+jsonrpc_generate_client_stub(${PROJECT_SOURCE_DIR}/include/fep3/rpc_components/clock/clock.json
+                             fep::rpc_stubs::RPCClockServiceClient
+                             ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/clock/clock_service_client.h)
+
+jsonrpc_generate_server_stub(${PROJECT_SOURCE_DIR}/include/fep3/rpc_components/clock/clock_sync_master.json
+                             fep::rpc_stubs::RPCClockSyncMaster
+                             ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/clock/clock_sync_master.h)
+jsonrpc_generate_client_stub(${PROJECT_SOURCE_DIR}/include/fep3/rpc_components/clock/clock_sync_master.json
+                             fep::rpc_stubs::RPCClockSyncMasterClient
+                             ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/clock/clock_sync_master_client.h)
+
+jsonrpc_generate_server_stub(${PROJECT_SOURCE_DIR}/include/fep3/rpc_components/clock/clock_sync_slave.json
+                             fep::rpc_stubs::RPCClockSyncSlave
+                             ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/clock/clock_sync_slave.h)
+jsonrpc_generate_client_stub(${PROJECT_SOURCE_DIR}/include/fep3/rpc_components/clock/clock_sync_slave.json
+                             fep::rpc_stubs::RPCClockSyncSlaveClient
+                             ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/clock/clock_sync_slave_client.h)
+
+jsonrpc_generate_client_stub(${PROJECT_SOURCE_DIR}/include/fep3/rpc_components/participant_info/participant_info.json
+                             fep::rpc_stub::RPCParticipantInfoClient
+                             ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/clock/participant_info_service_client.h)
+
+set(CLOCK_SOURCES_PUBLIC ${PROJECT_SOURCE_DIR}/include/fep3/components/clock/clock_service_intf.h
+                         ${PROJECT_SOURCE_DIR}/include/fep3/components/clock/clock_base.h)
+
+set(CLOCK_RPC_SOURCES_PUBLIC ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/clock/clock_service.h
+                         ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/clock/clock_service_client.h
+                         ${PROJECT_SOURCE_DIR}/include/fep3/rpc_components/clock/clock.json
+
+                         ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/clock/clock_sync_master.h
+                         ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/clock/clock_sync_master_client.h
+                         ${PROJECT_SOURCE_DIR}/include/fep3/rpc_components/clock/clock_sync_master.json
+
+                         ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/clock/clock_sync_slave.h
+                         ${PROJECT_BINARY_DIR}/include/fep3/rpc_components/clock/clock_sync_slave_client.h
+                         ${PROJECT_SOURCE_DIR}/include/fep3/rpc_components/clock/clock_sync_slave.json
+
+                         ${PROJECT_SOURCE_DIR}/include/fep3/rpc_components/clock/clock_service_rpc_intf_def.h)
+
+
+set(CLOCK_SOURCES_PRIVATE
+    fep3/components/clock/local_clock_service.cpp
+    fep3/components/clock/local_clock_service.h
+    fep3/components/clock/local_clock_service_master.cpp
+    fep3/components/clock/local_clock_service_master.h
+    fep3/components/clock/local_system_clock.cpp
+    fep3/components/clock/local_system_clock.h
+    fep3/components/clock/local_system_clock_discrete.cpp
+    fep3/components/clock/local_system_clock_discrete.h
+)
+
+install(FILES
+        ${CLOCK_SOURCES_PUBLIC}
+        DESTINATION include/fep3/components/clock
+)
+
+install(FILES
+        ${CLOCK_RPC_SOURCES_PUBLIC}
+        DESTINATION include/fep3/rpc_components/clock
+)
+
+set(CLOCK_SOURCES ${CLOCK_SOURCES_PUBLIC} ${CLOCK_RPC_SOURCES_PUBLIC} ${CLOCK_SOURCES_PRIVATE})
+
+source_group(components\\clock\\public_rpc FILES ${CLOCK_RPC_SOURCES_PUBLIC})
+source_group(components\\clock\\public FILES ${CLOCK_SOURCES_PUBLIC})
+source_group(components\\clock FILES ${CLOCK_SOURCES_PRIVATE})

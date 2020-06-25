@@ -1,0 +1,173 @@
+/**
+ *
+ * This file describes the usage of FEP Requirements
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+
+
+namespace fep
+{ /**
+@page fep_sys_req FEP %System Requirements
+
+\anchor fep_supported_platforms
+FEP is designed to work with and has been tested for the following platform configurations:
+
+
+Windows 32 Bit
+----------------------------------------------------------------------------------------------------
+
+- Windows 7/10 x86/x64
+- Visual Studio 2015 (vc140)
+
+
+Windows 64 Bit
+----------------------------------------------------------------------------------------------------
+
+- Windows 7/10 x64 
+- Visual Studio 2015 (vc140)
+
+
+Linux 64 Bit
+----------------------------------------------------------------------------------------------------
+
+- Ubuntu/Xubuntu/Kubuntu 14.04.5 LTS x86_64
+- GCC 4.8.4
+
+or
+
+- Ubuntu/Xubuntu/Kubuntu 16.04.5 LTS x86_64
+- GCC 5.4.0
+
+FEP will most likely run on any recent Linux distribution but has only been tested with the versions
+named above. If you are not running these tested distributions make sure that \c libc is at least
+version 2.19 and \c libstdc++ at least version 6.0.19.
+
+
+ARM v8
+----------------------------------------------------------------------------------------------------
+
+- Ubuntu/Xubuntu/Kubuntu 16.04.5 LTS x86_64
+- GCC 5.4.0
+
+\warning Platform or compiler versions other than the ones mentioned above are <b>NOT</b> 
+         supported!
+
+
+Ports
+----------------------------------------------------------------------------------------------------
+
+Depending on the chosen transmission driver, different ports are required for the FEP SDK to
+function properly. Additionally, the chosen domain (see \ref fep_participant_configuration) as well
+as the number of participants on the host system may influence the required range of ports.
+
+The following ports are required for the RTI DDS driver when using domains 0, 1 and 2 with a maximum
+of 10 participants on each host:
+
+<table>
+    <tr>
+        <th>Domain</th>
+        <th>Meta MultiCast Port</th>
+        <th>Meta Unicast Port</th>
+        <th>Meta Unicast Port / User Uni Cast Port</th>
+    </tr>
+    <tr>
+        <td>0</td>
+        <td>7400</td>
+        <td>7401</td>
+        <td>7410 - 7430</td>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>7650</td>
+        <td>7651</td>
+        <td>7660 - 7680</td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td>7900</td>
+        <td>7901</td>
+        <td>7910 - 7930</td>
+    </tr>
+</table>
+
+\warning
+On the Audi FEP.IT Ubuntu clients, only the ports listed above are opened. <b>This implies that by
+default the Audi FEP.IT clients only support domain 0, 1 and 2!</b>
+
+Protocol is UDP.
+
+\note
+For the range of ports needed for a custom configuration, please contact the support.
+
+
+Participant Discovery: Multi-/Broadcast vs. Peer List Configuration
+---------------------------------------------------------------------------------------------------
+
+The discovery mechanism of the underlying RTI Connext DDS middleware uses broad- and/or multicasts.
+It automatically discovers participants on the same domain, making any manual connection setup
+unnecessary.
+
+However, in some networks or for some clients broad- and/or multicasts might be blocked or filtered
+(cloud networks typically disable multicast). In this case the FEP Participants will neither be able
+to discover each other nor to communicate in any way, e.g. interchanging simulation data.
+
+For this situation, RTI Connext DDS provides support to configure all nodes/computers participating
+by hostname or IP address, bypassing broad- and/or multicasts.
+There are two ways to achieve this:
+- Creating an environment variable named \c NDDS_DISCOVERY_PEERS holding a comma separated list of
+hostnames and/or IP addresses.
+- Placing a file with the same name and the same content as the environment variable next to the
+executable.
+
+Please note, that this is not a FEP feature, but an RTI Connecxt DDS feature. Thus, see
+[RTI DDS manual, Chapter "Configuring the Peers List Used in Discovery"](https://community.rti.com/static/documentation/connext-dds/5.3.0/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/ConfigPeersListUsed_inDiscov.htm)
+for more information. Also keep in mind that you have to apply this environment variable or file on
+every node/computer that should participate in the simulation.
+
+
+Monitoring the network using the RTI Monitor
+---------------------------------------------------------------------------------------------------
+
+The underlying RTI Connext DDS middleware supports traffic monitoring using the RTI Monitor tools,
+which is part of the RTI Connext suite (NOT part of the FEP SDK!).
+
+To enable monitoring for your participants, you will have to use the shared library variant of the
+FEP SDK. Additionally, the two files <c>${FEP_SDK_PARTICIPANT_DIR}/doc/rti_monitoring/rtimonitoring.dll</c>
+(file name may vary depending on platform) and
+<c>${FEP_SDK_PARTICIPANT_DIR}/doc/rti_monitoring/USER_QOS_PROFILES.xml</c> need to be copied alongside the
+fep_core library and its dependencies.
+
+Some statistics are only available, if all participants in the system are started with monitoring
+support.
+
+
+FEP Participants
+---------------------------------------------------------------------------------------------------
+
+If your library / executable is build in release mode, you cannot use it with the debug version of
+the  FEP Library or vice versa.  FEP Bus compatibility is guaranteed between FEP Participants of the
+same FEP SDK Major Version.  Messages and Samples received from FEP Participants of a different
+Major Version will be dropped and an incident indicating the reception will be thrown.
+
+\subpage fep_system_req_examples "Requirements for Examples see here."
+
+
+ADTF
+---------------------------------------------------------------------------------------------------
+
+No ADTF installation is required to use the FEP SDK.
+
+*/ }

@@ -1,0 +1,232 @@
+/**
+ *
+ * This file describes the usage of data.
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+namespace fep
+{
+/**
+\page fep_data Transporting Data in FEP
+
+This page discusses the following topics:
+- \ref fep_data_what "What is FEP data?"
+- \ref fep_data_modes "Which kind of data transmission is provided?"
+- \ref fep_standard_data_transmission "Standard use case of data transmission"
+- \ref fep_special_use_cases_data_tx "Special use cases of data transmission"
+- \ref fep_signal_muting "Mute output signals and entire participants"
+- \ref fep_user_data_access "User data access"
+- \ref ddl_explanation_limits "Data Description Language"
+
+\section fep_data_what What is Data?
+
+When talking about data in the FEP context, we need to distinguish between configuration data,
+simulation data, static data, and dynamic data.
+<br>
+<br>
+<b><i>Configuration data and static data</i></b>
+<br>
+This is data needed to configure the FEP participant. This kind of data is not sent during the
+RUNNING state and will usually be stored in the Property Tree (see \ref fep_properties) and be
+transported via set property commands (see \ref fep_messages)
+
+<br>
+<br>
+<b><i>Simulation Data and Dynamic Data</i></b>
+<br>
+Simulation and dynamic data is the object of your simulation. This kind of data will predominantly
+be transmitted and processed during the state RUNNING.
+
+This page focuses on the latter kind of data. In the FEP context this kind of data is called a
+signal. Signals can be transmitted and received during the states FS_READY and FS_RUNNING. To be
+more precise the transmission is enabled before any external ReadyEntry-callback, and disabled after
+all RunningExit- callbacks. Output signals - unlike messages - are always transmitted via a
+broadcast.
+
+\section fep_data_modes Modes of Data Transmission
+
+The FEP SDK provides three different modes for data transmission. The first mode is the so called
+RAW mode. This mode simply transmits a block of data as it lies in memory. The size of the
+transmitted data can vary between consecutive transmit calls of one signal. As the name RAW mode
+implies, there is no size checking or serialization of the transmitted data. Therefore, it can only
+be used on platforms that are compatible to each other, i.e., regarding endianness.
+
+The second (Ddl_Raw) and third (Ddl_Ser) modes use the Data Description Language (DDL \ref
+page_ddl_specification) to transmitted the data. Thereby, it provides size checking and gives a
+clear description on both sides of the transmission of what is transmitted. Ddl_Raw uses the DDL but
+turns off the serialization. Ddl_Ser serializes the data and allows for the transmission of data
+across different platforms using different endianness and alignment. It still provides a description
+and size checking.
+
+The decision which mode should be used is highly dependent on the use case. If your FEP system
+requires high performance and is only used on compatible platforms then RAW mode or DDL mode with
+Ddl_Raw might be a good choice. If the FEP system spans across multiple incompatible platforms
+Ddl_Ser mode needs to be used.
+
+The following example shows the code for two FEP participants sending and receiving one raw and one 
+serialized signal, respectively. This is the standard way which should cover the vast majority of 
+use cases.
+
+There is also a mechanism to mute (e.g. suppress the transmission of) output signals (see 
+\ref fep_signal_muting).
+
+\section fep_standard_data_transmission Signal Transmission & Reception
+
+In the following part the standard and most frequent use case of FEP data transmission is described.
+This excludes advanced concepts like signal mapping or distributed data buffer (DDB). For these and
+more specific use cases refer to \ref fep_special_use_cases_data_tx "Special Use Cases".
+Furthermore, this part describes a data triggered approach. For the specifics of a time triggered
+use case requiring determinism please refer to \ref page_fep_timing "FEP Timing" (Yet, if you are new to
+FEP you should read the following chapter prior to reading the FEP Timing chapter, since the
+following sections provide information that is usefull in understanding the FEP Timing approach)  
+
+The two main components relevant to transmitting signals are the \ref fep_signal_registry "Signal
+Registry" (to register signals & signal descriptions) and the \ref fep_user_data_access
+"UserDataAccess" (to register UserDataListeners and actually transmit signals). Typically some
+participant transmits a signal and one or more participants receive this signal.
+
+For a serialized signal a DDL description is required. So the first step is to register a signal
+description (this step can be omitted in case of a raw signal). After the signal description is made
+known to FEP the signal itself needs to be registered (have a look at \ref fep_UserSignalOptions
+"cUserSignalOptions" after finishing this section). Subsequently, it is required to create a
+UserDataSample via a factory provided by the FEP DataAccess. The signal itself it transmitted via a
+call to the transmit method. Note that the transmit call is synchronous.
+
+On the reception side, the DDL and the signal have to be registered as well. To actually receive a
+signal, a data listener has to be registered at the data access interface. Whenever new data is
+available, the Update-Callback of the registered \ref IUserDataListener is called.
+
+\warning
+If the \ref IUserDataListener::Update() callback of a signal gets blocked for a longer period than
+the maximum allowed processing time given by the receiving sample rate (1/frequency), the receive
+buffer for the signal may overflow and samples will be lost.
+
+\warning
+The current version of FEP has a known issue regarding the parallel reception of multiple FEP
+Messages within callbacks: If you try to receive or wait for FEP Messages via the FEP Service Bus,
+i.e. all FEP Notifications and FEP Commands, while being in a callback that was triggered from
+remote, you risk to encounter this problem.  The affected callbacks are state callbacks that were
+triggered by a remote event and \c Update callbacks for data received via the FEP Service Bus. If
+the problem occurs, most likely you "just" get a timeout, but you might also run into a deadlock -
+depending on your implementation.  Note, that this also affects usage of most of the \c IAI methods.
+
+All the steps described above are shown in the following example for a sending and a receiving participant.
+
+Lets start with the transmission side:
+\snippet snippet_data_transmission/data_transmitter.h Transmitting participant
+\snippet snippet_data_transmission/data_transmitter.cpp Transmitting participant
+
+The receiving side:
+\snippet snippet_data_transmission/data_receiver.h Receiving participant
+\snippet snippet_data_transmission/data_receiver.cpp Receiving participant
+
+The actual receiving object:
+\snippet snippet_data_transmission/data_processor.h Processing participant
+
+Now lets bring it all together:
+\snippet snippet_data_transmission/main.cpp The main program
+
+\note
+This code is intended to show how to transmit and receive signals. It is not intended to demonstrate
+the recommended use of FEP itself. In a single process, there is little to no reason to use multiple
+modules (Keep in mind that a FEP module is rather heavy weight). Of course, sending and receiving
+can be done in a single/the same module. It is recommended to use one module per process and
+dispatch the processing of incoming data via registering different UserDataListeners. The effective
+transmission performance relates to the "location" of the modules. Modules on one node (e.g.
+computer) communicate (in general) faster than those on different machines (e.g. network
+communication). Before implementing a FEP particpant please consult the \ref fep_best_practice "Best
+Practices".
+
+\subsection fep_data_tx_loss_detection Detection of Data Loss 
+
+In order to detect missing frames, FEP internally stores a frame ID and a sample number for each
+transmitted data sample. When calling \ref IUserDataAccess::TransmitData, both will be set depending
+on the sync flag. When the sync flag is set to true the frame ID is increased. FEP will detect a
+missing sample when it receives a sample with a frame ID higher than the previously received frame
+ID + 1. Therefore make sure to always set the sync flag to true unless you are having a \ref
+fep_special_use_cases_data_tx "special use case" requiring the use of the \ref fep_ddb_component
+"DDB".  In case data loss is detected a \ref page_aux_builtin_incidents "\c FSI_TRANSM_RX_MISSING_DATASAMPLE"
+incident of \ref tSeverityLevel \c "SL_Warning" severity is raised.
+
+\subsection fep_data_tx_default_init Default Sample Initialization
+
+When a signal is registered, a default initialized sample is created.  The default initialization is
+based on the default values of each data type contained in the sample (specified in the DDL). If no
+default value is given the corresponding participant will be zero initialized. Note that RAW samples
+are not(!) initialized.
+
+\section fep_signal_muting Signal Muting
+
+The FEP SDK provides a muting mechanism for output signals. Muted signals will not be transmitted.
+This mechanism is made accessible via the automation interface. To suppress the transmission of
+signals, you can either mute the individual signal or mute the entire participant. Keep in mind that
+muting only affects output data signals. Input signals are still received (not muteable) and
+messages are still transmitted and received.  To mute/unmute signals you can use the \ref
+AutomationInterface::MuteSignal /\ref AutomationInterface::UnmuteSignal methods.  To mute/unmute the
+entire module use the \ref AutomationInterface::MuteParticipant /\ref
+AutomationInterface::UnmuteParticipant methods.  The muting status of a signal or participant can be
+checked using the method \ref AutomationInterface::IsSignalMuted and \ref
+AutomationInterface::IsParticipantMuted respectively.  Alternatively the current muting status of a
+participant can be queried via its corresponding property: fep::g_strElementHeaderPath_bGlobalMute
+("Header.GlobalMute"). The muting status for a signal is available via the following property : \ref
+FEP_CSR_OUTPUT_SIGNALS_PATH .${signal name}. \ref FEP_CSR_SIGNAL_MUTED_FIELD
+("ComponentConfig.SignalRegistry.RegisteredOutputSignals.${SIGNAL NAME}.bMutedSignal").
+
+\warning
+The property must not be altered. Changing the property will neither mute nor unmute. The property
+only reflects the current muting state.
+
+\section fep_user_data_access User Data Access
+
+The \ref fep::IUserDataAccess "UserDataAccess" is the primary interface for the SDK user to interact
+with the FEP data transmission.  Besides the three key functionalities introduced \ref
+fep_standard_data_transmission "here": registering/unregistering UserDataListeners, creating
+UserDataSamples and transmiting data, the UserDataAccess provides another key feature, the so called
+sample backlog. The sample backlog provides access to previously received samples. The last received
+sample for a given signal can be retrieved via a call to \ref fep::IUserDataAccess::LockData
+"LockData" (it needs to be returned via a call to \ref fep::IUserDataAccess::UnlockData
+"UnlockData"). A sample received at a time close to a given timestamp for a given signal can be
+retrieved via the \ref fep::IUserDataAccess::LockDataAt "LockDataAt" method (similar to LockData the
+retrieved sample of LockDataAt must be returned via \ref fep::IUserDataAccess::UnlockData
+"UnlockData"). There are different strategies to evaluate the meaning of "close in time" that can be
+selected via the enum \ref IUserDataAccess::tSampleSelectionMechanism "tSampleSelectionMechanism".
+The default size of the backlog is 1 (e.g. only the latest sample is stored). The size/length of the
+backlog can be configured via the property \ref FEP_MAPPING_REMOTE_MAPPING_PATH with the path:
+"ComponentConfig.Mapping.strRemoteMappingPath".
+
+\section fep_special_use_cases_data_tx Special Use Cases
+
+At this point it is reasonable to mention some of the advanced tools that are provided by the FEP
+SDK to cover a range of use cases. To map a single big incoming signal on to multiple input signals,
+the SDK provides a so called mapping component. Furthermore it can be used to retrieve only a subset
+of the information contained in a signal.  For a detailed description of the mapping component refer
+to \ref fep_signal_mapping "Signal Mapping".
+
+Another use case is the transmission of a data stream. This means a signal is sent in multiple
+instances and the receiving side reassembles those instances into one single frame. This can be
+achieved using the distributed data buffer (DDB). An in-depth explanation of 
+\subpage fep_ddb_component "the DDB is given here".
+
+\section ddl_explanation_limits Data Description Language
+
+For the serialization of the transmitted signals the data description language (or short DDL) is
+used.  A general explanation of the DDL format and it's use is described @ref
+page_ddl_specification "here".  In context of FEP the DDL capabilities are limited to fixed size
+arrays (dynamic arrays are not supported).  The FEP SDK provides methods to use the DDL
+serialization and interact with DDL described data via the the package property tree. For an
+explanation of these methods please refer to the package property tree documentation.
+
+*/
+}

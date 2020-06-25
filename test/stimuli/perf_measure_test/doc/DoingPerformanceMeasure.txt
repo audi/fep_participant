@@ -1,0 +1,101 @@
+
+Copyright @ 2019 Audi AG. All rights reserved.
+
+    This Source Code Form is subject to the terms of the Mozilla
+    Public License, v. 2.0. If a copy of the MPL was not distributed
+    with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+If it is not possible or desirable to put the notice in a particular file, then
+You may include the notice in a location (such as a LICENSE file in a
+relevant directory) where a recipient would be likely to look for such a notice.
+
+You may add additional accurate notices of copyright ownership.
+
+How to do a Performance Measurements
+====================================
+
+About
+-----
+See Readme.txt for a introduction to measurements.
+
+Requirements
+------------
+The measurement script currently is using python3, but might be ported back to python2
+(Python2 does not support timeouts when executing programs).
+
+The plot script depends on the plotting library "matplotlib" and required a python distribution
+including the required packages. 
+
+It is recommended to use Annaconda Python (https://www.continuum.io/downloads) as it contains
+all required dependencies. It is available and tested to work for Windows and Linux.
+
+Preparation
+-----------
+Compile and Install a release build of FEP (Documentation of this is out of the scope of this docuemnt).
+Change the measurement script "measure_results.py" to match your configuration or create a new one:
+=== SNIP === START ===
+def ChooseConfig(use_config):
+    if use_config == "WindowsDefault":
+        hostname_client= ""
+        hostname_server= ""
+        stimuli_client= 'D:/abuild/build-fep_core-trunk/test/stimuli/perf_measure_test/src/RelWithDebInfo/perf_measure_stimuli.exe'
+        stimuli_server= stimuli_client
+        ...
+=== SNIP === END ===
+The path to "stimuli_client" needs to match with your local path to the executable "perf_measure_stimuli".
+
+Measurement Definition
+----------------------
+The measurement is required to be defined inside the measurement script "measure_results.py".
+Thi script already contains a lot of different definitions, e.g.:
+=== SNIP === START ===
+    class Scenario_dds(Generic_Scenario):
+        ''' Check Dependencies on Sample Size
+        '''
+        def __init__(self):
+            Generic_Scenario.__init__(self)
+            self.name= "Scenario_dds"
+            
+            for i in range (5):                            # 5 identical Signals are set up  
+                self.signals.append({                      # single signal
+                        "bytes": [1024],                   # always use 1024 bytes packets
+                        "frequency": [100,200,500,1000],   # The frequencies should e tested
+                        "ddbsize": [0],                    # No DDB
+                        "numpercycle": [1]                 # Send one packet (No bursts)
+                    }) 
+=== SNIP === END ===
+
+Measurement Scenario
+====================
+Different measurement definitions are combined as a scenario. This is done by setting a 
+list of measurement definitions.
+=== SNIP === START ===
+test_Scenarios_local=[Scenario_dds]
+=== SNIP === END ===
+
+Running a measurement
+======================
+Note: Under MS Windows a cygwin shell (bash) is used
+
+### Please create a results directory, if not present
+$ mkdir ../results
+
+### Go to the scripts directory
+$ cd <FEP_SOURCE_DIR>/test/stimuli/perf_measure_test/scripts
+
+### Start the script using your config (here: "WindowsDefault")
+$ python -u measure_results.py WindowsDefault
+
+Plotting the results
+====================
+### Go into the created results directory
+$ cd ../results/<New Results directory
+The measurements are stored as CSV-Files (*.csv) inside this directory.
+The measurement is described by a META-File (*.meta) with same base filename.
+
+### Run the plot script
+$ bash ../../scripts/plot_all.sh
+This commands creates PNG- and PDF-Files out of the CSV- and META-Files.
+
+
+

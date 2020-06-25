@@ -1,0 +1,233 @@
+/**
+ *
+ * This file describes the usage of FEP Capabilities
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+
+
+namespace fep
+{ /**
+\page fep_capabilities FEP Capabilities
+
+
+Tests
+----------------------------------------------------------------------------------------------------
+
+The following values have been extracted from the automated tests of the FEP SDK with RTI DDS.
+
+Better values might be possible. Limits mostly depend on available RAM.
+
+A known working test machine setting has 16 GB RAM running Microsoft Windows 7 Enterprise x64.
+
+
+<b>Maximal number of DDS domains per machine</b><br>
+233 (0-232)<br>
+\note When using a FEP.IT Client / AUDI Ubuntu Client only the domains 0, 1 and 2 are available.
+Only for these three domains the ports are unlocked.
+
+<b>Maximal theoretical number of running FEP Participants per machine</b><br>
+120<br>
+
+<b>Maximal number of FEP Participants communicating via shared memory per machine</b><br> 16 (this
+includes FEP AutomationInterface instances which may be hiding inside automation tooling!)<br>
+
+<b>Maximal number of running FEP Participants per process</b><br>
+Win64: 10<br>
+Win32: 2<br>
+Linux: 10<br>
+
+<b>Maximal number of registered signals</b><br>
+Win64: 180<br>
+Win32: 16<br>
+Linux: 180<br>
+
+<b>Maximal number of mapped signals</b><br>
+Win64: 93<br>
+Win32: 16<br>
+Linux: 93<br>
+
+<b>Maximal number of received buffered commands</b><br>
+Win64: 90<br>
+Win32: 30<br>
+Linux: 90<br>
+
+____________________________________________________________________________________________________
+
+
+Limits
+----------------------------------------------------------------------------------------------------
+
+<b>Maximal payload size of message packet</b><br>
+~2 MB minus overhead through character escaping (up to 50% of data)<br>
+
+<b>Maximal payload size of simulation data packet</b><br>
+Driver dependend:
+* RTI_DDS: theoretically unlimited <br>
+
+____________________________________________________________________________________________________
+
+
+Infrastructure
+----------------------------------------------------------------------------------------------------
+
+The transport mechanism between FEP Participants relies on IP-networking.<br>
+
+<b>RTI DDS Transport</b><br>
+Only IPv4 networks are supported. <br>
+\note IPv6 support was dropped starting with 1.1.<br>
+
+
+____________________________________________________________________________________________________
+
+
+Performance
+----------------------------------------------------------------------------------------------------
+
+@subpage fep_transmission_performance "FEP Transmission Performance Measurements" page.
+
+
+\page fep_transmission_performance FEP Transmission Performance Measurements
+
+The following page exists to provide you with an overview of the transmission performance you can
+expect from each available driver.
+
+The table below shows the round-trip-times (RTT: Client->Server->Client) of different representative
+scenarios.  The actual values may/will vary due to the network setup and the machines involved.
+
+<table   CELLPADDING="10" border="1">
+<caption id="driver_perf_measurements">RTI_DDS - Driver Performance Measurements</caption>
+          <tr>
+                 <td align="center" colspan="2">Nr. of signals</td>
+               <td  align="center" colspan="2"> 4</td>
+               <td  align="center" colspan="2"> 10 </td>
+          </tr>
+          <tr>
+               <td align="center" colspan="2">Freq. of signals</td>
+               <td align="center">100Hz </td>
+               <td align="center">1000Hz </td>
+               <td align="center">100Hz </td>
+               <td align="center">1000Hz </td>
+          </tr>
+          <tr align="center">
+                  <td align="center"> Signal size:</td>
+               <td align="center"> 1kB</td>
+               <td align="center">       <p>
+                                    Packets-Send: 12000<br/>
+                                    Packets-Lost: 0<br/>
+                                    Loss Rate: 0.00%<br/>
+                                    Round-Trip-Times (avg/min/max):<br/>
+                                    5432/3382/12526 <br/>
+                                    </p>
+                                    </td>
+               <td align="center">       <p>
+                                    Packets-Send: 23757<br/>
+                                    Packets-Lost: 0<br/>
+                                    Loss Rate: 0.00%<br/>
+                                    Round-Trip-Times (avg/min/max):<br/>
+                                    7409/4827/36935<br/>
+                                    </p>
+                                    </td>
+               <td align="center">       <p>
+                                    Packets-Send: 23816<br/>
+                                    Packets-Lost: 0<br/>
+                                    Loss Rate: 0.00%<br/>
+                                    Round-Trip-Times (avg/min/max):<br/>
+                                    16972/5667/20435<br/>
+                                    </p>
+                                    </td>
+               <td align="center">       <p>
+                                    Packets-Send: 181199<br/>
+                                    Packets-Lost: 171272<br/>
+                                    Loss Rate: 94.52%<br/>
+                                    Round-Trip-Times (avg/min/max):<br/>
+                                    7777/3350/3907294<br/>
+                                        </p>
+                </td>
+          </tr>
+          <tr>
+                <td align="center"></td>
+               <td align="center"> 65kB</td>
+               <td align="center">       <p>
+                                        Packets-Send: 12000<br/>
+                                        Packets-Lost: 0<br/>
+                                        Loss Rate: 0.00%<br/>
+                                        Round-Trip-Times (avg/min/max):<br/>
+                                        9785/7830/23129<br/>
+                                        </p>
+                </td>
+               <td align="center">       <p>
+                                        Packets-Send: 23075<br/>
+                                        Packets-Lost: 77<br/>
+                                        Loss Rate: 0.33%<br/>
+                                        Round-Trip-Times (avg/min/max):<br/>
+                                        116897/7956/1739281<br/>
+                                        </p>
+                                        </td>
+               <td align="center">       <p>
+                                        Packets-Send: 29796<br/>
+                                        Packets-Lost: 2001<br/>
+                                        Loss Rate: 6.72%<br/>
+                                        Round-Trip-Times (avg/min/max):<br/>
+                                        1397723/10108/8510915<br/>
+                                        </p>
+                                        </td>
+               <td align="center">       <p>
+                                        Packets-Send: 37777<br/>
+                                        Packets-Lost: 15490<br/>
+                                        Loss Rate: 41.00%<br/>
+                                        Round-Trip-Times (avg/min/max):<br/>
+                                        2986009/16629/21725689<br/>
+                                        </p>
+                                        </td>
+          </tr>
+          <tr>
+          <td align="center"></td>
+               <td align="center"> 1MB</td>
+               <td align="center">       <p>
+                                        Packets-Send: 8108<br/>
+                                        Packets-Lost: 5576<br/>
+                                        Loss Rate: 68.77%<br/>
+                                        Round-Trip-Times (avg/min/max):<br/>
+                                        34048837/187915/65510897<br/>
+                                        </p>
+                                        </td>
+               <td align="center">n/a</td>
+               <td align="center"> n/a</td>
+               <td align="center">n/a</td>
+          </tr>
+          <tr>
+          <td align="center"></td>
+               <td align="center"> 2MB</td>
+               <td align="center">      <p>
+                                        Packets-Send: 1870<br/>
+                                        Packets-Lost: 2<br/>
+                                        Loss Rate: 0.11%<br/>
+                                        Round-Trip-Times (avg/min/max):<br/>
+                                        14200742/267795/25171503<br/> </td>
+                                        </p>
+               <td align="center">n/a </td>
+               <td align="center">n/a</td>
+               <td align="center">n/a</td>
+          </tr>
+</table>
+
+The configured frequency is a target value. The actual frequency is the number of packets sent
+divided by the tests duration. The configured time each test ran in the scenarios depicted above is
+30 seconds.
+
+The measurement setup consisted of two windows 7 computers next to each other in the AUDI-LAN.
+
+*/ }

@@ -1,0 +1,148 @@
+{
+   <Uuid-Library: Ingnore Leak in uuid_create>
+   Memcheck:Cond
+   fun:uuid_prng_create
+   fun:uuid_create
+   ...
+}
+{
+   <RTI-DDS: Ingnore Leak in RTI XML Parser>
+   Memcheck:Cond
+   fun:REDASkiplist_assertNodeEA
+   ...
+}
+{
+   <RTI-DDS: Ingnore Leak in RTI XML Parser>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   fun:RTIOsapiHeap_reallocateMemoryInternal
+   ...
+}
+{
+   <RTI-DDS: Reachable internal memory management>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   fun:RTIOsapiHeap_reallocateMemoryInternal
+   ...
+}
+{
+   <RTI-DDS: Reachable internal memory management>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   fun:RTIOsapiHeap_reallocateMemoryInternal
+   ...
+}
+{
+   <RTI-DDS: Something not initialized by RTI DDS>
+   Memcheck:Cond
+   fun:REDASkiplist_addNonExistingNodeAtEndEA
+   ...
+}
+{
+   <RTI-DDS: Something internal to RTI DDS>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:RTI_doProlog
+   ...
+}
+{
+   <RTI-DDS: Something internal to RTI DDS>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   fun:RTI_doProlog
+   ...
+}
+{
+   <RTI-DDS: Something internal to RTI DDS>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   fun:DDS_DomainParticipantGlobals_create_callbackInfoI
+   ...
+}
+{
+   <RTI-DDS: Something internal to RTI DDS>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:RTI_parserCreate
+   ...
+}
+{
+   <RTI-DDS: Something internal to RTI DDS>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:RTI_poolGrow
+   ...
+}
+{
+   <RTI-DDS: Something internal to RTI DDS>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:RTI_XML_Parse
+   ...
+}
+{
+   <RTI-DDS: Also looks like a leak in RTI DDS>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:_Znwm
+   fun:_ZN32DDSDomainParticipantFactory_impl7createIEP32DDS_DomainParticipantFactoryImpl
+   fun:_ZN27DDSDomainParticipantFactory16create_instanceIEPKc
+   fun:_ZN27DDSDomainParticipantFactory12get_instanceEv
+   ...
+}
+{
+   <RTI-DDS: Also looks like a leak in RTI DDS>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:realloc
+   fun:RTIOsapiHeap_reallocateMemoryInternal
+   ...
+}
+{
+   <RTI-DDS: Also looks like a leak in RTI DDS>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:realloc
+   fun:RTIOsapiHeap_reallocateMemoryInternal
+   ...
+}
+{
+   <RTI-DDS: Also looks like a leak in RTI DDS>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:_Znwm
+   fun:_ZN17NDDSConfigVersion12get_instanceEv
+   fun:DDSDomainParticipantFactory_impl_get_version_string
+   ...
+}
+{
+   <glibc: pthread allocate stack can be ignored>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   fun:allocate_dtv
+   fun:_dl_allocate_tls
+   fun:allocate_stack
+   fun:pthread_create@@GLIBC_2.2.5
+   ...
+}
+{
+   <glibc: init malloc can be ignored>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   ...
+   fun:call_init.part.0
+   fun:call_init
+   fun:_dl_init
+   ...
+}

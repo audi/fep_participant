@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<mapping>
+    <header>
+        <language_version>1.00</language_version>
+        <author>AUDI AG</author>
+        <date_creation>04.04.2019</date_creation>
+        <date_change>10.09.2019</date_change>
+        <description>Mapping that maps one source to two targets</description>
+    </header>
+    <sources>
+        <source name="FEPVUProvider_ObjectState" type="tFEP_VU_ObjectState" />
+    </sources>
+    <targets>
+        <target name="sVTD_speed" type="tVTD_speed">
+            <assignment to="SpeedLongitudinal__kph" from="FEPVUProvider_ObjectState.f64SpeedLongitudinal" transformation="mps2kph" />
+            <trigger type="data" variable="FEPVUProvider_ObjectState.ui32Id" operator="equal" value="1" />
+        </target>
+        <target name="sVTD_simTime" type="tVTD_simTime">
+            <assignment to="f64SimTime" from="FEPVUProvider_ObjectState.f64SimTime" />
+            <trigger type="periodic" period="10" unit="ms" />
+        </target>
+    </targets>
+    <transformations>
+        <polynomial name="mps2kph" b="3.6" />
+    </transformations>
+</mapping>

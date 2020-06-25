@@ -1,0 +1,35 @@
+//
+// Copyright @ 2019 Audi AG. All rights reserved.
+// 
+//     This Source Code Form is subject to the terms of the Mozilla
+//     Public License, v. 2.0. If a copy of the MPL was not distributed
+//     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+// 
+// If it is not possible or desirable to put the notice in a particular file, then
+// You may include the notice in a location (such as a LICENSE file in a
+// relevant directory) where a recipient would be likely to look for such a notice.
+// 
+// You may add additional accurate notices of copyright ownership.
+//
+/**
+\page fep_participant_library_participant FEP 3 Native Components
+
+\section delivered_native_components Delivered Native Components
+
+- \subpage page_fep_clock_service
+- \subpage page_fep_clock_sync_service
+- \subpage page_fep_scheduler_service
+- \subpage page_fep_data_registry
+
+\section emulated_components Emulation of Components
+
+\subsection service_bus_emulation Current Service Bus Emulation
+Since FEP 2 has no separated Service Bus yet, the Service Bus is reduced to be the current implementation
+The \ref fep_rpc "FEP RPC Service" will use the fep::ISignalRegistry under the hood together with the 
+@ref fep_messages "Messaging Implementation of FEP 2".
+
+\subsection simulation_bus_emulation Current Simulation Bus Emulation
+Since FEP 2 has no separated Simulation Bus yet, the Simulation Bus is reduced to be the current implementation
+The \ref fep::ISignalRegistry and fep::IUserDataAccess.
+
+*/ 

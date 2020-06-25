@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<element xmlns="fep/xsd/element">
+    <schema_version>1.0.0</schema_version>
+    <type_name>Driver</type_name>
+    <description>Driver element used in the FEP SDK timing example</description>
+    <version>2.1.0</version>
+    <contact>aev.support@audi.de</contact>
+    <interfaces>
+        <interface>
+            <name>FEP_SignalRegistry</name>
+            <version>2.1.0</version>
+            <properties>
+                <property>
+                    <name>Input/FrontDistance/Type</name>
+                    <type>string</type>
+                    <value>tSensorInfo</value>
+                </property>
+                <property>
+                    <name>Input/BackDistance/Type</name>
+                    <type>string</type>
+                    <value>tSensorInfo</value>
+                </property>
+                <property>
+                    <name>Output/DriverCommand/Type</name>
+                    <type>string</type>
+                    <value>tDriverCtrl</value>
+                </property>
+                <property>
+                    <name>SignalDescriptionFiles</name>
+                    <type>string</type>
+                    <value>descriptions/timing_example.description</value>
+                </property>
+            </properties>
+        </interface>
+        <interface>
+            <name>FEP_TimingClient</name>
+            <version>3.0.0</version>
+            <properties/>
+        </interface>
+    </interfaces>
+    <requirements>
+        <requirement>
+            <name>FEP_TimingMaster</name>
+            <version>3.0.0</version>
+        </requirement>
+    </requirements>
+</element>

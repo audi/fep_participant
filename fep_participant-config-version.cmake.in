@@ -1,0 +1,33 @@
+#
+# Copyright @ 2019 Audi AG. All rights reserved.
+# 
+#     This Source Code Form is subject to the terms of the Mozilla
+#     Public License, v. 2.0. If a copy of the MPL was not distributed
+#     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+# 
+# If it is not possible or desirable to put the notice in a particular file, then
+# You may include the notice in a location (such as a LICENSE file in a
+# relevant directory) where a recipient would be likely to look for such a notice.
+# 
+# You may add additional accurate notices of copyright ownership.
+#
+set(VERSION_MAJOR @FEP_SDK_PARTICIPANT_VERSION_MAJOR@)
+set(VERSION_MINOR @FEP_SDK_PARTICIPANT_VERSION_MINOR@)
+set(VERSION_PATCH @FEP_SDK_PARTICIPANT_VERSION_PATCH@)
+
+set(PACKAGE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
+
+if(PACKAGE_FIND_VERSION_MAJOR EQUAL VERSION_MAJOR)
+    if(PACKAGE_FIND_VERSION_MINOR EQUAL VERSION_MINOR)
+        if(PACKAGE_FIND_VERSION_PATCH EQUAL VERSION_PATCH)
+            set(PACKAGE_VERSION_EXACT true)
+        endif(PACKAGE_FIND_VERSION_PATCH EQUAL VERSION_PATCH)
+        if(PACKAGE_FIND_VERSION_PATCH LESS VERSION_PATCH)
+            set(PACKAGE_VERSION_COMPATIBLE true)
+        endif(PACKAGE_FIND_VERSION_PATCH LESS VERSION_PATCH)
+    endif(PACKAGE_FIND_VERSION_MINOR EQUAL VERSION_MINOR)
+
+    if(PACKAGE_FIND_VERSION_MINOR LESS VERSION_MINOR)
+        set(PACKAGE_VERSION_COMPATIBLE true)
+    endif(PACKAGE_FIND_VERSION_MINOR LESS VERSION_MINOR)
+endif(PACKAGE_FIND_VERSION_MAJOR EQUAL VERSION_MAJOR)

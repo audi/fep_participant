@@ -1,0 +1,10 @@
+module fep {
+    module transmission {
+        const short STRINGLENGTH = 128;
+        struct tModuleStatus {
+            string<STRINGLENGTH> strModuleName;
+            long i32Status;
+            string<STRINGLENGTH> strMessage;
+        };
+    };
+};

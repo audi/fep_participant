@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
+<adtf:ddl xmlns:adtf="adtf">
+ <header>
+  <language_version>3.00</language_version>
+  <author>AUDI AG</author>
+  <date_creation>21.03.2014</date_creation>
+  <date_change>22.09.2015</date_change>
+  <description>ADTF generated</description>
+ </header>
+ <units />
+ <datatypes>
+  <datatype description="predefined ADTF tBool datatype" max="tTrue" min="tFalse" name="tBool" size="8" />
+  <datatype description="predefined ADTF tChar datatype" max="127" min="-128" name="tChar" size="8" />
+  <datatype description="predefined ADTF tUInt8 datatype" max="255" min="0" name="tUInt8" size="8" />
+  <datatype description="predefined ADTF tInt8 datatype" max="127" min="-128" name="tInt8" size="8" />
+  <datatype description="predefined ADTF tUInt16 datatype" max="65535" min="0" name="tUInt16" size="16" />
+  <datatype description="predefined ADTF tInt16 datatype" max="32767" min="-32768" name="tInt16" size="16" />
+  <datatype description="predefined ADTF tUInt32 datatype" max="4294967295" min="0" name="tUInt32" size="32" />
+  <datatype description="predefined ADTF tInt32 datatype" max="2147483647" min="-2147483648" name="tInt32" size="32" />
+  <datatype description="predefined ADTF tUInt64 datatype" max="18446744073709551615" min="0" name="tUInt64" size="64" />
+  <datatype description="predefined ADTF tInt64 datatype" max="9223372036854775807" min="-9223372036854775808" name="tInt64" size="64" />
+  <datatype description="predefined ADTF tFloat32 datatype" max="3.402823e+38" min="-3.402823e+38" name="tFloat32" size="32" />
+  <datatype description="predefined ADTF tFloat64 datatype" max="1.797693e+308" min="-1.797693e+308" name="tFloat64" size="64" />
+ </datatypes>
+ <enums />
+ <structs>
+  <struct alignment="8" name="adtf.core.media_type" version="1">
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="0" name="mediatype" type="tMediaTypeInfo" />
+  </struct>
+  <struct alignment="8" name="tMediaTypeInfo" version="1">
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="0" name="ui32MajorType" type="tUInt32" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="4" name="ui32SubType" type="tUInt32" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="8" name="ui32Flags" type="tUInt32" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="12" name="ui32Flags1" type="tUInt32" />
+  </struct>
+  <struct alignment="1" name="tFEP_VU_Coord" version="1">
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="0" name="f64X" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="8" name="f64Y" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="16" name="f64Z" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="24" name="f64H" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="32" name="f64P" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="40" name="f64R" type="tFloat64" />
+  </struct>
+  <struct alignment="1" name="tFEP_VU_PointCartesian" version="1">
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="0" name="f64X" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="8" name="f64Y" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="16" name="f64Z" type="tFloat64" />
+  </struct>
+  <struct alignment="1" name="tFEP_VU_PointSpherical" version="1">
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="0" name="f64RadialDistance" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="8" name="f64AzimuthalAngle" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="16" name="f64ElevationAngle" type="tFloat64" />
+  </struct>
+  <struct alignment="1" name="tFEP_VU_PosRoad" version="1">
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="0" name="f64S" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="8" name="f64T" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="16" name="f64LaneOffset" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="24" name="f64HdgOffset" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="32" name="ui32RoadId" type="tUInt32" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="36" name="i8LaneId" type="tInt8" />
+  </struct>
+  <struct alignment="1" name="tFEP_VU_WheelState" version="1">
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="0" name="ui8WheelId" type="tUInt8" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="1" name="ui32ValidityMask" type="tUInt32" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="5" name="f64AngleRotation" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="13" name="f64AngleSteering" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="21" name="f64SpringCompression" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="29" name="f64SpeedRotation" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="37" name="f64SlipNormalized" type="tFloat64" />
+  </struct>
+  <struct alignment="1" name="tFEP_VU_LightSource" version="1">
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="0" name="f64SimTime" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="8" name="ui32Id" type="tUInt32" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="12" name="ui8State" type="tUInt8" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="13" name="sPosIntertial" type="tFEP_VU_Coord" />
+  </struct>
+  <struct alignment="1" name="tFEP_VU_ObjectState" version="1">
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="0" name="f64SimTime" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="8" name="ui32Id" type="tUInt32" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="12" name="ui32ValidityMask" type="tUInt32" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="16" name="sPosInertial" type="tFEP_VU_Coord" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="64" name="sSpeedInertial" type="tFEP_VU_Coord" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="112" name="sAccelInertial" type="tFEP_VU_Coord" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="160" name="sPosRoad" type="tFEP_VU_PosRoad" />
+   <element alignment="1" arraysize="1" byteorder="BE" bytepos="197" name="sPosGeographical" type="tFEP_VU_PosGeographical" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="229" name="f64SpeedLongitudinal" type="tFloat64" />
+  </struct>
+  <struct alignment="1" name="tFEP_VU_PosGeographical" version="1">
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="0" name="f64LongDegree" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="8" name="f64LatDegree" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="16" name="f64HeadingDegree" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="24" name="f64Altitude" type="tFloat64" />
+  </struct>
+  <struct alignment="1" name="tFEP_VU_TrafficLight" version="1">
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="0" name="f64SimTime" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="8" name="ui32Id" type="tUInt32" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="12" name="ui32StateMask" type="tUInt32" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="16" name="f64State" type="tFloat64" />
+  </struct>
+  <struct alignment="1" name="tFEP_VU_VehicleAppearance" version="1">
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="0" name="f64SimTime" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="8" name="ui32ObjectId" type="tUInt32" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="12" name="ui32ValidityMask" type="tUInt32" />
+   <element alignment="1" arraysize="4" byteorder="LE" bytepos="16" name="asWheelState" type="tFEP_VU_WheelState" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="196" name="sVehicleSound" type="tFEP_VU_VehicleSound" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="216" name="f64SteeringWheelAngle" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="224" name="ui32LightMask" type="tUInt32" />
+  </struct>
+  <struct alignment="1" name="tFEP_VU_VehicleSound" version="1">
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="0" name="f64EngineRpm" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="8" name="f64EngineLoadNormalized" type="tFloat64" />
+   <element alignment="1" arraysize="1" byteorder="LE" bytepos="16" name="ui32EventMask" type="tUInt32" />
+  </struct>
+  <struct alignment="1" name="tFEP_Test_Struct" version="1">
+    <element alignment="1" arraysize="1" byteorder="LE" bytepos="0" name="magic" type="tUInt64" />
+    <element alignment="1" arraysize="1" byteorder="LE" bytepos="8" name="timeStamp" type="tUInt64" />
+    <element alignment="1" arraysize="1" byteorder="LE" bytepos="16" name="seqNr" type="tUInt32" />
+    <element alignment="1" arraysize="1" byteorder="LE" bytepos="20" name="unused1" type="tUInt32" />
+    <element alignment="1" arraysize="1" byteorder="LE" bytepos="24" name="unused2" type="tUInt32" />
+    <element alignment="1" arraysize="1" byteorder="LE" bytepos="28" name="unused3" type="tUInt32" />
+  </struct>
+  <struct alignment="1" name="tFEP_Performance_Test" version="1">
+    <element alignment="1" arraysize="1" byteorder="LE" bytepos="0" name="tFEP_Test" type="tFEP_Test_Struct" />
+    <element alignment="1" arraysize="1" byteorder="LE" bytepos="32" name="tFEP_Test_Data" type="tFEP_VU_VehicleAppearance" />
+  </struct>
+ </structs>
+ <streams>
+  <stream name="FEP_VU_StreamLightSource" type="adtf.core.media_type">
+   <struct bytepos="0" name="sLightSource" type="tFEP_VU_LightSource" />
+  </stream>
+  <stream name="FEP_VU_StreamObjectState" type="adtf.core.media_type">
+   <struct bytepos="0" name="sObjectState" type="tFEP_VU_ObjectState" />
+  </stream>
+  <stream name="FEP_VU_StreamTrafficLight" type="adtf.core.media_type">
+   <struct bytepos="0" name="sTrafficLight" type="tFEP_VU_TrafficLight" />
+  </stream>
+  <stream name="FEP_VU_StreamVehicleAppearance" type="adtf.core.media_type">
+   <struct bytepos="0" name="sVehicleAppearance" type="tFEP_VU_VehicleAppearance" />
+  </stream>
+  <stream name="FEP_Performance_Test" type="adtf.core.media_type">
+   <struct bytepos="0" name="sPerformanceData" type="tFEP_Performance_Test" />
+  </stream>
+ </streams>
+</adtf:ddl>

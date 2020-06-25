@@ -1,0 +1,112 @@
+#
+# Copyright @ 2019 Audi AG. All rights reserved.
+# 
+#     This Source Code Form is subject to the terms of the Mozilla
+#     Public License, v. 2.0. If a copy of the MPL was not distributed
+#     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+# 
+# If it is not possible or desirable to put the notice in a particular file, then
+# You may include the notice in a location (such as a LICENSE file in a
+# relevant directory) where a recipient would be likely to look for such a notice.
+# 
+# You may add additional accurate notices of copyright ownership.
+#
+set(MESSAGES_SOURCES
+    messages/fep_command_control.cpp
+    messages/fep_command_custom.cpp
+    messages/fep_command_get_property.cpp
+    messages/fep_command_get_signal_info.cpp
+    messages/fep_command_resolve_signal_type.cpp
+    messages/fep_command_listener.cpp
+    messages/fep_command_reg_prop_listener.cpp
+    messages/fep_command_set_property.cpp
+    messages/fep_command_delete_property.cpp
+    messages/fep_command_unreg_prop_listener.cpp
+    messages/fep_command_signal_description.cpp
+    messages/fep_command_mapping_configuration.cpp
+    messages/fep_command_name_change.cpp
+    messages/fep_command_mute_signal.cpp
+    messages/fep_command_get_schedule.cpp
+    messages/fep_command_rpc.cpp
+    messages/fep_control_event.cpp
+    messages/fep_message.cpp
+    messages/fep_notification_incident.cpp
+    messages/fep_notification_listener.cpp
+    messages/fep_notification_prop_changed.cpp
+    messages/fep_notification_property.cpp
+    messages/fep_notification_reg_prop_listener_ack.cpp
+    messages/fep_notification_signal_description.cpp
+    messages/fep_notification_signal_info.cpp
+    messages/fep_notification_state.cpp
+    messages/fep_notification_name_changed.cpp
+    messages/fep_notification_unreg_prop_listener_ack.cpp
+    messages/fep_notification_resultcode.cpp
+    messages/fep_notification_schedule.cpp
+    
+    messages/fep_command_control.h
+    messages/fep_command_get_property.h
+    messages/fep_command_get_signal_info.h
+    messages/fep_command_resolve_signal_type.h
+    messages/fep_command_reg_prop_listener.h
+    messages/fep_command_set_property.h
+    messages/fep_command_delete_property.h
+    messages/fep_command_unreg_prop_listener.h
+    messages/fep_command_signal_description.h
+    messages/fep_command_mapping_configuration.h
+    messages/fep_command_name_change.h
+    messages/fep_command_mute_signal.h
+    messages/fep_command_get_schedule.h
+    messages/fep_notification_incident.h
+    messages/fep_notification_prop_changed.h
+    messages/fep_notification_property.h
+    messages/fep_notification_reg_prop_listener_ack.h
+    messages/fep_notification_signal_description.h
+    messages/fep_notification_signal_info.h
+    messages/fep_notification_state.h
+    messages/fep_notification_name_changed.h
+    messages/fep_notification_unreg_prop_listener_ack.h
+    messages/fep_notification_resultcode.h
+    messages/fep_notification_schedule.h    
+    ../include/messages/fep_command_access_intf.h
+    ../include/messages/fep_command_control_intf.h
+    ../include/messages/fep_command_custom.h
+    ../include/messages/fep_command_rpc.h
+    ../include/messages/fep_command_custom_intf.h
+    ../include/messages/fep_command_get_property_intf.h
+    ../include/messages/fep_command_get_signal_info_intf.h
+    ../include/messages/fep_command_resolve_signal_type_intf.h
+    ../include/messages/fep_command_intf.h
+    ../include/messages/fep_command_listener.h
+    ../include/messages/fep_command_listener_intf.h
+    ../include/messages/fep_command_reg_prop_listener_intf.h
+    ../include/messages/fep_command_set_property_intf.h
+    ../include/messages/fep_command_delete_property_intf.h
+    ../include/messages/fep_command_signal_description_intf.h
+    ../include/messages/fep_command_mapping_configuration_intf.h
+    ../include/messages/fep_command_name_change_intf.h
+    ../include/messages/fep_command_unreg_prop_listener_intf.h
+    ../include/messages/fep_command_get_schedule_intf.h
+    ../include/messages/fep_command_rpc_intf.h
+    ../include/messages/fep_control_event.h
+    ../include/messages/fep_message.h
+    ../include/messages/fep_message_intf.h
+    ../include/messages/fep_message_listener_intf.h
+    ../include/messages/fep_notification_access_intf.h
+    ../include/messages/fep_notification_incident_intf.h
+    ../include/messages/fep_notification_intf.h
+    ../include/messages/fep_notification_listener.h
+    ../include/messages/fep_notification_listener_intf.h
+    ../include/messages/fep_notification_prop_changed_intf.h
+    ../include/messages/fep_notification_property_intf.h
+    ../include/messages/fep_notification_reg_prop_listener_ack_intf.h
+    ../include/messages/fep_notification_signal_description_intf.h
+    ../include/messages/fep_notification_signal_info_intf.h
+    ../include/messages/fep_notification_name_changed_intf.h
+    ../include/messages/fep_notification_state_intf.h
+    ../include/messages/fep_notification_unreg_prop_listener_ack_intf.h
+    ../include/messages/fep_notification_resultcode_intf.h
+    ../include/messages/fep_command_mute_signal_intf.h
+    ../include/messages/fep_notification_schedule_intf.h)
+
+source_group(messages FILES ${MESSAGES_SOURCES})
+

@@ -1,0 +1,146 @@
+/**
+ *
+ * This file describes the usage of the fep transmission adapter
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+
+namespace fep
+{
+
+/**
+\page fep_transmission FEP Transmission
+
+FEP Transmission is responsible for the communication between FEP participants - both locally and
+over the network. It is comprised of two componentens: the transmission adapter and the transmission
+driver. The transmission adapter is, among other things, responsible for queuing received data and
+serialization. The transmission driver takes care of the actual transmission.
+
+\section fep_transmission_adapter Configuring the Transmission Adapter
+
+The queued data will be processed by a number of worker threads. The number of worker threads can be
+configured before entering the \ref fep::FS_READY state by setting the property \ref
+FEP_TX_ADAPTER_WORKERTHREADS_PATH in \ref fep_configs accordingly. Values set after entering \ref
+fep::FS_READY state will only be used after reinitialization of the participant. The default number
+of threads is four.
+
+Serialization can be enabled or disabled by setting the property \ref FEP_CSR_SERIALIZATION_PATH.
+Disabling serialization can be used to improve performance on compatible plattforms. The default
+behaviour is to serialize data using the Data Description Language (DDL).
+
+The transmission adapter will create a channel for message transport. The delivery of messages (e.g.
+commmands and notifications) is reliable if the specified transmission driver does support reliable
+communication. If this is not the case, an incident is invoked and message transport will operate in
+"best-effort" mode.
+
+\section fep_transmission_driver Transmission Driver
+
+The Transmission Driver takes care of the actual transmission and reception of data, which may be
+either signals or messages and is the connection to the underlying transport layer. Hence,
+communication is limited to FEP Participants using the same transmission driver.  There are the
+following ways to select the desired driver (in increasing precedence):
+- Using environment variables: FEP_TRANSMISSION_DRIVER=$Driver$
+- Using commandline arguments: -transmission $Driver$
+- Using module options: \ref cModuleOptions::SetTransmissionType
+- During module creation: \ref cModule::Create takes as an optional argument a pointer to an
+  instance of a driver fullfilling the \ref fep::ITransmissionDriver Interface.
+
+\note
+Be aware of the precendence of the configuration methods: A hard coded Transmission Driver cannot be
+changed by any means after compilation. Therefore, using the API-Call SetTransmissionType or
+providing a pointer to an instance of a transmission driver should only be used if you have a good
+reason to do so.
+
+For details on configuring FEP participants, see \ref fep_participant_configuration.
+
+\subsection built_in_drivers Built-in Transmission Drivers
+
+Currently, there are three built-in drivers to choose from:
+- RTI DDS (default): \ref fep::TT_RTI_DDS
+- zmq: \ref fep::TT_ZMQ
+
+When using the environment variable or the commandline argument, the arguments are equal to the enum
+\ref fep::tTransmissionType without the leading "TT_"(the default adapter TT_RTI_DDS becomes
+"RTI_DDS"). The arguments are case sensitive. In case of invalid arguments, the creation of the
+FEP Participant will fail.
+
+\subsubsection fep_dds_drivers FEP RTI DDS Driver
+
+Because of the underlying RTI Connext DDS middleware, it is currently not possible to operate the
+FEP RTI DDS Driver without at least one IP address i.e. one active network interface. If no active
+network interfaces are found on a system during the creation of a FEP Participant using the FEP RTI
+DDS Driver, the creation process will fail.
+
+\anchor TX_RTI_DDS RTI DDS (default)
+----------------------------------------------------------------------------------------------------
+
+This driver is the default driver. The driver version is the one introduced with FEP 1.2.0 as
+DDS_V2. However, there is no backwards capability with FEP 1.2.0. It provides a mechanism for raw
+data signals - i.e.  signals not described by a DDL - that support variable data package sizes. To
+use a raw data signal, you just have to register a signal without signal type - i.e set the signal
+type variable in \ref ISignalRegistry::RegisterSignal to NULL (example:
+oModule.GetSignalRegistry()->RegisterSignal("VarSize", NULL, SD_Input, hSigHandle)).
+
+\note
+Since raw data signals do not have a fixed data package size it may be necessary to allocate or
+reallocate ressources during reception. It is advised to use normal signals if possible for maximum
+performance.  \warning Because raw data signals do not provide a signal description, it is not
+possible to serialize the transmitted data. Thus it is advised to only use raw data signals between
+compatible plattforms.
+
+Furthermore, this adapter has no absolute maximum signal size. Nevertheless, very large signal sizes
+(> 2 MB) will have a negative impact on performance and memory usage.
+
+<b>Supported QoS settings [default]:</b>
++ Reliability  [off]
++ AsyncPublisher: transmit call is asynchronous (returns immediately) [off]
++ LowLatencyProfile: uses a special low latency profile for reliable signals [on]
+
+Alternatively to the RTI Connext based Drivers FEP provides a build-in transmission driver based on
+ZMQ/Zyre.
+
+
+\anchor TX_ZMQ_ZYRE ZMQ/Zyre
+----------------------------------------------------------------------------------------------------
+
+The ZMQ/Zyre driver (in the following just ZMQ-Driver) uses automatic participant discovery provided
+by Zyre. The driver relies on the zyre-API for message and data transport which is based on the
+popular ZMQ library.
+
+The driver provides comparable functionality as the DDS V2 driver (e.g. variable signal size and
+reliable message transport). There are no absolute limits for the signals size. Nevertheless the
+notes/warnings mentioned in the DDS V2 part apply to this driver as well. For the time being, no ZMQ
+specific configurations are supported and message as well as data transport are realised by the same
+mechanisms.
+
+\warning
+
+- It is strongly recommended to specify an interface on machines that provide more than one. One and
+  only one interface must be specified by its ip adress (example for the commandline:
+  "./myexecutable-transmission ZMQ-interface 192.168.0.14). Neither a range of adresses nor
+  multiple interface can be configured.
+- Currently, (depending on your setup) root privileges might be required to use the ZMQ-Driver on
+  Linux platforms.
+- The Audi FEP.IT Client is currently not supported by this driver (due to firewall/privilege
+  restrictions).
+
+The default transport mechanism of this driver is TCP based. The auto discovery is implemented via
+UDP beacons.
+
+<b>Supported QoS settings:</b>
++ Reliability (supported but will have no effect)
+
+*/
+} 

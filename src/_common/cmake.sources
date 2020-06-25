@@ -1,0 +1,46 @@
+#
+# Copyright @ 2019 Audi AG. All rights reserved.
+# 
+#     This Source Code Form is subject to the terms of the Mozilla
+#     Public License, v. 2.0. If a copy of the MPL was not distributed
+#     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+# 
+# If it is not possible or desirable to put the notice in a particular file, then
+# You may include the notice in a location (such as a LICENSE file in a
+# relevant directory) where a recipient would be likely to look for such a notice.
+# 
+# You may add additional accurate notices of copyright ownership.
+#
+set(COMMON_SOURCES
+    _common/fep_stringlist.cpp
+    _common/fep_schedule_list.cpp
+    _common/fep_deadline_timer.cpp
+    _common/fep_timestamp.cpp
+    _common/fep_networkaddr.cpp
+    _common/fep_commandline.cpp
+
+    _common/fep_waitable_queue.h
+    _common/fep_blocking_queue.h
+    _common/fep_locked_queue.h
+    _common/fep_stringlist.h
+    _common/fep_schedule_list.h
+    _common/fep_deadline_timer.h
+    _common/fep_timestamp.h
+    _common/fep_networkaddr.h
+    _common/fep_observer_pattern.h
+
+    _common/fep_optional.h
+
+    ../include/_common/fep_stringlist_intf.h
+    ../include/_common/fep_schedule_list_intf.h
+    ../include/_common/fep_commandline.h
+    
+    _common/fast/spinlock.h
+    _common/fast/mutex.h
+    _common/fast/condition_variable.h
+    _common/fast/latch.h  
+    _common/fast/semaphore.h
+)
+
+source_group(common FILES ${COMMON_SOURCES})
+

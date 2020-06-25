@@ -1,0 +1,35 @@
+//
+// Copyright @ 2019 Audi AG. All rights reserved.
+// 
+//     This Source Code Form is subject to the terms of the Mozilla
+//     Public License, v. 2.0. If a copy of the MPL was not distributed
+//     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+// 
+// If it is not possible or desirable to put the notice in a particular file, then
+// You may include the notice in a location (such as a LICENSE file in a
+// relevant directory) where a recipient would be likely to look for such a notice.
+// 
+// You may add additional accurate notices of copyright ownership.
+//
+/**
+\page fep_common FEP
+
+@section fep_standard_data_models FEP Standard Data Models
+
+Since the FEP SDK is a middleware abstraction SDK it does not provide any end-user functionality. For the
+most common use-cases, such functionality is provided by FEP Utilities, FEP Tool Interfaces and
+FEP Standard Participants. These functional implementations may introduce additional dependencies
+which, however, do not relate to the actual development of the FEP SDK. To easily interface with
+these standardized, non-SDK extensions of the FEP SDK, the FEP SDK provides FEP Data Models. These
+FEP Data Models are called FEP Standard Data Models (in distinction to user specific FEP Data
+Models) and can be used by any FEP user to interface with these contents.
+
+All FEP Standard Data Models are provided as <c>*.description</c> files using the Data
+Definition Language (\ref page_ddl_specification "DDL") to describe all signals and accompanying C structures to hold data
+instances of the specific data.
+
+\par References
+\li \subpage fep_common_information_about_fep
+\li \subpage page_fep_participant_system_view
+
+*/ 

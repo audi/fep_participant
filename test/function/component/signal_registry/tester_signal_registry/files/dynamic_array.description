@@ -1,0 +1,197 @@
+<?xml version="1.0"?>
+<adtf:ddl xmlns:adtf="adtf">
+    <header>
+        <language_version>3.00</language_version>
+        <author>AUDI AG</author>
+        <date_creation>08.05.2018</date_creation>
+        <date_change>07.06.2018</date_change>
+        <description>VU Data Model</description>
+    </header>
+    <units/>
+    <datatypes>
+        <datatype name="tBool" size="8" description="predefined ADTF tBool datatype" min="tFalse" max="tTrue" />
+        <datatype name="tChar" size="8" description="predefined ADTF tChar datatype" min="-128" max="127" />
+        <datatype name="tFloat32" size="32" description="predefined ADTF tFloat32 datatype" min="-3.402823e+38" max="3.402823e+38" />
+        <datatype name="tFloat64" size="64" description="predefined ADTF tFloat64 datatype" min="-1.797693e+308" max="1.797693e+308" />
+        <datatype name="tInt16" size="16" description="predefined ADTF tInt16 datatype" min="-32768" max="32767" />
+        <datatype name="tInt32" size="32" description="predefined ADTF tInt32 datatype" min="-2147483648" max="2147483647" />
+        <datatype name="tInt64" size="64" description="predefined ADTF tInt64 datatype" min="-9223372036854775808" max="9223372036854775807" />
+        <datatype name="tInt8" size="8" description="predefined ADTF tInt8 datatype" min="-128" max="127" />
+        <datatype name="tUInt16" size="16" description="predefined ADTF tUInt16 datatype" min="0" max="65535" />
+        <datatype name="tUInt32" size="32" description="predefined ADTF tUInt32 datatype" min="0" max="4294967295" />
+        <datatype name="tUInt64" size="64" description="predefined ADTF tUInt64 datatype" min="0" max="18446744073709551615" />
+        <datatype name="tUInt8" size="8" description="predefined ADTF tUInt8 datatype" min="0" max="255" />
+    </datatypes>
+    <enums>
+        <enum name="ObjectStateValidityMask" type="tUInt32">
+            <element name="OSVM_None" value="0" />
+            <element name="OSVM_PosInertial" value="1" />
+            <element name="OSVM_SpeedInertial" value="2" />
+            <element name="OSVM_AccelInertial" value="4" />
+            <element name="OSVM_PosRoad" value="8" />
+            <element name="OSVM_PosGeographical" value="16" />
+            <element name="OSVM_Speed_Longitudinal" value="32" />
+        </enum>
+        <enum name="ObjectType" type="tUInt32">
+            <element name="OT_Undefined" value="0" />
+            <element name="OT_Car" value="1" />
+            <element name="OT_Truck" value="2" />
+            <element name="OT_Van" value="3" />
+            <element name="OT_Motorbike" value="4" />
+            <element name="OT_Bicycle" value="5" />
+            <element name="OT_Pedestrian" value="6" />
+            <element name="OT_Animal" value="7" />
+            <element name="OT_Trailer" value="8" />
+            <element name="OT_Obstacle" value="9" />
+        </enum>
+        <enum name="VehicleAppearanceLightMask" type="tUInt32">
+            <element name="VALM_Off" value="0" />
+            <element name="VALM_Park" value="1" />
+            <element name="VALM_LowBeam" value="2" />
+            <element name="VALM_HighBeam" value="4" />
+            <element name="VALM_RearBrake" value="8" />
+            <element name="VALM_RearDrive" value="16" />
+            <element name="VALM_IndicatorLeft" value="32" />
+            <element name="VALM_IndicatorRight" value="64" />
+            <element name="VALM_FrontFog" value="128" />
+            <element name="VALM_RearFog" value="256" />
+            <element name="VALM_Drl" value="512" />
+            <element name="VALM_DrlLeftLow" value="1024" />
+            <element name="VALM_DrlRightLow" value="2048" />
+            <element name="VALM_Emergency" value="4096" />
+            <element name="VALM_IndicatorLampOn" value="8192" />
+        </enum>
+        <enum name="VehicleAppearanceValidityMask" type="tUInt32">
+            <element name="VAVM_None" value="0" />
+            <element name="VAVM_WheelState" value="1" />
+            <element name="VAVM_VehicleSound" value="2" />
+            <element name="VAVM_SteeringWheelAngle" value="4" />
+            <element name="VAVM_LightMask" value="8" />
+        </enum>
+        <enum name="VehicleSoundEventMask" type="tUInt32">
+            <element name="VSEM_Off" value="0" />
+            <element name="VSEM_Horn" value="1" />
+            <element name="VSEM_Crash" value="2" />
+        </enum>
+        <enum name="WheelIdBike" type="tUInt32">
+            <element name="WIB_Undefined" value="0" />
+            <element name="WIB_Front" value="1" />
+            <element name="WIB_Rear" value="2" />
+        </enum>
+        <enum name="WheelIdCar" type="tUInt32">
+            <element name="WIC_Undefined" value="0" />
+            <element name="WIC_FrontLeft" value="1" />
+            <element name="WIC_FrontRight" value="2" />
+            <element name="WIC_RearRight" value="3" />
+            <element name="WIC_RearLeft" value="4" />
+        </enum>
+        <enum name="WheelStateValidityMask" type="tUInt32">
+            <element name="WSVM_None" value="0" />
+            <element name="WSVM_AngleRotation" value="1" />
+            <element name="WSVM_AngleSteering" value="2" />
+            <element name="WSVM_SpringCompression" value="4" />
+            <element name="WSVM_SpeedRotation" value="8" />
+            <element name="WSVM_SlipNormalized" value="16" />
+        </enum>
+    </enums>
+    <structs>
+        <struct name="Coord" version="0" alignment="1">
+            <element type="tFloat64" name="x" bytepos="0" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="y" bytepos="8" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="z" bytepos="16" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="h" bytepos="24" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="p" bytepos="32" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="r" bytepos="40" byteorder="LE" alignment="1" arraysize="1" />
+        </struct>
+        <struct name="Geometry" version="0" alignment="1">
+            <element type="PointCartesian" name="size" bytepos="0" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="PointCartesian" name="offset" bytepos="24" byteorder="LE" alignment="1" arraysize="1" />
+        </struct>
+        <struct name="PointCartesian" version="0" alignment="1">
+            <element type="tFloat64" name="x" bytepos="0" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="y" bytepos="8" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="z" bytepos="16" byteorder="LE" alignment="1" arraysize="1" />
+        </struct>
+        <struct name="Object" version="0" alignment="1">
+            <element type="ObjectInfo" name="object_info" bytepos="0" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="ObjectState" name="object_state" bytepos="889" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="VehicleAppearance" name="vehicle_appearance" bytepos="1118" byteorder="LE" alignment="1" arraysize="1" />
+        </struct>
+        <struct name="ObjectInfo" version="0" alignment="1">
+            <element type="tChar" name="name" bytepos="0" byteorder="LE" alignment="1" arraysize="255" />
+            <element type="tChar" name="type_name" bytepos="255" byteorder="LE" alignment="1" arraysize="255" />
+            <element type="tChar" name="model_path" bytepos="510" byteorder="LE" alignment="1" arraysize="255" />
+            <element type="Coord" name="init_pos" bytepos="765" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="Geometry" name="geometry" bytepos="813" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="mass" bytepos="861" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="wheel_base" bytepos="869" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tUInt32" name="object_type" bytepos="877" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tUInt32" name="tractor_id" bytepos="881" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tUInt32" name="object_id" bytepos="885" byteorder="LE" alignment="1" arraysize="1" />
+        </struct>
+        <struct name="ObjectState" version="0" alignment="1">
+            <element type="Coord" name="pos_inertial" bytepos="0" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="Coord" name="speed_inertial" bytepos="48" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="Coord" name="accel_inertial" bytepos="96" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="PosRoad" name="pos_road" bytepos="144" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="PosGeographical" name="pos_geographical" bytepos="181" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="speed_longitudinal" bytepos="213" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="ObjectStateValidityMask" name="validity_mask" bytepos="221" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tUInt32" name="object_id" bytepos="225" byteorder="LE" alignment="1" arraysize="1" />
+        </struct>
+        <struct name="PosRoad" version="0" alignment="1">
+            <element type="tFloat64" name="s" bytepos="0" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="t" bytepos="8" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="lane_offset" bytepos="16" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="hdg_offset" bytepos="24" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tUInt32" name="road_id" bytepos="32" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tInt8" name="lane_id" bytepos="36" byteorder="LE" alignment="1" arraysize="1" />
+        </struct>
+        <struct name="PosGeographical" version="0" alignment="1">
+            <element type="tFloat64" name="long_degree" bytepos="0" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="lat_degree" bytepos="8" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="heading_degree" bytepos="16" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="altitude" bytepos="24" byteorder="LE" alignment="1" arraysize="1" />
+        </struct>
+        <struct name="VehicleAppearance" version="0" alignment="1">
+            <element type="WheelState" name="wheel_state" bytepos="0" byteorder="LE" alignment="1" arraysize="4" />
+            <element type="VehicleSound" name="vehicle_sound" bytepos="180" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="steering_wheel_angle" bytepos="200" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="VehicleAppearanceLightMask" name="light_mask" bytepos="208" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="VehicleAppearanceValidityMask" name="validity_mask" bytepos="212" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tUInt32" name="object_id" bytepos="216" byteorder="LE" alignment="1" arraysize="1" />
+        </struct>
+        <struct name="WheelState" version="0" alignment="1">
+            <element type="tFloat64" name="angle_rotation" bytepos="0" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="angle_steering" bytepos="8" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="spring_compression" bytepos="16" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="speed_rotation" bytepos="24" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="slip_normalized" bytepos="32" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="WheelStateValidityMask" name="validity_mask" bytepos="40" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tUInt8" name="wheel_id" bytepos="44" byteorder="LE" alignment="1" arraysize="1" />
+        </struct>
+        <struct name="VehicleSound" version="0" alignment="1">
+            <element type="tFloat64" name="engine_rpm" bytepos="0" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="engine_load_normalized" bytepos="8" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="VehicleSoundEventMask" name="event_mask" bytepos="16" byteorder="LE" alignment="1" arraysize="1" />
+        </struct>
+        <struct name="ObjectSensorView" version="0" alignment="1">
+            <element type="PointCartesian" name="point_local" bytepos="0" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="PointSpherical" name="point_spherical" bytepos="24" byteorder="LE" alignment="1" arraysize="1" />
+        </struct>
+        <struct name="PointSpherical" version="0" alignment="1">
+            <element type="tFloat64" name="radial_distance" bytepos="0" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="azimuthal_angle" bytepos="8" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="tFloat64" name="elevation_angle" bytepos="16" byteorder="LE" alignment="1" arraysize="1" />
+        </struct>
+        <struct name="SensorView" version="0" alignment="1">
+            <element type="tUInt32" name="object_count" bytepos="0" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="ObjectSensorView" name="object_dyn" bytepos="4" byteorder="LE" alignment="1" arraysize="object_count" />
+        </struct>
+        <struct name="SimState" version="0" alignment="1">
+            <element type="tUInt32" name="object_count" bytepos="0" byteorder="LE" alignment="1" arraysize="1" />
+            <element type="Object" name="object" bytepos="4" byteorder="LE" alignment="1" arraysize="object_count" />
+        </struct>
+    </structs>
+    <streams />
+</adtf:ddl>

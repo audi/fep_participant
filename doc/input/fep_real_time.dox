@@ -1,0 +1,241 @@
+//
+// Copyright @ 2019 Audi AG. All rights reserved.
+// 
+//     This Source Code Form is subject to the terms of the Mozilla
+//     Public License, v. 2.0. If a copy of the MPL was not distributed
+//     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+// 
+// If it is not possible or desirable to put the notice in a particular file, then
+// You may include the notice in a location (such as a LICENSE file in a
+// relevant directory) where a recipient would be likely to look for such a notice.
+// 
+// You may add additional accurate notices of copyright ownership.
+//
+namespace fep
+{
+
+/**
+*
+@page fep_realtime FEP Real-Time Applications
+
+The FEP framework and its accompanying SDK are real-time compliant and serve as a real-time
+compliant middleware in user-defined applications. To assure that these applications which combine
+FEP runtime components with user-defined implementations still meet the desired real-time
+requirements, several aspects have to be taken into account by the developer. The first and most
+important is the choice of the operating system. As of the current release, the FEP supports
+real-time applications on Linux operating systems with the Preempt-RT kernel patch set
+(https://rt.wiki.kernel.org/). FEP Systems running on Windows platforms, on the contrary, do not
+support full real-time compliant determinism due to operating system limitations.
+
+This chapter is dedicated to cover platform-specific characteristics and configuration options
+regarding real-time in detail.
+
+
+Real-Time on Windows operating systems
+----------------------------------------------------------------------------------------------------
+
+Windows operating systems have several formal limitations regarding the code and, for technical
+reasons, the Windows API does not support full preemption of the OS kernel and system drivers. This
+platform therefore cannot guarantee deterministic application scheduling and behaviour. Where
+applicable, FEP core components will therefore choose the highest thread priority available without
+regard to any real-time violations induced by external (system-)components. Please note, that FEP
+does not perform memory locking on Windows systems.
+
+
+Real-Time on Linux operating systems
+----------------------------------------------------------------------------------------------------
+
+Standard Linux operating systems, on the contrary, do support (soft) real-time applications through
+the Vanilla Kernel RT Patch which is available at https://www.kernel.org/pub/linux/kernel/. Please
+note that this patch is being developed for the corresponding vanilla kernel versions and should not
+be applied to customized kernels of various Linux distributions such as Ubuntu or OpenSuse. By
+patching and installing the RT compliant kernel, full preemption support for any kernel module as
+well as the kernel itself is enabled. To allow user-space threads and processes to be ran with RT
+priority and use a reasonable large amount (500 MB) of committed, allocated memory, the following
+modifications in <i>/etc/security/limits.conf</i> have to be made:
+
+@code
+ $user    -    memlock    512000
+ $user    -    rtprio     99
+@endcode
+
+Note: @c $user is the main unix user through which RT processes are supposed to be spawned.
+
+When changes are made to this configuration file, the current user needs to re-login for
+the new limits to take effect. The command <em>ulimit -a</em> can be used to retrieve the
+security limits currently in operation. For more details, refer to the \e limits.conf manpage.
+
+The set-up above corresponds to the configurations, that the FEP SDK is being verified with. In
+addition to the Soft-RT patch for vanilla Linux Kernels, hard real-time systems such as Eagle Linux
+exist. FEP has not been tested with these specialized systems and therefore currently does not
+officially support these.
+
+With the configuration and setup above, FEP is able to run any internal threads and timers with
+real-time priority and real-time compliant scheduling and will attempt to do so. If anything
+prevents FEP from spawning threads with the desired parameters, normal scheduling is used instead.
+A full (soft-) RT-Kernel setup is therefore not necessary to run FEP applications. In this case, the
+same limitations apply to non-RT Linux systems as they do for Windows platforms.
+
+<b><i>Hardware aspects for deterministic systems.</i></b>
+
+In addition to the choice of software, the actual hardware plays a significant role when it comes to
+meeting deterministic requirements. To avoid hardware interrupts during runtime, the following
+aspects and advices should be taken into account:
+
+- All unnecessary kernel modules (e.g. drivers) should be unloaded or blacklisted. This especially
+  applies to proprietary 3rd party drivers which may not be RT compliant due to not being maintained
+  along in the Linux kernel directly. If possible, hardware drivers included in the Linux kernel
+  should be favoured, as these are part of the Vanilla RT patch whereas proprietary drivers are not
+  (e.g. NVIDIA drivers, "normal" PEAK CAN Drivers, etc.)
+- On-board hardware that is not used but might still cause hardware-interrupts should be disabled in
+  the BIOS / UEFI
+- All ACPI functionality or functionality related to energy saving plans should be disabled on Linux
+  as well as in the BIOS / UEFI. (screen dimming, screen saver, harddisk spin-down, etc.)
+- A CPU governor should be run with "performance" mode instead of the mode "on-demand" to avoid
+  delays during CPU frequency switching.
+- Intriguingly, it appears to be advisable to use "old-fashioned" PS/2 hardware over common USB
+  input devices such as mouse and keyboard.
+
+@note
+Optionally, timing accuracy of the Linux system may be verified by using the Cyclictest test program
+which can be obtained from https://rt.wiki.kernel.org/index.php/Cyclictest.
+
+
+FEP Real-Time Applications
+----------------------------------------------------------------------------------------------------
+
+This section will discuss general approaches to RT compliant programming regarding general Do's and
+Dont's and FEP specific aspects. Generally speaking, RT-compliant programming needs to be applied to
+sections running during state \ref FS_RUNNING. In contrast, all blocking operations and I/O should
+be completed during the initialisation phase, e.g. reading files, allocating memory or FEP User Data
+Samples as well as instantiation of classes.
+
+FEP real-time capabilities always exclusively refer to the state \ref FS_RUNNING and only apply to
+the critical path. Real-time constrains do not apply in FEP Participant states below \ref
+FS_RUNNING!
+<br>
+From a general point of view, FEP relies on the RTI NDDS bus which generally provides for RT
+compliant bus communication. RT compliance, however, is violated by FEP Messages (e.g. FEP Command,
+FEP Notification, FEP Incident, etc.) as they are purely string-based and thus impair RT with
+additional allocation, formatting and parsing overhead. For this reason, the FEP framework does not
+guarantee delivery or processing of FEP Messages in a deterministic manner. While FEP Messages
+usually serve little to no purpose during \ref FS_RUNNING, they are all the more essential for the
+states \ref FS_INITIALIZING or \ref FS_IDLE. As a consequence, user-defined implementations within
+these states are *not* necessarily required to meet RT compatibility either.
+<br>
+Whereas any state outside \ref FS_RUNNING is the domain of FEP Messages, FEP Signals make up the
+essential part of the running state and are thus guaranteed to be RT compliant, regardless of the
+method of access. Since FEP Signals are user-driven, processing thereof requires the corresponding
+user-implementations to meet RT requirements unconditionally:
+<br>
+
+<b>Transmission</b>:
+- Each FEP User Data Sample has to be pre-allocated (using \ref IUserDataSample::SetSize()) 
+  before entering \ref FS_RUNNING.
+- FEP User Data Signals are designed to be re-used to avoid reconstruction each time a new set of 
+  data is available.
+- The "FEP Transmission Adapter" is pre-allocating 50 samples during initialisation. These samples 
+  are reused when receiving data. If the number of pre-allocated samples is not sufficient further 
+  samples must be allocated.
+
+<b>Reception</b>:
+- If accessing the \ref IUserDataAccess directly and subscribing to it using a \ref 
+  IUserDataListener implementation, ensure that the \ref IUserDataListener::Update() callback 
+  is not being blocked longer than the period in between new samples are expected to arrive. 
+  Generally, a callback must not violate the desired update rate of the FEP system setup. Sample 
+  loss is the immediate consequence and is *not* detectable by the NDDS bus! 
+
+- In case a frame-based models is pursued, the 
+  \ref fep_data_receive_ddb "FEP Distriburted Data Buffer (DDB)" is the option of choice and
+  already provides memory allocation and incident / error management. 
+  Please note, that even though incident and error management are in place, the DDB must neither 
+  be blocked through the \c ProcessDDBSync() nor through the \c LockBuffer() methods for longer 
+  than the period of the intended update frequency of the FEP application.
+
+<b>General</b>:
+- Allocate all your memory during the initialization phase i.e. in your \ref cModule::Create()
+  or \ref FS_INITIALIZING.
+- \ref IUserDataAccess::CreateUserDataSample() will automatically allocate User Data Samples if
+  a valid FEP Signal Handle is provided. Otherwise user data samples have to be allocated using
+  \ref IUserDataSample::SetSize and \ref ISignalRegistry::GetSignalSampleSize().
+- Do not retrieve and evaluate properties directly from the FEP Property Tree during running state.
+- FEP RT Applications are usually not required to pre-allocate stack memory. Each thread or timer
+  with RT priority will allocate 8MB of stack during creation (deliberately provoking page faults
+  on the stack)
+
+\warning Any events or incidents that arise during the \ref FS_RUNNING state may potentially impair
+RT compliance of an application if these do not have a state transition as a consequence. Events and
+incidents are therefore to be avoided at all times during the running state. If this is not the case
+(e.g. buffer overflow incidents occur frequently), this usually implies misconfiguration,
+implementations that do not meet RT requirements or simply exceed the hosting systems capabilities
+(e.g. system overload).
+
+In a broader scope beyond FEP SDK specific aspects, anything that performs blocking Input/Output
+operations such as file or socket access as well as any form of string processing impairs RT
+conformity. This, for instance, disqualifies the use of FEP Participants and code using the Data
+Definition Language (DDL) through string identifiers. Instead, the data structures should be
+accessed through their ID references.
+
+In order to prevent unpredictable delays during the execution of your code, always respect the
+following rules:
+
+- Do not allocate heap or stack memory during runtime. Do so during the initialization phase.
+  Note that each class that contains a FEP d-Pointer pattern allocates dynamic memory in its
+  constructor, so it is not safe to create objects of these classes on the stack (as local
+  variables). This applies to almost all FEP classes.
+- Do not perform blocking operations. These include file access, socket access as well as the use
+  of mutexes and semaphores. This also applies to console output via std::cout or std::cerr,
+  printf() and alike.
+- Do not use string operations, which usually require dynamic memory allocation and whose memory
+  access is always non-deterministic due to the dynamic length of strings.
+- Avoid the use of STL containers whose sorting algorithms are not deterministic and whose
+  allocators use dynamically allocated heap memory by default.
+- Avoid using the unoptimized <i>Debug</i> mode when compiling your code.
+- Avoid any kind of user-input during runtime. It is recommended to prefer a remote shell over a
+  physical keyboard when user input is required.
+- Use classes with constructors that are not real-time safe only as members and call only those
+  methods that are explicitly labelled as real-time safe.
+- Use timers and threads with real-time scheduling and real-time priority.
+- Use Lock-Free containers and atomic operations where possible.
+- You may use mutexes but make sure that you do not violate any of the above limitations in ANY of
+  the critical sections that are guarded by these mutexes. RT compliant mutexes have to use
+  priority inheritance to ensure that priority inversion is not an issue.
+- In if/else differentiations, each branch should cause the same latency (only applies to very
+  high requirements to determinism)
+
+In a homogeneous FEP environment, these aspects lead to the following rule of thumb:
+
+<b>Avoid any calls to functions which are blocking for an unpredictable and non-determined time!
+This generally includes hardware interaction (files, sockets, memory and maybe even terminals) or
+generally blocking calls to semaphores, mutexes.</b>
+
+
+General Notes and Background Information
+----------------------------------------------------------------------------------------------------
+
+\warning
+Only processes owned by root can change their policy from SCHED_IDLE to something else.
+Unprivileged processes are stuck within SCHED_IDLE once they have it, no matter what is configured
+in the limits.conf file. Please see the man file of \e sched_setscheduler.
+
+\note
+The FEP Real-Time Extension is being tested on non-stock Linux Vanilla Kernels with RT Patch.  These
+Kernels do not include distribution-specific amendments, as produced for example by Canonical for
+the Ubuntu variants.
+
+\warning
+When GDB reports a caught SIGRTMIN or FEP applications close unexpectedly after being "terminated by
+SIGRTMIN", a segmentation fault along with a race condition in the created RT thread or timer is
+usually the cause. This happens when the thread is being deleted prematurely or has not been halted
+and deleted properly (e.g. the StateMachine has not been shut down properly).
+
+
+Further Reading on Real-Time Applications
+----------------------------------------------------------------------------------------------------
+A real-time preemption overview including a very good overview of the RT "universe" and the Linux
+Kernel RT patch can be found at <a href="http://lwn.net/Articles/146861">
+http://lwn.net/Articles/146861 </a>
+
+*/
+
+}

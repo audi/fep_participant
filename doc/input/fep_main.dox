@@ -1,0 +1,48 @@
+/**
+ *
+ * This file holds the main page of the FEP SDK Participant library user documentation.
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+
+/**
+\mainpage FEP SDK Participant library Overview
+
+This documentation covers all information about the FEP SDK Participant library which comes with the Functional Engineering Platform (FEP).
+
+FEP is a product familiy of software libraries and tools that enables the composition of a
+distributed system in an automotive context. The resulting FEP System consists of a collection of FEP Participants
+that are connected to each other based on automatic network discovery mechanisms. 
+
+To understand FEP have a look at @ref fep_wording and @ref page_fep_participant_system_view.
+
+The main artifact of FEP is the FEP Software Development Kit 
+containing this \ref fep_participant_library, a shared library provided for Windows and Linux operating systems. 
+This library implements the basic programming model \b FEP \b Participant to participate in a FEP System.
+This FEP Participant provides funcitonality to publish data or subscribe for data on the FEP Data Bus (Simulation Bus) and join 
+a FEP System by connecting to a so called Service Bus.
+
+To connect and control a FEP System the FEP SDK System library and a common @ref fep_description_tooling is provided.
+
+\par References
+\li \subpage fep_participant_library
+\li \subpage fep_description_tooling
+
+\par Additional Information
+\li \ref fep_common_information_about_fep
+\li \subpage fep_sdk_participant_change_log
+\li \subpage fep_sdk_installation
+*/
+

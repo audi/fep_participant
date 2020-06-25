@@ -1,0 +1,60 @@
+#
+# Copyright @ 2019 Audi AG. All rights reserved.
+# 
+#     This Source Code Form is subject to the terms of the Mozilla
+#     Public License, v. 2.0. If a copy of the MPL was not distributed
+#     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+# 
+# If it is not possible or desirable to put the notice in a particular file, then
+# You may include the notice in a location (such as a LICENSE file in a
+# relevant directory) where a recipient would be likely to look for such a notice.
+# 
+# You may add additional accurate notices of copyright ownership.
+#
+# subtle difference: on unix the command silently fails if the output directory does not exist...
+file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/include/fep3/components/rpc)
+
+jsonrpc_generate_server_stub(${PROJECT_SOURCE_DIR}/include/fep3/components/rpc/rpc_element_object_server.json
+                             fep::rpc_stubs::cRPCElementObjectServer
+                             ${PROJECT_BINARY_DIR}/include/fep3/components/rpc/rpc_stubs_element_object_server.h)
+jsonrpc_generate_client_stub(${PROJECT_SOURCE_DIR}/include/fep3/components/rpc/rpc_element_object_server.json
+                             fep::rpc_stubs::cRPCElementObjectClient
+                             ${PROJECT_BINARY_DIR}/include/fep3/components/rpc/rpc_stubs_element_object_client.h)
+
+set(RPC_SOURCES_PUBLIC ../include/fep3/components/rpc/fep_json_rpc.h
+                       ../include/fep3/components/rpc/fep_rpc_intf.h
+                       ../include/fep3/components/rpc/fep_rpc_stubs.h
+                       ../include/fep3/components/rpc/fep_rpc.h
+                       ../include/fep3/components/rpc/fep_element_object_client.h
+                       ../include/fep3/components/rpc/fep_rpc_remote_object_factory.h
+                       ${PROJECT_SOURCE_DIR}/include/fep3/components/rpc/rpc_element_object_server.json)
+
+set(RPC_PRC_SOURCES_PUBLIC )
+
+set(RPC_SOURCES_PRIVATE
+    fep3/components/rpc/fep_json_rpc.cpp
+    fep3/components/rpc/fep_rpc_impl.cpp
+    fep3/components/rpc/fep_rpc_server_connection.cpp
+    fep3/components/rpc/fep_rpc_object_registry.cpp
+    fep3/components/rpc/fep_rpc_element_object.cpp
+
+    fep3/components/rpc/fep_rpc_impl.h
+    fep3/components/rpc/fep_rpc_server_connection.h
+    fep3/components/rpc/fep_rpc_object_registry.h
+    fep3/components/rpc/fep_rpc_element_object.h
+
+    ${PROJECT_BINARY_DIR}/include/fep3/components/rpc/rpc_stubs_element_object_server.h
+    ${PROJECT_BINARY_DIR}/include/fep3/components/rpc/rpc_stubs_element_object_client.h
+)
+
+install(
+    FILES
+        ${PROJECT_BINARY_DIR}/include/fep3/components/rpc/rpc_stubs_element_object_server.h
+        ${PROJECT_BINARY_DIR}/include/fep3/components/rpc/rpc_stubs_element_object_client.h
+    DESTINATION include/fep3/components/rpc
+)
+
+set(RPC_SOURCES ${RPC_SOURCES_PUBLIC} ${RPC_SOURCES_PRIVATE})
+
+source_group(components\\rpc\\public FILES ${RPC_SOURCES_PUBLIC})
+source_group(components\\rpc FILES ${RPC_SOURCES_PRIVATE})

@@ -1,0 +1,74 @@
+/**
+ *
+ * Image of the incident handler architecture
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+
+digraph incident_handler_architecture{
+    graph [splines=ortho]
+    edge [dir="both"]
+    node [shape="box", fillcolor="lightsteelblue", style="filled"]
+    
+    subgraph clusterUseCase {
+        label = "Use-case implementation, hosting all required and related Incident Handling
+        Strategies"
+        margin = 10
+        color = gray42
+        bgcolor = lavender
+        
+        cMyHostModule [label="cMyHostModule"]
+        cMyFirstStrategy [label="cMyFirstStrategy", fillcolor="lightyellow", style="filled"]
+        cMySecondStrategy [label="cMySecondStrategy", fillcolor="lightyellow", style="filled"]
+        cMyThirdStrategy [label="cMyThirdStrategy", fillcolor="lightyellow", style="filled"]
+    }
+    subgraph clusterFEPCoreAPI {
+        label = "FEP-Core API"
+        labelloc = "b"
+        margin = 40
+        color = gray42
+        bgcolor = lavender
+        IIncidentStrategy [label="IIncidentStrategy", fillcolor="lightyellow", style="filled"]
+        IIncidentHandler [label="IIncidentHandler"]
+        cModule [label="cModule"]
+        IPropertyTree [label="IPropertyTree"]
+    }
+    
+    // Implements
+    edge [arrowhead = "onormal", arrowtail = "none"]
+    cMyFirstStrategy -> IIncidentStrategy 
+    cMySecondStrategy -> IIncidentStrategy 
+    cMyThirdStrategy -> IIncidentStrategy 
+    cMyHostModule -> cModule
+    
+    // Aggregation
+    edge [arrowtail = "odiamond", arrowhead="none"]
+    IIncidentHandler -> IIncidentStrategy
+    
+    // Komposition
+    edge [arrowtail = "diamond", arrowhead="none"]
+    cModule -> IIncidentHandler
+    cMyHostModule -> cMyFirstStrategy
+    cMyHostModule -> cMySecondStrategy
+    cMyHostModule -> cMyThirdStrategy
+    
+    // Use
+    edge [arrowhead = "ovee", arrowtail="none", style="dashed", xlabel=" <<use>> "]
+    cMyFirstStrategy -> IPropertyTree
+    cMySecondStrategy -> IPropertyTree
+    cMyThirdStrategy -> IPropertyTree [xlabel="       <<use>>"]
+    IIncidentStrategy -> IPropertyTree
+    IIncidentHandler -> IPropertyTree
+}

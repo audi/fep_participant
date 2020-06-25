@@ -1,0 +1,530 @@
+/**
+ *
+ * This file describes the usage of FEP 2 Timing
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+
+namespace fep
+{
+
+/**
+\page fep_timing_2 FEP 2 Timing
+
+\section fep_simulation_time Time in FEP
+
+Every FEP module instance contains a timing client component (interface \ref ITiming) which provides
+access to the current simulation time. This time does generally not correlate to the real system
+time, but can be configured to be synchronized to it (see \ref fep_step_trigger "User trigger" for
+details). It is guaranteed that
+- it is monotonically increasing,
+- it is synchronized across all FEP participants in a FEP sub-network that are registered to the
+  same FEP Timing Master component.
+
+The current simulation time (\ref ITiming::GetTime) is only available during \ref FS_RUNNING and
+will return 0 during other states.
+
+However, a synchronized time-base across the FEP %System is not enough for a deterministic
+co-simulation sequence over multiple participants. Tasks and data need to be synchronized as well.
+See \ref fep_step_listener "Step Listeners" and \ref fep_step_data_access "Step Data Access" for
+more details. For hands on examples see @ref demo_timing.
+
+\warning
+For the use of FEP Timing it is strongly recommended to disable the energy saving mode of the
+operating system. This mode could significantly reduce synchronization performance between FEP
+Participants, and more generally could make the entire simulation unstable.  The energy saving mode
+can be automatically disabled by simply connecting the computer to a power source.  Alternatively,
+the following image shows how to deactivate this mode on windows.
+
+![How to deactivate energy saving mode on windows](deactivate_energy_saving_mode.png)
+
+\section fep_simulation_sync Time synchronization and simulation coordination
+
+Time and simulation synchronization is achieved by means of a discrete time event quantization. The
+needed quantization is performed automatically by the FEP Timing Master component of the FEP
+sub-network. Only one such Timing Master instance can exist per domain for correct functionality. A
+Timing Master is configured for the whole system by setting the name of the Timing Master
+participant into the configuration property \ref FEP_TIMING_MASTER_PARTICIPANT in the \ref
+fep_configs "FEP Component Configuration Area" in every FEP Participant that is to be time
+synchronized.
+
+\note
+\ref FEP_TIMING_MASTER_PARTICIPANT is supposed to be set by the system integrator. A participant
+should never set this property on its own!
+
+In every module instance, during the switch from \ref FS_INITIALIZING to \ref FS_READY, the property
+is evaluated as follows:
+- In case of no configured timing master and needed synchronization (i.e. Step Listeners were
+  registered in the Timing Client component) the module instance will report an error and stop
+  initialization.
+- If the configured timing master is some other module instance, only the timing client component
+  will be initialized and configured.
+- If the configured timing master is the module instance itself, the FEP Timing Master component of
+  the instance will be initialized and configured.
+
+<b>FEP Timing Master</b>
+<br>
+The FEP Timing Master triggers and controls the time/simulation sequence of the entire FEP %System
+(if configured). It does so by triggering the system with discrete time events containing the
+current point in simulation time the timing clients should use for their calculation. These triggers
+are processed by the Timing Clients and their respective Step Listeners with regard to required step
+execution. The time event table / schedule is built up automatically by the timing master during
+initialization by requesting information of all timing clients about their registered step
+listeners, i.e. tasks and their respective simulation time cycles.
+
+\warning
+For correct functionality the Timing Master has to be initialized <b>AFTER</b> all Timing Clients
+have been configured and their respective Step Listeners have been registered.
+
+The Timing Master passes through the time event table after reaching \ref FS_RUNNING dependent on
+the trigger mode configured in the property \ref FEP_TIMING_MASTER_TRIGGER_MODE. There are four
+trigger modes available which will be described in the following:
+
+1. <b>AFAP</b>
+<br>
+The Timing Master will trigger the discrete time events as fast as possible i.e. continue to the
+next event instantly after all acknowledgements about the successful execution of the previous
+events from the respective Step Listeners were received.
+2. <b>SYSTEM_TIME</b>
+<br>
+In this mode the timing master will try to synchronize the simulation time to the scaled system time
+the master is executed on. Nevertheless, to secure a deterministic simulation sequence the timing
+master will delay the simulation time until all pending acknowledgements about previous events are
+received from respective Step Listeners. The scale of the simulation time compared to the platform
+system time is configured by setting the property \ref FEP_TIMING_MASTER_TIME_FACTOR.
+<br>
+3. <b>EXTERNAL_CLOCK</b>
+<br>
+This mode is to be used to keep the simulation time synchronized to an external real time component.
+The real time component has to periodically publish samples containing its current time and time
+validity on the FEP Signal with name "_StepTrigger" and of type "tFEP_StepTrigger" (the signal
+description is found at /description/fep_timing.description). The timing master will try to follow
+the real time progression strictly and will not wait for execution of events by the step listeners
+to keep the simulation time as close as possible to the time of the real time component. For more
+detailed information about time violations see \ref fep_real_time.
+<br>
+4. <b>USER_IMPLEMENTATION</b>
+<br>
+The timing master will be triggered by a user implementation registered in the timing master
+instance if it exists. If this property value is used but no user implementation was registered the
+initialization will fail with an error. For detailed information see the paragraph \ref
+fep_step_trigger.
+
+\note
+When using AFAP or SYSTEM_TIME trigger mode the timing master component will reach a wait timeout if
+not receiving any acknowledgements for a time span configured by \ref
+FEP_TIMING_MASTER_CLIENT_TIMEOUT and proceed to \ref FS_ERROR state. This mechanism may be disabled
+by setting the timeout value to 0. The default configuration is 10 seconds.
+
+<b>FEP Timing Client</b>
+<br>
+The timing client component is used to register and configure cyclic simulation time events i.e.
+the step listeners. Additionally, it receives the discrete time event triggers of the timing master
+and decides which of its respective step listeners need to be triggered for execution. Each step
+listener can be configured during registration through the provided StepConfig structure used in the
+registration method signature. Additionally, step listeners can be reconfigured during runtime by
+provision of a .xml configuration through the property \ref FEP_TIMING_CLIENT_CONFIGURATION_FILE.
+For detailed information about the configuration properties see the paragraph \ref
+fep_step_listener.
+
+\note
+The timing client component will reach a wait timeout if not receiving any triggers for a time span
+configured by the property \ref FEP_TIMING_CLIENT_SYSTEM_TIMEOUT and set the participant to \ref
+FS_ERROR state. This mechanism may be disabled by setting the timeout value to 0. The default
+configuration is 300 seconds. The property is evaluated during initialization, therefore it has to
+be set before or during FS_IDLE.
+
+\note
+The timing master participant may also have several step listeners registered in its timing client
+component and will receive its own discrete simulation time events.
+
+\note
+The Timing Client can make use of multicast (RTI_DDS only) see \ref FEP_TIMING_CLIENT_USE_MULTICAST.
+
+\section fep_step_trigger Custom Trigger Mode
+
+The Timing Master component provides a possibility to implement and use a custom trigger mode. To do
+so you simply have to provide a class implementing the \ref IStepTrigger interface by means of the
+method \ref ITimingMaster::SetStepTrigger. The Timing Master will register as \ref
+IStepTriggerListener providing the determined time quantization i.e. cycle time of the system when
+reaching \ref FS_RUNNING.
+
+After registration the Timing Master can be controlled by two methods:
+- \ref IStepTriggerListener::SetInitialSimulationTime can be called initially to set a simulation
+  start time if it needs to be non-zero.
+- \ref IStepTriggerListener::Trigger will continue the simulation time by the cycle time given in
+  the \ref IStepTrigger::RegisterTrigger method.
+
+\note \ref IStepTriggerListener::SetInitialSimulationTime has to be called <b>before</b>
+triggering the Timing Master. Calling the method afterwards will return an error code.
+
+\section fep_step_listener Simulation Task synchronization / Step Listeners
+
+Step Listeners provide a way to execute tasks at equidistant discrete time events i.e. periodically
+in the coordinated simulation time. They are registered in the timing client component using the
+\ref ITiming::RegisterStepListener method during the state \ref FS_INITIALIZING. Step listeners
+provide a multitude of configuration properties regarding time synchronization, data validity and
+error handling.
+
+\snippet snippets/snippet_timing/snippet_timing.cpp StepListenerRegistration
+
+<br>
+An explanation of the configuration properties of the \ref StepConfig structure is shown in the
+following table:
+<br>
+<table>
+<caption>Step Configuration Properties</caption>
+<tr><th width="120"><b>Entry</b></th><th><b>Type</b></th><th>Name in structure</th><th><b>Description</b></th></tr>
+<tr>
+<td><i>Cycle time (microseconds)</i></td><td>timestamp_t</td><td>m_max_cycleTime_sim_us</td>
+<td><b>(Required)</b> The simulation time period the step listener will use to trigger the user
+callback. This information will be used by the timing master to determine the schedule map of
+discrete time events for the system.</td>
+
+</tr>
+<tr>
+<td><i>Maximum Waittime for Inputs (microseconds)</i></td><td>timestamp_t</td><td>m_maxInputWaittime_us</td>
+<td><b>(Optional, default 0)</b> The maximum system time that the step listener will wait for valid
+input data. In case of a timeout the step listener will consider the current simulation step faulty
+and react in accordance with the input violation strategy. For more detailed information see \ref
+fep_simulation_causality.
+<br>
+<b>IMPORTATNT NOTICE:</b> <br> 
+This m_maxInputWaittime_us parameter is deprecated and not supported anymore within programming API since 2.3.
+It will only be considered if you use the Timing Configuration File! (contact the support for your usecase with that)
+</td>
+</tr>
+<tr>
+<td><i>Maximum Runtime (microseconds)</i></td><td>timestamp_t</td><td>m_maxRuntime_us</td>
+<td><b>(Optional, default 0)</b> The maximum runtime that can be used by the step listener for user
+code execution. In case of a timeout the step listener will consider the current simulation step
+faulty and react in accordance with the runtime violation strategy. For more detailed information
+see \ref fep_real_time.</td>
+</tr>
+<tr>
+<td><i>Runtime Violation Strategy</i></td><td>enum TimeViolationStrategy</td><td>m_runtimeViolationStrategy</td>
+
+<td><b>(Optional, default TS_IGNORE_RUNTIME_VIOLATION)</b> Enum defining how the step listener
+should react in case of a simulation step taking longer than the configured maximum runtime. Can
+take the following values:<br>
+\ref TS_IGNORE_RUNTIME_VIOLATION,<br>
+\ref TS_WARN_ABOUT_RUNTIME_VIOLATION,<br>
+\ref TS_SKIP_OUTPUT_PUBLISH,<br>
+\ref TS_SET_STM_TO_ERROR.<br>
+For more detailed information see \ref fep_real_time.</td>
+</tr>
+<tr>
+<td><i>Map of Input Signals</i></td><td>Map(string,struct)</td><td>m_inputs</td>
+<td><b>(Optional, default empty)</b> For each Step Listener multiple required input signals may be
+defined and configured. The configuration properties are explained in the following tables.</td>
+</tr>
+<tr>
+<td><i>Map of Output Signals</i></td><td>Map(string,struct)</td><td>m_outputs</td>
+<td><b>(Optional, default empty)</b> For each Step Listener multiple output signals may be
+defined.</td>
+</tr>
+</table>
+<br>
+An explanation of the configuration properties of the \ref InputMap structure is shown in the
+following table:
+<br>
+<table>
+<caption>Input Configuration Map</caption>
+<tr><th width="80"><b>Entry</b></th><th><b>Type</b></th>
+<th>Name in structure</th><th><b>Description</b></th></tr>
+<tr>
+<td><i>Name</i></td><td>key / string</td><td></td>
+<td>The name of the required input signal.</td>
+</tr>
+<tr>
+<td><i>Valid Age (microseconds)</i></td><td>value / timestamp_t</td><td>m_validAge_sim_us</td>
+<td><b>(Required)</b> The maximum age in simulation time that the timestamp of the most recently
+received sample of the input signal may have to be considered valid for the current simulation step.
+If no such sample exists the step listener will wait the configured maximum waittime for inputs
+before considering the current step faulty and reacting in accordance with the input violation
+strategy. For more detailed information see \ref fep_simulation_causality "Causality and Determinism".</td>
+</tr>
+<tr>
+<td><i>Input Violation Strategy</i></td><td>value / enum InputViolationStrategy</td><td>m_inputViolationStrategy</td>
+<td><b>(Required)</b> Enum defining how the Step Listener should react in case of no valid input
+samples existing when executing its current simulation step. Can take the following values:<br>
+\ref IS_IGNORE_INPUT_VALIDITY_VIOLATION,<br>
+\ref IS_WARN_ABOUT_INPUT_VALIDITY_VIOLATION,<br>
+\ref IS_SKIP_OUTPUT_PUBLISH,<br>
+\ref IS_SET_STM_TO_ERROR.<br>
+For more detailed information see \ref fep_simulation_causality "Causality and Determinism".</td>
+</tr>
+<tr>
+<td><i>Delay (microseconds)</i></td><td>value / timestamp_t</td><td>m_delay_sim_us</td>
+<td><b>(Optional, default 0)</b> A simulated delay that will be added as an offset to the reception
+time of the input signal. In case of the sample simulation time exceeding the simulation time of the
+current step i.e the sample is too new, it will be treated as not yet existing.</td>
+</tr>
+</table>
+<br>
+An explanation of the configuration properties of the \ref OutputMap structure is shown in the
+following table:
+<br>
+<table>
+<caption>Output Configuration Map</caption>
+<tr><th width="80"><b>Entry</b></th><th><b>Type</b></th><th>Name in structure</th><th><b>Description</b></th></tr>
+<tr>
+<td><i>Name</i></td><td>key / string</td>
+<td>The name of the output signal. Configured outputs are skipped in case of a runtime or input
+violation if a corresponding skip strategy is activated. In case of data transmission through the
+\ref IStepDataAccess the samples are first batched in an output sample buffer and published after
+the step finishes. For more detailed information see \ref fep_step_data_access "Step Data Access".
+</td>
+</tr>
+</table>
+
+\note
+For input and output configuration it is vital that the signals in question are registered
+<b>BEFORE</b> registering the Step Listener. Otherwise the Step Listener registration will fail.
+
+Step Listeners will periodically call the registered user callback with the following signature:
+
+\snippet snippets/snippet_timing/snippet_timing.cpp UserCallback
+
+The argument tmSimulation is the exact simulation time for the current simulation step. The argument
+pStepDataAccess is to be used for data access inside the user callback (for more information read
+\ref fep_step_data_access "Data Synchronization").
+
+A configuration .xml file may be provided through the property \ref
+FEP_TIMING_CLIENT_CONFIGURATION_FILE before state \ref FS_READY to reconfigure all registered step
+listeners of a participant during runtime without the need for recompilation. A configuration file
+has the following form:
+
+\code
+<?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
+<timing xmlns:timing="timing">
+ <header>
+  <author>XXX</author>
+  <date_creation>DD.MM.YYYY</date_creation>
+  <date_change>DD.MM.YYYY</date_change>
+  <description>manual</description>
+ </header>
+ <participants>
+    <participant name="participantName" systemTimeout_s="0">
+        <steps>
+            <step name="nameStepListener" cycleTime_sim_us="cycleTime" maxRuntime_us="runTime" maxInputWaittime_us="waitingTime" runtimeViolationStrategy="TS_Enum">
+                <inputs>
+                    <input name="inputName" validAge_sim_us="maxValidAge" delay_sim_us="delay" inputViolationStrategy="IS_Enum" />
+                </inputs>
+                <outputs>
+                    <output name="outputName" />
+                </outputs>
+            </step>
+        </steps>
+        <inputs>
+            <input name="inputName" backLogSize="1" />
+        </inputs>
+    </participant>
+ </participants>
+</timing>
+\endcode
+
+Here a link to the XSD schema: [timing_configuration.xsd](xsd/timing_configuration.xsd)
+
+\note
+Step listeners given in the configuration file <b>HAVE</b> to be registered prior in the timing
+client component or initialization of the participant will fail.
+
+\warning
+The timing master will trigger an incident and go to the error state if the resulting schedule
+table would get too big. This could happen when a combination of timing frequencies like 60 Hz, 30 Hz
+and 10 Hz is used. A solution for this would be to round the resulting microseconds to the nearest
+integer value.
+
+\section fep_simulation_causality Causality and Determinism
+
+Often, the most important characteristics for simulations are the repeatability of simulation runs
+and reproducability of their results. To satisfy these demands FEP Timing offers mechanisms to
+achieve strict timed step execution and data synchronization with regard to a deterministic
+simulation sequence.
+
+The provided trigger modes "AFAP" and "SYSTEM_TIME" provide strict time synchronization between
+participants independent of other configuration options since the Timing Master will always wait
+until all previous time events / steps of all participants have been executed and acknowledged
+before proceeding to the next step. Additionally, to ensure the validity of the data used for
+computation in each step it is vital to configure the valid age property of input signals for a Step
+Listener in accordance with the refresh frequency of the output signals providing the data.
+Absolute causality and determinism are reached when the participant providing the data refreshes its
+outputs with the same cycle time as the processing Step Listener and the maximum valid age is set to
+the cycle time of the corresponding producer (the cycle time of the data job which provides the input signals).
+
+Since FEP Timing does not synchronize data exchange actively but provides check mechanisms for data
+validity, it is indispensable that the cycle times of producers, i.e. the step listener cycle times
+of participants providing data, and the cycle times of consumers, i.e. the step listener cycle times
+of participants processing this data, and the valid age configuration for the inputs have to be
+configured correctly.
+
+\warning
+Configuring a consuming participant with a shorter cycle time than the producing participant, while
+simultaneously setting the valid age for the consuming inputs too low, will trigger the consuming
+participant to regard step execution as faulty and will trigger the configured "input violation
+strategy".
+
+\note
+Depending on the network topology and signal sizes of the simulation system transfer times of the
+timing synchronization signals may be shorter than those of the data signals. In this case the
+maximum waiting time for inputs needs to be configured accordingly.
+
+When an execution step is considered faulty because of missing valid data for configured inputs the
+Input Violation Strategy will be executed to deal with the error. The four provided strategies
+configured by enumeration are described in the following:
+<br>
+<br>
+1. <b>IS_IGNORE_INPUT_VIOLATION</b>
+<br>
+The input data violation will be ignored and the Step Listener will continue execution transparently.
+<br>
+<br>
+2. <b>IS_WARN_ABOUT_INPUT_VIOLATION</b>
+<br>
+An incident with incident code \ref FSI_STEP_LISTENER_INPUT_VALIDITY_VIOLATION and \ref SL_Warning
+severity will be published. Step execution will continue transparently.
+<br>
+<br>
+3. <b>IS_SKIP_OUTPUT_PUBLISH</b>
+<br>
+An incident with incident code \ref FSI_STEP_LISTENER_INPUT_VALIDITY_VIOLATION and \ref
+SL_Critical_Global severity will be published. Step execution will continue but all configured
+output signals transmitted through \ref IStepDataAccess::TransmitData will not be published.
+<br>
+<br>
+4. <b>IS_SET_STM_TO_ERROR</b>
+<br>
+An incident with incident code \ref FSI_STEP_LISTENER_INPUT_VALIDITY_VIOLATION and \ref
+SL_Critical_Global severity will be published. Step execution will not continue and the state
+machine will be set to \ref FS_ERROR.
+
+\section fep_real_time Real Time Capabilities
+
+In some use cases the most important concern is the synchronization of the simulation time to the
+time of an external real time system (for example a hardware component). This can be achieved by
+setting the timing master trigger mode to "EXTERNAL_CLOCK" and providing the timing master with
+periodic heartbeats containing the current time and time progress until the next heartbeat should be
+expected. Another possibility is to implement the timing master component directly and use
+"USER_IMPLEMENTATION" as trigger mode. In both cases the timing master will continue through the
+schedule map in accordance with the external time and disregard pending acknowledgements of the step
+listeners to keep the synchronization as close as possible. Thus, determinism and causality are not
+inherently guaranteed when using these trigger modes. However, FEP Timing provides mechanisms to
+determine whether a specific simulation sytem is operable under real time constraints and to detect
+violations during runtime.
+
+Because of the duration of data transmissions and the overhead resulting from the timing
+synchronization itself, infinitely exact quantization granularity can not be achieved. The factors
+affecting the maximum possible granularity i.e. lowest possible step listener cycle time for each
+participant are highly dependent on the network topology, the number and deployment of simulation
+participants in the system, and the user implementations of the respective step listener callbacks.
+Therefore, strict determinism and real time capabilities can only be achieved simultaneously under
+certain boundary conditions differing for each system. Furthermore, it has to be considered that the
+execution of a step may have to finish faster than the configured cycle if another simulation
+participant is dependent on its outputs.
+
+FEP Timing provides mechanisms to detect overruns of the runtime. The first is the configuration of
+a maximum runtime on a per step listener basis, which can also be used outside of real time step
+triggers to determine whether required timing constraints of the system can be adhered to by the
+step listener. The second is the detection of step listeners which did not finish their computation
+during reception of the next time event affecting the step listener when a real time trigger mode is
+used. Both of these will cause the step listener to consider the current step faulty and will
+trigger the time violation strategy to deal with the error.
+
+The four provided strategies configured by enumeration are described in the following:
+<br>
+<br>
+1. <b>TS_IGNORE_RUNTIME_VIOLATION</b>
+<br>
+The runtime violation will be ignored and the Step Listener will continue execution transparently.
+<br>
+<br>
+2. <b>TS_WARN_ABOUT_RUNTIME_VIOLATION</b>
+<br>
+An incident with incident code \ref FSI_STEP_LISTENER_RUNTIME_VIOLATION and \ref SL_Warning severity
+will be published. Step execution will continue transparently.
+<br>
+<br>
+3. <b>TS_SKIP_OUTPUT_PUBLISH</b>
+<br>
+An incident with incident code \ref FSI_STEP_LISTENER_RUNTIME_VIOLATION and \ref SL_Critical_Global
+severity will be published. Step execution will continue but all configured output signals
+transmitted through \ref IStepDataAccess::TransmitData will not be published.
+<br>
+<br>
+4. <b>TS_SET_STM_TO_ERROR</b>
+<br>
+An incident with incident code \ref FSI_STEP_LISTENER_RUNTIME_VIOLATION and \ref SL_Critical_Global
+severity will be published. Step execution will not continue and the state machine will be set to
+\ref FS_ERROR.
+
+\note
+The general approach imagined by FEP Timing for designing deterministic real time simulations is to
+use the configurable runtime limits and runtime violation detections to determine and test the
+timing constraints of a simulation system to ensure the real time capabilities of its architecture
+before deploying it in a real time environment.
+
+\note
+FEP Timing only supports the existence of one real time component to drive the simulation time. If
+multiple time sources are to be used it is expected that an external time synchronization service
+has to generate a synchronized real time to be used as a simulation driver.
+
+\section fep_timing_simulation_sequence Simulation Sequence
+
+A typical simulation sequence using a FEP Timing Master participant and two FEP Timing Client
+participants each registering a step listener is shown in the following diagram:
+
+![Sequence Diagram FEP Timing](FEP_Timing_Simulation_Sequence.png)
+
+\section fep_step_data_access Data synchronization / Step Data Access
+
+Each Step Listener callback will be provided a configured \ref IStepDataAccess Step Data Access that
+enables time synchronized data reception and transmission in accordance with the given
+configuration. Signal samples are associated with the simulation time of the sender. This timestamp
+can be accessed using \ref IUserDataSample::GetTime.
+
+To access received samples based on their timestamp, the \ref IStepDataAccess "Step Data Access
+Interface" provides two methods:
+
+- \ref IStepDataAccess::CopyRecentData selects the sample with the most recent valid timestamp 
+  (i.e. the current simulation time is used as upper bound) and copies it to the given user data 
+  sample. 
+- \ref IStepDataAccess::CopyDataBefore selects the sample closest to the given simulation time 
+  upper bound and copies it to the given user data sample.
+
+\note
+The above methods will return ERR_OUT_OF_SYNC if no sample was received yet in the current
+simulation run. In this case, a default sample with timestamp zero will be returned.
+
+\warning
+For correct functionality it is vital that the signal sample backlog has the appropriate size in
+accordance with the cycle times of the producing and consuming participants. To configure the signal
+backlog size use the \ref ISignalRegistry::SetSignalSampleBacklog method or configure it by means of
+the FEP Timing configuration .xml file.
+
+To transmit samples, the interface provides the \ref IStepDataAccess::TransmitData method. While
+samples containing non-configured signal handles will be forwarded to the transmission adapter
+transparently, samples containing signal handles associated with configured output signals of the
+respective step listener are copied into a buffer and published automatically after the user code
+execution finishes.
+
+\note
+In both cases the step data access will automatically set the timestamps of transmitted samples to
+the current simulation time plus the cycle time of the step listener.
+
+*/
+}
+
+

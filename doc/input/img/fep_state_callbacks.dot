@@ -1,0 +1,65 @@
+/**
+ *
+ * Image showing the State Callback Sequence
+ *
+ * @file
+ * Copyright @ 2019 Audi AG. All rights reserved.
+ * 
+ *     This Source Code Form is subject to the terms of the Mozilla
+ *     Public License, v. 2.0. If a copy of the MPL was not distributed
+ *     with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * 
+ * If it is not possible or desirable to put the notice in a particular file, then
+ * You may include the notice in a location (such as a LICENSE file in a
+ * relevant directory) where a recipient would be likely to look for such a notice.
+ * 
+ * You may add additional accurate notices of copyright ownership.
+ *
+ */
+ 
+ digraph fep_state_machine {
+    graph [];
+    
+    node [shape = "box"];
+    
+    
+    ENTRY                   [label="" shape="circle" style="filled" fillcolor="black"];
+    ENTRY -> qEVENT
+    
+    qEVENT                  [label="Any event given?" shape="diamond"]
+    qEVENT -> qEVENTyes     [label="yes"]
+    qEVENT -> qEVENTno      [label="no"]
+    
+    qEVENTno                [label="- stay in current state" shape="note"]
+    qEVENTyes               [label="- call all state request callbacks" shape="note"]
+    
+    qEVENTyes -> qERROR
+    
+    qERROR                  [label="Was at least one \"real\" error code\nreturned by the state request callbacks?" shape="diamond"]
+    qERROR -> qERRORno      [label="no"]
+    qERROR -> qERRORyes     [label="yes"]
+    
+    qERRORyes               [label="- stay in current state (change denied)\l- return first error that occurred\l" shape="note"]
+    qERRORno                [label="- call state exit callbacks" shape="note"]
+    qERRORno -> CHANGE
+    
+    CHANGE                  [label="- perform state change\l  (now IStateMachine::GetState() returns the new state)\l" shape="note"]
+    CHANGE -> qCLEANUP
+    
+    qCLEANUP                [label="Is current event a Restart- or ShutdownEvent?" shape="diamond"]
+    qCLEANUP -> qCLEANUPno  [label="no"]
+    qCLEANUP -> qCLEANUPyes [label="yes"]
+    
+    qCLEANUPyes             [label="- call CleanUp callbacks" shape="note"]
+    qCLEANUPyes -> qCLEANUPno
+    
+    qCLEANUPno              [label="- call state entry callbacks"  shape="note"]
+    qCLEANUPno -> qERROR2
+    
+    qERROR2                 [label="Was at least one \"real\" error code\nreturned by the state exit, state\nentry and cleanup callbacks?" shape="diamond"]
+    qERROR2 -> qERROR2yes   [label="yes"]
+    qERROR2 -> qERROR2no    [label="no"]
+    
+    qERROR2yes              [label="return first error that occurred" shape="note"]
+    qERROR2no               [label="return ERR_NOERROR" shape="note"]
+}

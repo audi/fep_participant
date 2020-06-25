@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<system xmlns="fep/xsd/system">
+    <schema_version>1.0.0</schema_version>
+    <description>Dummy System that should fail</description>
+    <version>1.0.0</version>
+    <contact>aev.support@audi.de</contact>
+    <properties>
+        <property>
+            <name>TimingConfig</name>
+            <type>string</type>
+            <value>timing_configurations/system_time_configuration.xml</value>
+        </property>
+    </properties>
+    <elements>
+        <element>
+            <name>NeverStarted</name>
+            <type>NeverStarted</type>
+            <type_version>1.0.0</type_version>
+            <interface_properties />
+            <requirement_resolutions>
+                <requirement_resolution>
+                    <requirement>FEP_TimingMaster</requirement>
+                    <resolution>TimingMaster</resolution>
+                </requirement_resolution>
+            </requirement_resolutions>
+        </element>
+        <element>
+            <name>TimingMaster</name>
+            <type>TimingMaster</type>
+            <type_version>1.0.0</type_version>
+            <interface_properties />
+            <requirement_resolutions>
+                <requirement_resolution>
+                    <requirement>FEP_TimingMaster</requirement>
+                    <resolution>TimingMaster</resolution>
+                </requirement_resolution>
+            </requirement_resolutions>
+        </element>
+    </elements>
+</system>
