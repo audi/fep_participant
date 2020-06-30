@@ -25,6 +25,7 @@ target_link_libraries(${TEST_NAME}
     PRIVATE
         fep_participant
         a_util
+		GTest::Main
 )
 
 target_compile_definitions(${TEST_NAME} PRIVATE

@@ -23,5 +23,5 @@ add_test(NAME tester_meta_model
          WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../")
 set_target_properties(tester_meta_model PROPERTIES FOLDER test/tooling)
 add_dependencies(tester_meta_model fep_launcher fep_controller)
-target_link_libraries(tester_meta_model PRIVATE fep_participant)
+target_link_libraries(tester_meta_model PRIVATE fep_participant GTest::Main)
 fep_deploy_libraries(tester_meta_model)
